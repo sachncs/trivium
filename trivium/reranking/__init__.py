@@ -1,4 +1,4 @@
-"""ABC contracts for the trivium.reranking package."""
-from trivium.reranking.base import Reranker
+"""trivium.reranking: cross-attention rerankers."""
+from trivium.reranking.registry import RerankerRegistry
 
-__all__ = ["Reranker"]
+__all__ = ["RerankerRegistry"]
