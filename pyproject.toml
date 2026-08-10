@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trivium"
+version = "0.1.0"
+description = "Hybrid search benchmark: BM25 + dense vector + cross-encoder rerank"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+authors = [{ name = "sachin", email = "sachncs@gmail.com" }]
+dependencies = [
+    "faiss-cpu>=1.7",
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "bm25s>=0.3",
+    "beir>=2.2",
+    "datasets>=2.14",
+    "sentence-transformers>=2.6",
+    "torch>=2.0",
+    "pytrec_eval>=0.5",
+    "pyyaml>=6.0",
+    "pydantic>=2.0",
+    "datasketch>=0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.8",
+    "ruff>=0.4",
+    "pytest>=8.0",
+    "pytest-cov>=4.0",
+    "types-PyYAML>=6.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["trivium*"]
+exclude = ["bench*", "search*", "data*", "tests*"]
+
+[project.scripts]
+trivium-benchmark = "scripts.run_benchmark:main"
+trivium-prepare = "scripts.prepare_data:main"
+
+[tool.setuptools.package-data]
+"" = ["*.yaml"]
