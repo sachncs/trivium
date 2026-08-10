@@ -1,4 +1,4 @@
-"""ABC contracts for the trivium.embeddings package."""
-from trivium.embeddings.base import Embedder
+"""trivium.embeddings: text vectorizers."""
+from trivium.embeddings.registry import EmbedderRegistry, get_embedder, register_embedder
 
-__all__ = ["Embedder"]
+__all__ = ["EmbedderRegistry", "get_embedder", "register_embedder"]
