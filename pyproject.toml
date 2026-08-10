@@ -45,3 +45,17 @@ trivium-prepare = "scripts.prepare_data:main"
 
 [tool.setuptools.package-data]
 "" = ["*.yaml"]
+
+[tool.pytest.ini_options]
+markers = [
+    "golden: regression-anchor tests that must never break (BM25 preflight etc.)",
+]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["trivium"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+fail_under = 90
