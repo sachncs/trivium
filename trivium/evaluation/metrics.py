@@ -57,7 +57,15 @@ class Evaluator:
 
     @staticmethod
     def from_measure_name(name: str) -> str:
-        """Inverse of to_measure_name. Only flips the first underscore."""
+        """Inverse of to_measure_name. Inserts the dot before the trailing k-cut digits.
+
+        pytrec_eval reports 'ndcg_cut_10' which means ndcg_cut at k=10. We
+        translate that back to the canonical 'ndcg_cut.10' by splitting on
+        the last underscore if the tail is all digits, otherwise on the first.
+        """
+        if "_" in name and name.rsplit("_", 1)[-1].isdigit():
+            head, tail = name.rsplit("_", 1)
+            return f"{head}.{tail}"
         return name.replace("_", ".", 1) if "_" in name else name
 
     def evaluate(self, qrels: Qrels, results: dict[str, dict[str, float]]) -> EvaluationMetrics:

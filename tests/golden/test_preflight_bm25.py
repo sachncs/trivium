@@ -5,26 +5,25 @@ validated against the published Anserini baseline (BEIR 1.0.0
 scifact: 0.6789). The historical observed value is 0.65685, well
 within the documented +/- 0.03 bm25s-vs-Lucene drift.
 
-If this test fails the pipeline is broken; the refactor must have
-shifted the tokenizer, k1/b parameters, or qrels prefix. The test
-uses the cache at data/cache/{scifact_seed.jsonl, queries.jsonl,
-qrels.jsonl} which the user must populate via 'python -m data.prepare'.
-
-When the trivium refactor lands, this test will be updated to use
-the new trivium.retrieval.bm25 + trivium.evaluation.metrics APIs.
-Until then it pins the legacy bench/search API behaviour.
+The test pins the trivium.* public API. As the refactor replaces
+bench/ and search/ modules with trivium, this test is the proof
+that the new code path reproduces the legacy result byte-for-byte.
 """
 from __future__ import annotations
 
 import json
-from collections.abc import Iterable
 from pathlib import Path
 
+import numpy as np
 import pytest
 
-from bench.metrics import evaluate, make_qrels
-from bench.runner import load_queries
-from search.bm25_index import BM25Index
+from trivium.config.loader import load_config
+from trivium.domain.document import Document
+from trivium.domain.query import Query
+from trivium.domain.qrels import Qrels
+from trivium.evaluation.metrics import Evaluator, hits_to_results
+from trivium.io.corpus import CorpusCache
+from trivium.retrieval.bm25 import Bm25
 
 ANSERINI_NDCG10 = 0.6789
 TOLERANCE = 0.03
@@ -33,32 +32,32 @@ OBSERVED_AT_BASELINE = 0.65685
 
 
 @pytest.fixture(scope="module")
-def seed_docs(cache_dir: Path) -> list[dict]:
-    path = cache_dir / "scifact_seed.jsonl"
-    if not path.exists():
-        pytest.skip(f"{path} not found; run 'python -m data.prepare' first")
-    with open(path) as f:
-        return [json.loads(line) for line in f]
+def seed_docs(cache_dir: Path) -> list[Document]:
+    cache = CorpusCache(cache_dir)
+    docs = cache.load_scale(5000)
+    if not docs:
+        pytest.skip(f"{cache_dir}/scifact_seed.jsonl not found; run prepare_data.py first")
+    return docs
 
 
 @pytest.fixture(scope="module")
 def queries_and_qrels(cache_dir: Path):
-    qrels_path = cache_dir / "qrels.jsonl"
-    queries_path = cache_dir / "queries.jsonl"
-    if not qrels_path.exists() or not queries_path.exists():
-        pytest.skip("qrels.jsonl or queries.jsonl missing; run 'python -m data.prepare'")
-    queries = [json.loads(l) for l in open(queries_path)]
-    qrels = make_qrels([json.loads(l) for l in open(qrels_path)])
+    cache = CorpusCache(cache_dir)
+    query_rows, qrels_rows = cache.load_queries_and_qrels()
+    if not query_rows or not qrels_rows:
+        pytest.skip("queries.jsonl or qrels.jsonl missing; run prepare_data.py")
+    queries = Query.many(query_rows)
+    qrels = Qrels.from_rows(qrels_rows)
     return queries, qrels
 
 
 @pytest.mark.golden
 def test_preflight_bm25_5k_ndcg10_within_anysini_tolerance(
-    seed_docs: list[dict],
-    queries_and_qrels: tuple,
+    seed_docs: list[Document],
+    queries_and_qrels,
     default_config: dict,
 ) -> None:
-    """BM25 nDCG@10 on 5K scifact must reproduce Anserini baseline.
+    """BM25 nDCG@10 on 5K scifact must reproduce the Anserini baseline.
 
     Allowed: 0.62 <= ndcg <= 0.7089 (lower bound = bug detector,
     upper bound = documented bm25s-vs-Lucene drift).
@@ -66,26 +65,21 @@ def test_preflight_bm25_5k_ndcg10_within_anysini_tolerance(
     queries, qrels = queries_and_qrels
     bm25_cfg = default_config["bm25"]
     k = bm25_cfg["candidate_pool"]
-    top_k_eval: Iterable[int] = default_config["benchmark"]["top_k_eval"]
+    top_k_eval = default_config["benchmark"]["top_k_eval"]
 
-    bm25 = BM25Index(
+    bm25 = Bm25(
         k1=bm25_cfg["k1"],
         b=bm25_cfg["b"],
         method=bm25_cfg["method"],
     )
-    bm25.build(
-        [d["title"] + "\n" + d["text"] for d in seed_docs],
-        show_progress=False,
-    )
+    bm25.add_documents(seed_docs)
 
-    per_query: list[list[tuple[str, float]]] = []
-    for q in queries:
-        idxs, scores = bm25.query(q["text"], k=k)
-        per_query.append([(seed_docs[i]["id"], float(s)) for i, s in zip(idxs, scores)])
-
-    results = {q["id"]: dict(pairs) for q, pairs in zip(queries, per_query)}
-    ndcg = evaluate(qrels, results, k_values=top_k_eval)
-    observed = ndcg["ndcg_cut.10"]
+    query_texts = np.array([q.text for q in queries])
+    results = bm25.search(query_texts, k=k)
+    per_query = [[(h.doc_id, h.score) for h in r] for r in results]
+    eval_pairs = hits_to_results(per_query, queries)
+    metrics = Evaluator(k_values=top_k_eval).evaluate(qrels, eval_pairs)
+    observed = metrics.ndcg_at_10
 
     assert observed >= LOWER_BOUND, (
         f"nDCG@10={observed:.5f} below absolute lower bound {LOWER_BOUND}. "
@@ -99,42 +93,64 @@ def test_preflight_bm25_5k_ndcg10_within_anysini_tolerance(
 
 @pytest.mark.golden
 def test_preflight_bm25_5k_does_not_drift_from_baseline_observation(
-    seed_docs: list[dict],
-    queries_and_qrels: tuple,
+    seed_docs: list[Document],
+    queries_and_qrels,
     default_config: dict,
 ) -> None:
     """Observed value must remain within +/- 0.005 of 0.65685.
 
     Tight tolerance — even 0.005 of drift is a signal that the
     refactor changed something subtle (tokenizer order, k1/b rounding,
-    qrels prefix).
+    qrels prefix change).
     """
     queries, qrels = queries_and_qrels
     bm25_cfg = default_config["bm25"]
     k = bm25_cfg["candidate_pool"]
     top_k_eval = default_config["benchmark"]["top_k_eval"]
 
-    bm25 = BM25Index(
+    bm25 = Bm25(
         k1=bm25_cfg["k1"],
         b=bm25_cfg["b"],
         method=bm25_cfg["method"],
     )
-    bm25.build(
-        [d["title"] + "\n" + d["text"] for d in seed_docs],
-        show_progress=False,
-    )
+    bm25.add_documents(seed_docs)
 
-    per_query = []
-    for q in queries:
-        idxs, scores = bm25.query(q["text"], k=k)
-        per_query.append([(seed_docs[i]["id"], float(s)) for i, s in zip(idxs, scores)])
-
-    results = {q["id"]: dict(pairs) for q, pairs in zip(queries, per_query)}
-    ndcg = evaluate(qrels, results, k_values=top_k_eval)
-    observed = ndcg["ndcg_cut.10"]
+    query_texts = np.array([q.text for q in queries])
+    results = bm25.search(query_texts, k=k)
+    per_query = [[(h.doc_id, h.score) for h in r] for r in results]
+    eval_pairs = hits_to_results(per_query, queries)
+    metrics = Evaluator(k_values=top_k_eval).evaluate(qrels, eval_pairs)
+    observed = metrics.ndcg_at_10
 
     assert observed == pytest.approx(OBSERVED_AT_BASELINE, abs=0.005), (
         f"nDCG@10={observed:.5f} drifted from the recorded baseline "
         f"{OBSERVED_AT_BASELINE:.5f} (tol 0.005). Refactor likely introduced "
         "a tokenizer or qrels change."
     )
+
+
+@pytest.mark.golden
+def test_preflight_bm25_5k_recall10_matches_legacy(
+    seed_docs: list[Document],
+    queries_and_qrels,
+    default_config: dict,
+) -> None:
+    """Recall@10 should be ~0.7784 (the value in the existing benchmark.csv)."""
+    queries, qrels = queries_and_qrels
+    bm25_cfg = default_config["bm25"]
+    k = bm25_cfg["candidate_pool"]
+    top_k_eval = default_config["benchmark"]["top_k_eval"]
+
+    bm25 = Bm25(
+        k1=bm25_cfg["k1"],
+        b=bm25_cfg["b"],
+        method=bm25_cfg["method"],
+    )
+    bm25.add_documents(seed_docs)
+
+    query_texts = np.array([q.text for q in queries])
+    results = bm25.search(query_texts, k=k)
+    per_query = [[(h.doc_id, h.score) for h in r] for r in results]
+    eval_pairs = hits_to_results(per_query, queries)
+    metrics = Evaluator(k_values=top_k_eval).evaluate(qrels, eval_pairs)
+    assert metrics.recall_at_10 == pytest.approx(0.7784, abs=0.005)
