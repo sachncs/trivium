@@ -1,0 +1,29 @@
+target-version = "py312"
+line-length = 100
+src = ["trivium"]
+
+[lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "W",   # pycodestyle warnings
+    "I",   # isort
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "SIM", # flake8-simplify
+    "RUF", # ruff-specific
+]
+ignore = [
+    "E501", # line length handled by formatter
+    "B008", # function call in default argument - common for ABC patterns
+]
+
+[lint.per-file-ignores]
+"tests/**/*.py" = ["B011", "N802"]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+skip-magic-trailing-comma = false
