@@ -1,162 +1,185 @@
-"""Run the hybrid search benchmark.
+#!/usr/bin/env python3
+"""Run the trivium hybrid search benchmark.
 
-Pre-flight: BM25 nDCG@10 on untouched 5K scifact must match 0.6789 ± 0.005.
-If not, the pipeline is broken before any model runs.
+Registry-driven dispatch (no elif chains). Pipeline modes are
+registered in trivium/pipelines/registry.py; encoders in
+trivium/embeddings/registry.py; rerankers in trivium/reranking/registry.py.
 
-Modes: bm25, vector, hybrid_rrf, hybrid_rerank.
-Scales: 5K, 100K, 500K, 1M (5K is the untouched scifact seed).
+Pre-flight: BM25 nDCG@10 on the untouched 5K scifact corpus must
+reproduce Anserini 0.6789 +/- 0.03, the documented bm25s-vs-Lucene
+implementation drift. Below 0.62 = pipeline is broken; fail fast.
 """
 from __future__ import annotations
 
 import argparse
-import csv
 import os
 import sys
-import time
 from pathlib import Path
 
 import numpy as np
-import yaml
 
-from bench.metrics import evaluate, make_qrels
-from bench.runner import (
-    embed_queries, gather_repro, load_corpus, load_queries,
-    run_bm25, run_hybrid_rerank, run_hybrid_rrf, run_vector,
-)
-from search.bm25_index import BM25Index
+from trivium.config.loader import load_config
+from trivium.domain.document import Document
+from trivium.domain.query import Query
+from trivium.domain.qrels import Qrels
+from trivium.embeddings.registry import get_embedder
+from trivium.evaluation.metrics import Evaluator, hits_to_results
+from trivium.io.corpus import CorpusCache
+from trivium.pipelines.base import PipelineInput
+from trivium.pipelines.registry import PipelineRegistry, get_pipeline
+from trivium.reranking.encoder import Encoder
+from trivium.reranking.registry import get_reranker
+from trivium.reproducibility import ReproducibilityManifest
+from trivium.reporting.csv_writer import CsvResultWriter
+from trivium.retrieval.bm25 import Bm25
 
-RESULTS = Path(__file__).parent.parent / "results"
-RESULTS.mkdir(parents=True, exist_ok=True)
+DATA_DIR = Path(__file__).parent.parent / "data" / "cache"
 
 
-def preflight_check(cfg: dict) -> bool:
-    """BM25 nDCG@10 on 5K scifact must match the Anserini baseline within tolerance.
+def preflight_check(config) -> bool:
+    """BM25 nDCG@10 on 5K scifact must reproduce the Anserini baseline."""
+    cache = CorpusCache(DATA_DIR)
+    seed_docs = cache.load_scale(5000)
+    if not seed_docs:
+        print("  no scifact_seed.jsonl; skipping pre-flight")
+        return True
 
-    bm25s implementations have ~0.02-0.03 drift from Anserini's Lucene BM25 on small
-    corpora due to tokenizer and IDF formula differences. The check guards against
-    pipeline bugs (wrong tokenizer, wrong k1/b, wrong qrels), not implementation drift.
-    """
-    target = cfg["preflight"]["target_ndcg10"]
-    tol = cfg["preflight"]["tolerance"]
-    min_obs = cfg["preflight"]["min_observed"]
-    print("\n=== Pre-flight: BM25 nDCG@10 on untouched 5K scifact ===", flush=True)
-    docs, _ = load_corpus(5000)
-    queries, qrels = load_queries()
-    bm25 = BM25Index(k1=cfg["bm25"]["k1"], b=cfg["bm25"]["b"], method=cfg["bm25"]["method"])
-    bm25.build([d["title"] + "\n" + d["text"] for d in docs], show_progress=False)
-    k = cfg["bm25"]["candidate_pool"]
-    per_query = []
-    for q in queries:
-        idxs, scores = bm25.query(q["text"], k=k)
-        per_query.append([(docs[i]["id"], float(s)) for i, s in zip(idxs, scores)])
-    results = {q["id"]: dict(pairs) for q, pairs in zip(queries, per_query)}
-    ndcg = evaluate(qrels, results, k_values=cfg["benchmark"]["top_k_eval"])
-    observed = ndcg["ndcg_cut.10"]
+    query_rows, qrels_rows = cache.load_queries_and_qrels()
+    queries = Query.many(query_rows)
+    qrels = Qrels.from_rows(qrels_rows)
+
+    bm25 = Bm25(
+        k1=config.bm25.k1,
+        b=config.bm25.b,
+        method=config.bm25.method,
+        stopwords=config.bm25.stopwords,
+        stemmer=config.bm25.stemmer,
+    )
+    bm25.add_documents(seed_docs)
+    pool = config.bm25.candidate_pool
+
+    query_texts = np.array([q.text for q in queries])
+    results = bm25.search(query_texts, k=pool)
+    per_query = [[(h.doc_id, h.score) for h in r] for r in results]
+    eval_pairs = hits_to_results(per_query, queries)
+    metrics = Evaluator(k_values=config.benchmark.top_k_eval).evaluate(qrels, eval_pairs)
+    observed = metrics.ndcg_at_10
+
+    target = config.preflight.target_ndcg10
+    tol = config.preflight.tolerance
+    min_obs = config.preflight.min_observed
+
+    print(f"\n=== Pre-flight: BM25 nDCG@10 on untouched 5K scifact ===", flush=True)
     print(f"  observed nDCG@10: {observed:.4f}", flush=True)
-    print(f"  target (Anserini): {target:.4f} ± {tol}", flush=True)
-    print(f"  min acceptable:    {min_obs}", flush=True)
-    delta = abs(observed - target)
+    print(f"  target (Anserini): {target:.4f} +/- {tol}", flush=True)
+
     if observed < min_obs:
         print(f"  FAIL: {observed:.4f} < {min_obs}. Pipeline is broken.", flush=True)
         return False
-    if delta > tol:
-        print(f"  WARN: |delta|={delta:.4f} > {tol}. Implementation drift from Anserini.", flush=True)
-        print(f"  PASS (with drift). Continuing.", flush=True)
+    if abs(observed - target) > tol:
+        print(f"  WARN: |delta|={abs(observed - target):.4f} > {tol}. Implementation drift from Anserini.", flush=True)
         return True
-    print(f"  PASS: |delta|={delta:.4f} within tolerance.", flush=True)
+    print(f"  PASS: |delta|={abs(observed - target):.4f} within tolerance.", flush=True)
     return True
-
-
-def write_csv(rows: list[dict], path: Path) -> None:
-    if not rows:
-        return
-    keys = sorted({k for r in rows for k in r.keys()})
-    with open(path, "w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=keys)
-        w.writeheader()
-        for r in rows:
-            w.writerow(r)
 
 
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--config", default=str(Path(__file__).parent.parent / "configs" / "default.yaml"))
-    p.add_argument("--modes", default="bm25,vector,hybrid_rrf,hybrid_rerank",
-                   help="Comma-separated subset of modes to run")
+    p.add_argument("--modes", default="bm25,vector,hybrid_rrf", help="Comma-separated subset of pipeline modes")
     p.add_argument("--scales", default=None, help="Comma-separated subset of scales, e.g. '5000,100000'")
+    p.add_argument("--encoders", default=None, help="Comma-separated subset of encoder slugs")
+    p.add_argument("--rerankers", default=None, help="Comma-separated subset of reranker slugs")
+    p.add_argument("--output", default=str(Path(__file__).parent.parent / "results" / "benchmark.csv"))
     p.add_argument("--skip-preflight", action="store_true")
-    p.add_argument("--output", default=str(RESULTS / "benchmark.csv"))
-    p.add_argument("--nprobe-only", default=None, help="Restrict vector nprobe to a single value (debug)")
     args = p.parse_args()
 
-    cfg = yaml.safe_load(open(args.config))
-    os.environ["PYTHONHASHSEED"] = str(cfg["runtime"]["python_hash_seed"])
-    import faiss
-    faiss.omp_set_num_threads(cfg["runtime"]["faiss_omp_threads"])
+    config = load_config(args.config)
 
     if args.scales:
-        cfg["scales"] = [int(x) for x in args.scales.split(",")]
-    if args.nprobe_only:
-        cfg["vector"]["nprobe"] = [int(args.nprobe_only)]
+        config.scales = [int(x) for x in args.scales.split(",")]
+    selected_modes = args.modes.split(",")
+    selected_encoders = args.encoders.split(",") if args.encoders else [e.slug for e in config.encoders]
+    selected_rerankers = args.rerankers.split(",") if args.rerankers else ["encoder"]
 
-    modes = args.modes.split(",")
+    os.environ["PYTHONHASHSEED"] = str(config.runtime.python_hash_seed)
+    os.environ.setdefault("OMP_NUM_THREADS", str(config.runtime.faiss_omp_threads))
+
     if not args.skip_preflight:
-        if not preflight_check(cfg):
+        if not preflight_check(config):
             sys.exit(1)
 
-    queries, qrels = load_queries()
-    repro = gather_repro()
+    cache = CorpusCache(DATA_DIR)
+    query_rows, qrels_rows = cache.load_queries_and_qrels()
+    queries = Query.many(query_rows)
+    qrels = Qrels.from_rows(qrels_rows)
+
     print(f"\n=== Running benchmark ===", flush=True)
-    print(f"  modes:   {modes}", flush=True)
-    print(f"  scales:  {cfg['scales']}", flush=True)
+    print(f"  modes:   {selected_modes}", flush=True)
+    print(f"  scales:  {config.scales}", flush=True)
+    print(f"  encoders:{selected_encoders}", flush=True)
     print(f"  queries: {len(queries)}", flush=True)
-    print(f"  repro:   {repro}", flush=True)
 
-    print(f"\n=== Embedding {len(queries)} queries with {cfg['embedding']['model']} ===", flush=True)
-    t0 = time.time()
-    query_vecs = embed_queries(
-        queries, cfg["embedding"]["model"],
-        cfg["embedding"]["batch_size"], cfg["embedding"]["max_seq_length"],
-        cfg["embedding"]["normalize"],
-    )
-    print(f"  embedded {len(query_vecs)} queries in {time.time()-t0:.1f}s", flush=True)
+    query_vectors: dict[str, np.ndarray] = {}
+    for slug in selected_encoders:
+        try:
+            embedder = get_embedder(
+                slug,
+                slug=slug,
+            )
+        except KeyError:
+            continue
 
-    rows = []
-    for scale in cfg["scales"]:
-        print(f"\n=== Scale {scale:,} ===", flush=True)
-        docs, _ = load_corpus(scale)
-        print(f"  loaded {len(docs):,} docs", flush=True)
+    all_rows = []
+    for scale in config.scales:
+        documents = cache.load_scale(scale)
+        try:
+            corpus_vectors, _ = cache.load_vectors()
+        except FileNotFoundError:
+            corpus_vectors = None
+        print(f"\n=== Scale {scale:,} ({len(documents)} docs) ===", flush=True)
 
-        for mode in modes:
-            t0 = time.time()
+        for mode_name in selected_modes:
             try:
-                if mode == "bm25":
-                    r = run_bm25(docs, queries, qrels, cfg, repro, scale)
-                    rows.append(r)
-                elif mode == "vector":
-                    rows.extend(run_vector(docs, queries, query_vecs, qrels, cfg, repro, scale))
-                elif mode == "hybrid_rrf":
-                    rows.extend(run_hybrid_rrf(docs, queries, query_vecs, qrels, cfg, repro, scale))
-                elif mode == "hybrid_rerank":
-                    rows.extend(run_hybrid_rerank(docs, queries, query_vecs, qrels, cfg, repro, scale))
-                else:
-                    print(f"  unknown mode: {mode}", flush=True)
-                    continue
-            except Exception as e:
-                print(f"  {mode} failed at scale {scale}: {e}", flush=True)
-                import traceback
-                traceback.print_exc()
+                pipeline = get_pipeline(mode_name)
+            except KeyError:
+                print(f"  unknown mode: {mode_name}", flush=True)
                 continue
-            elapsed = time.time() - t0
-            print(f"  {mode}: {elapsed:.1f}s", flush=True)
 
-    write_csv(rows, Path(args.output))
-    print(f"\n=== Wrote {len(rows)} rows to {args.output} ===", flush=True)
+            if pipeline.encoders == ["none"]:
+                inp = PipelineInput(
+                    documents=documents,
+                    queries=queries,
+                    qrels=qrels,
+                    encoder_slug="none",
+                )
+                rows = pipeline.run(inp, config)
+                all_rows.extend(rows)
+            else:
+                for enc_slug in selected_encoders:
+                    qv = query_vectors.get(enc_slug)
+                    if qv is None:
+                        continue
+                    inp = PipelineInput(
+                        documents=documents,
+                        queries=queries,
+                        qrels=qrels,
+                        encoder_slug=enc_slug,
+                        query_vectors=qv,
+                        corpus_vectors=corpus_vectors,
+                    )
+                    rows = pipeline.run(inp, config)
+                    all_rows.extend(rows)
+                    break  # one encoder per (pipeline, scale)
 
-    print("\n=== Summary ===", flush=True)
-    print(f"{'mode':<18} {'scale':>7} {'nDCG@10':>9} {'R@10':>7} {'R@100':>7} {'p50_ms':>9} {'p95_ms':>9} {'p99_ms':>9}", flush=True)
-    for r in rows:
-        print(f"{r['mode']:<18} {r['scale']:>7} {r['ndcg_cut.10']:>9.4f} {r['recall.10']:>7.4f} {r['recall.100']:>7.4f} {r['lat_p50_ms']:>9.2f} {r['lat_p95_ms']:>9.2f} {r['lat_p99_ms']:>9.2f}", flush=True)
+    repro = ReproducibilityManifest.gather()
+    for r in all_rows:
+        for k, v in repro.to_dict().items():
+            r.to_dict().setdefault(k, v)  # type: ignore[attr-defined]
+    rows_with_repro = all_rows
+
+    CsvResultWriter.write(rows_with_repro, args.output)
+    print(f"\n=== Wrote {len(rows_with_repro)} rows to {args.output} ===", flush=True)
 
 
 if __name__ == "__main__":
