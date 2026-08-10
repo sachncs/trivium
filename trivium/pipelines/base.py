@@ -17,6 +17,33 @@ from trivium.domain.query import Query
 from trivium.domain.qrels import Qrels
 
 
+class PipelineInput:
+    """The complete input to a pipeline run.
+
+    Bundles everything the pipeline needs so the ABC signature stays
+    bounded and we can add new inputs (corpus_vectors, reranker) without
+    touching every concrete pipeline.
+    """
+
+    def __init__(
+        self,
+        documents: Sequence[Document],
+        queries: Sequence[Query],
+        qrels: Qrels,
+        encoder_slug: str,
+        query_vectors: "np.ndarray | None" = None,
+        corpus_vectors: "np.ndarray | None" = None,
+        reranker=None,
+    ) -> None:
+        self.documents = documents
+        self.queries = queries
+        self.qrels = qrels
+        self.encoder_slug = encoder_slug
+        self.query_vectors = query_vectors
+        self.corpus_vectors = corpus_vectors
+        self.reranker = reranker
+
+
 class BenchmarkPipeline(ABC):
     """One CSV-row-producing benchmark mode.
 
@@ -41,17 +68,10 @@ class BenchmarkPipeline(ABC):
     @abstractmethod
     def run(
         self,
-        documents: Sequence[Document],
-        queries: Sequence[Query],
-        qrels: Qrels,
-        query_vectors: dict[str, object],
+        inp: PipelineInput,
         config: Config,
-        encoder_slug: str,
     ) -> list[PipelineResult]:
         """Run the pipeline and emit one row per (hyperparam-combination).
-
-        The `query_vectors` dict is keyed by encoder slug; pipelines
-        pick the slug they need.
 
         The Config-driven mode dispatch in the runner calls this and
         extends the global row list. No elif chains anywhere in
