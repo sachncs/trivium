@@ -1,4 +1,4 @@
-"""ABC contracts for the trivium.retrieval package."""
-from trivium.retrieval.base import Retriever
+"""trivium.retrieval: search engines."""
+from trivium.retrieval.registry import RetrieverRegistry
 
-__all__ = ["Retriever"]
+__all__ = ["RetrieverRegistry"]
