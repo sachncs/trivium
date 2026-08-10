@@ -1,4 +1,4 @@
-"""ABC contracts for the trivium.fusion package."""
-from trivium.fusion.base import FusionStrategy
+"""trivium.fusion: result-list combiners."""
+from trivium.fusion.registry import FusionRegistry
 
-__all__ = ["FusionStrategy"]
+__all__ = ["FusionRegistry"]
