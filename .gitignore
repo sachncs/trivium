@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.pyo
+data/cache/
+results/*.csv
+.DS_Store
+*.npz
+*.pkl
+*.bin
+todo.md

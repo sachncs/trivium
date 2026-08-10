@@ -1,0 +1,10 @@
+faiss-cpu>=1.7
+numpy>=1.24
+scipy>=1.10
+bm25s>=0.3
+beir>=2.2
+datasets>=2.14
+sentence-transformers>=2.6
+torch>=2.0
+pytrec_eval>=0.5
+pyyaml>=6.0
