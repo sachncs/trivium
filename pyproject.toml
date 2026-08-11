@@ -23,7 +23,8 @@ dependencies = [
     "pyyaml>=6.0",
     "pydantic>=2.0",
     "datasketch>=0.1",
-]
+    "gigatoken>=0.10",
+]  # gigatoken: https://github.com/marcelroed/gigatoken
 
 [project.optional-dependencies]
 dev = [
