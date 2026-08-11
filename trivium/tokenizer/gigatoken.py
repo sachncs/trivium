@@ -9,19 +9,18 @@ track token throughput without taking a hard dependency on
 gigatoken's API.
 
 Public surface:
-- GigaToken: thin wrapper around gigatoken.Tokenizer.
-  - count_streaming(texts, batch_size=8192): bounded-memory
-    token counting over an iterable. Returns GigaTokenSummary.
-  - tokenize_from_jsonl(path, text_field='text'): streaming
-    tokenisation of a JSONL corpus using gigatoken's native
-    JsonlFileSource. Memory: O(batch).
-  - tokenize_from_text(path): gigatoken.TextFileSource variant.
-  - train_bpe(corpus_paths, vocab_size, special_tokens): wrapper
-    around gigatoken.train_bpe; the resulting model is loadable
-    by GigaToken(path_to_tokenizer_json).
+- count_streaming(texts, batch_size=8192): bounded-memory token
+  counting over an iterable. Returns GigaTokenSummary.
+- tokenize_to_memmap(texts, out_path): persist a 1B-token corpus
+  to a uint32 memmap so the index never loads the full token
+  stream into RAM.
+- tokenize_jsonl(path): gigatoken.JsonlFileSource streaming.
+- tokenize_textfile(path): gigatoken.TextFileSource streaming.
+- train_bpe(...): wrapper around gigatoken.train_bpe.
 - GigaTokenSummary: frozen dataclass with tokens/sec and
-  bytes/sec. Convertible to dict for CSV rows.
+  bytes/sec.
 """
+
 from __future__ import annotations
 
 import json
@@ -30,7 +29,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
 
-import gigatoken as _gt
+import gigatoken as external_gigatoken
 import numpy as np
 
 
@@ -68,30 +67,22 @@ class GigaToken:
             with gigatoken.Tokenizer for the Rust pipeline.
     """
 
-    DEFAULT_TOKENIZER = "gpt2"
+    DEFAULT_BUILTIN_TOKENIZER = "gpt2"
 
-    def __init__(self, tokenizer: str | Path | object = DEFAULT_TOKENIZER) -> None:
-        self._tokenizer: _gt.Tokenizer = _gt.Tokenizer(tokenizer)
-        self._vocab_size: int = int(self._tokenizer.vocab_size)
-        self._model_id: str = str(tokenizer) if isinstance(tokenizer, str | Path) else "<instance>"
+    def __init__(self, tokenizer: str | Path | object = DEFAULT_BUILTIN_TOKENIZER) -> None:
+        self.gigatoken: external_gigatoken.Tokenizer = external_gigatoken.Tokenizer(tokenizer)
+        self.vocab_size: int = int(self.gigatoken.vocab_size)
+        self.model_id: str = str(tokenizer) if isinstance(tokenizer, str | Path) else "<instance>"
 
     @property
     def slug(self) -> str:
         """Short identifier used in CSV rows."""
-        return f"gigatoken:{self._model_id}"
+        return f"gigatoken:{self.model_id}"
 
     @property
-    def vocab_size(self) -> int:
-        return self._vocab_size
-
-    @property
-    def model_id(self) -> str:
-        return self._model_id
-
-    @property
-    def native(self) -> _gt.Tokenizer:
+    def native(self) -> external_gigatoken.Tokenizer:
         """Access the underlying gigatoken.Tokenizer for advanced use."""
-        return self._tokenizer
+        return self.gigatoken
 
     def count_streaming(
         self,
@@ -116,15 +107,15 @@ class GigaToken:
         doc_count = 0
         bytes_processed = 0
         t0 = time.perf_counter()
-        for batch in _batched(texts, batch_size):
+        for batch in batched_texts(texts, batch_size):
             bytes_processed += sum(len(t.encode("utf-8")) for t in batch)
-            encoded = self._tokenizer.encode_batch(batch, parallel=True)
+            encoded = self.gigatoken.encode_batch(batch, parallel=True)
             total += int(sum(len(row.tolist()) for row in encoded))
             doc_count += len(batch)
         elapsed = time.perf_counter() - t0
         return GigaTokenSummary(
             total_tokens=total,
-            vocab_size=self._vocab_size,
+            vocab_size=self.vocab_size,
             doc_count=doc_count,
             bytes_processed=bytes_processed,
             seconds_elapsed=elapsed,
@@ -150,9 +141,7 @@ class GigaToken:
         Returns the manifest dict.
         """
         if dtype != np.uint32 and dtype != np.int64:
-            raise ValueError(
-                f"gigatoken emits uint32; dtype must be uint32 or int64, got {dtype}"
-            )
+            raise ValueError(f"gigatoken emits uint32; dtype must be uint32 or int64, got {dtype}")
 
         out_dir = Path(out_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -163,9 +152,9 @@ class GigaToken:
         t0 = time.perf_counter()
         offsets: list[int] = [0]
         with open(tokens_path, "wb") as tokens_f:
-            for batch in _batched(texts, batch_size):
+            for batch in batched_texts(texts, batch_size):
                 bytes_processed += sum(len(t.encode("utf-8")) for t in batch)
-                encoded = self._tokenizer.encode_batch(batch, parallel=True)
+                encoded = self.gigatoken.encode_batch(batch, parallel=True)
                 for row in encoded:
                     arr = np.asarray(row.tolist(), dtype=np.uint32)
                     arr.tofile(tokens_f)
@@ -181,7 +170,7 @@ class GigaToken:
         doc_count = len(offsets_arr) - 1
         manifest = GigaTokenSummary(
             total_tokens=total_tokens,
-            vocab_size=self._vocab_size,
+            vocab_size=self.vocab_size,
             doc_count=doc_count,
             bytes_processed=bytes_processed,
             seconds_elapsed=elapsed,
@@ -202,14 +191,18 @@ class GigaToken:
         the awkward-array encoding is held in RAM. For 1B tokens,
         chunk the result.
         """
-        source = _gt.JsonlFileSource([str(jsonl_path)], field=text_field)
-        encoded = self._tokenizer.encode_files(source, parallel=True)
+        source = external_gigatoken.JsonlFileSource([str(jsonl_path)], field=text_field)
+        encoded = self.gigatoken.encode_files(source, parallel=True)
         return [list(row.tolist()) for row in encoded]
 
     def tokenize_textfile(self, txt_path: str | Path) -> list[list[int]]:
-        """Tokenise a plain text file (one doc per line) via gigatoken's TextFileSource."""
-        source = _gt.TextFileSource([str(txt_path)], separator="\n")
-        encoded = self._tokenizer.encode_files(source, parallel=True)
+        """Tokenise a plain text file (one doc per line) via gigatoken's TextFileSource.
+
+        With the default ``separator=None`` each file is one document;
+        pass ``separator=...`` to split on a literal pattern.
+        """
+        source = external_gigatoken.TextFileSource([str(txt_path)], separator="\n")
+        encoded = self.gigatoken.encode_files(source, parallel=True)
         return [list(row.tolist()) for row in encoded]
 
     @staticmethod
@@ -224,7 +217,7 @@ class GigaToken:
         Returns the bytes of the resulting tokenizer.json. Persist
         with Path(out).write_bytes(...) and reload via GigaToken(path).
         """
-        return _gt.train_bpe(
+        return external_gigatoken.train_bpe(
             in_data=[str(p) for p in corpus_paths],
             vocab_size=int(vocab_size),
             special_tokens=special_tokens or {},
@@ -232,7 +225,7 @@ class GigaToken:
         )
 
 
-def _batched(iterable: Iterable[str], batch_size: int):
+def batched_texts(iterable: Iterable[str], batch_size: int):
     """Yield lists of up to batch_size items from the iterable."""
     batch: list[str] = []
     for item in iterable:

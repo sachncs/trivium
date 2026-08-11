@@ -79,8 +79,8 @@ class Vector(BenchmarkPipeline):
                         "index_type": index_type,
                         "nprobe": nprobe,
                         "nlist": getattr(retriever, "nlist", 0),
-                        "m": getattr(retriever, "_m", 0),
-                        "nbits": getattr(retriever, "_nbits", 0),
+                        "m": getattr(retriever, "m", 0),
+                        "nbits": getattr(retriever, "nbits", 0),
                     },
                 )
             )

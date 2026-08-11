@@ -31,21 +31,22 @@ def summarise(csv_path: str | Path) -> dict[str, Any]:
             r.get("mode", ""),
             r.get("encoder", ""),
         )
-        ndcg = _safe_float(r.get("ndcg_cut.10"))
-        recall = _safe_float(r.get("recall.10"))
-        p95 = _safe_float(r.get("lat_p95_ms"))
+        ndcg = safe_float(r.get("ndcg_cut.10"))
+        recall = safe_float(r.get("recall.10"))
+        p95 = safe_float(r.get("lat_p95_ms"))
         headline[key] = {"ndcg_cut.10": ndcg, "recall.10": recall, "p95_ms": p95}
 
     per_encoder = defaultdict(list)
     for r in rows:
         per_encoder[r.get("encoder", "")].append(
-            (int(r.get("scale", 0)), r.get("mode", ""), _safe_float(r.get("ndcg_cut.10")))
+            (int(r.get("scale", 0)), r.get("mode", ""), safe_float(r.get("ndcg_cut.10")))
         )
 
     return {"headline": headline, "per_encoder": dict(per_encoder)}
 
 
-def _safe_float(value) -> float:
+def safe_float(value) -> float:
+    """Parse a CSV cell into a float; default to 0.0 on failure."""
     if value is None or value == "":
         return 0.0
     try:

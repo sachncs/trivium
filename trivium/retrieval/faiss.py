@@ -45,8 +45,8 @@ class Faiss:
             return "faiss_flat"
 
         def __init__(self) -> None:
-            self._index = None
-            self._doc_ids: list[str] = []
+            self.index = None
+            self.doc_ids: list[str] = []
 
         def add_documents(
             self, documents: Sequence[Document], vectors: np.ndarray | None = None
@@ -55,21 +55,21 @@ class Faiss:
 
             if vectors is None:
                 raise ValueError("Faiss.Flat requires pre-computed vectors")
-            self._doc_ids = [d.doc_id for d in documents]
+            self.doc_ids = [d.doc_id for d in documents]
             d = int(vectors.shape[1])
             arr = np.asarray(vectors, dtype=np.float32)
-            self._index = faiss.IndexFlatIP(d)
-            self._index.add(arr)
+            self.index = faiss.IndexFlatIP(d)
+            self.index.add(arr)
 
         def search(self, query_vectors: np.ndarray, k: int) -> list[SearchResult]:
-            if self._index is None:
+            if self.index is None:
                 raise RuntimeError("Faiss.Flat.search called before add_documents")
             arr = np.asarray(query_vectors, dtype=np.float32)
-            scores, ids = self._index.search(arr, k)
+            scores, ids = self.index.search(arr, k)
             results: list[SearchResult] = []
             for row in range(ids.shape[0]):
                 pairs = [
-                    (self._doc_ids[int(ids[row, j])], float(scores[row, j]))
+                    (self.doc_ids[int(ids[row, j])], float(scores[row, j]))
                     for j in range(ids.shape[1])
                     if int(ids[row, j]) != -1
                 ]
@@ -81,7 +81,7 @@ class Faiss:
 
         def size_bytes(self) -> int:
             try:
-                return int(self._index.ntotal * self._index.d * 4)
+                return int(self.index.ntotal * self.index.d * 4)
             except Exception:
                 return 0
 
@@ -100,18 +100,18 @@ class Faiss:
             self.nlist = (
                 nlist_override if nlist_override is not None else config.nlist_for_scale(scale)
             )
-            self._index = None
-            self._ivf_handle: Any = None
-            self._doc_ids: list[str] = []
-            self._train_size_strategy: Literal["sqrt_n", "50_x_nlist", "fixed_N"] = (
+            self.index = None
+            self.ivf_handle: Any = None
+            self.doc_ids: list[str] = []
+            self.train_size_strategy: Literal["sqrt_n", "50_x_nlist", "fixed_N"] = (
                 config.train_size_strategy
             )
-            self._train_size_fixed: int = config.train_size_fixed
-            self._use_opq: bool = config.use_opq
-            self._use_rflat: bool = config.use_rflat
-            self._nbits: int = config.nbits
-            self._m: int = config.m
-            self._nprobe: int = config.nprobe_sweep[0]
+            self.train_size_fixed: int = config.train_size_fixed
+            self.use_opq: bool = config.use_opq
+            self.use_rflat: bool = config.use_rflat
+            self.nbits: int = config.nbits
+            self.m: int = config.m
+            self.nprobe: int = config.nprobe_sweep[0]
 
         def add_documents(
             self, documents: Sequence[Document], vectors: np.ndarray | None = None
@@ -120,40 +120,40 @@ class Faiss:
 
             if vectors is None:
                 raise ValueError("Faiss.Ivpq requires pre-computed vectors")
-            self._doc_ids = [d.doc_id for d in documents]
+            self.doc_ids = [d.doc_id for d in documents]
             arr = np.asarray(vectors, dtype=np.float32)
             d = int(arr.shape[1])
-            m = min(self._m, d)
+            m = min(self.m, d)
 
             rng_state = np.random.get_state()
             np.random.seed(42)
-            train_n = self._train_size(arr)
+            train_n = self.train_size(arr)
             train_idx = np.random.choice(len(arr), size=min(len(arr), train_n), replace=False)
             np.random.set_state(rng_state)
 
             factory = ivfpq_factory_str(
                 nlist=self.nlist,
                 m=m,
-                nbits=self._nbits,
-                use_opq=self._use_opq,
-                use_rflat=self._use_rflat,
+                nbits=self.nbits,
+                use_opq=self.use_opq,
+                use_rflat=self.use_rflat,
             )
             index = faiss.index_factory(d, factory, faiss.METRIC_INNER_PRODUCT)
             index.train(arr[train_idx])
             index.add(arr)
-            self._index = index
-            self._ivf_handle = self.locate_ivf(index)
-            self._ivf_handle.nprobe = self._nprobe
+            self.index = index
+            self.ivf_handle = Faiss.Ivpq.locate_ivf(index)
+            self.ivf_handle.nprobe = self.nprobe
 
         def search(self, query_vectors: np.ndarray, k: int) -> list[SearchResult]:
-            if self._index is None:
+            if self.index is None:
                 raise RuntimeError("Faiss.Ivpq.search called before add_documents")
             arr = np.asarray(query_vectors, dtype=np.float32)
-            scores, ids = self._index.search(arr, k)
+            scores, ids = self.index.search(arr, k)
             results: list[SearchResult] = []
             for row in range(ids.shape[0]):
                 pairs = [
-                    (self._doc_ids[int(ids[row, j])], float(scores[row, j]))
+                    (self.doc_ids[int(ids[row, j])], float(scores[row, j]))
                     for j in range(ids.shape[1])
                     if int(ids[row, j]) != -1
                 ]
@@ -162,26 +162,26 @@ class Faiss:
 
         def set_search_params(self, **params) -> None:
             nprobe = params.get("nprobe")
-            if nprobe is not None and self._ivf_handle is not None:
-                self._nprobe = int(nprobe)
-                self._ivf_handle.nprobe = int(nprobe)
+            if nprobe is not None and self.ivf_handle is not None:
+                self.nprobe = int(nprobe)
+                self.ivf_handle.nprobe = int(nprobe)
             k_factor = params.get("k_factor")
-            if k_factor is not None and hasattr(self._index, "k_factor"):
-                self._index.k_factor = int(k_factor)
+            if k_factor is not None and hasattr(self.index, "k_factor"):
+                self.index.k_factor = int(k_factor)
 
         def size_bytes(self) -> int:
             try:
-                return int(self._index.ntotal * self._index.d * 4)
+                return int(self.index.ntotal * self.index.d * 4)
             except Exception:
                 return 0
 
-        def _train_size(self, vectors: np.ndarray) -> int:
+        def train_size(self, vectors: np.ndarray) -> int:
             n = len(vectors)
-            if self._train_size_strategy == "sqrt_n":
+            if self.train_size_strategy == "sqrt_n":
                 return int(np.sqrt(n))
-            if self._train_size_strategy == "50_x_nlist":
-                return max(50 * self.nlist, self._train_size_fixed)
-            return self._train_size_fixed
+            if self.train_size_strategy == "50_x_nlist":
+                return max(50 * self.nlist, self.train_size_fixed)
+            return self.train_size_fixed
 
         @staticmethod
         def locate_ivf(index) -> Any:

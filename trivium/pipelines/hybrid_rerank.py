@@ -75,7 +75,7 @@ class HybridRerank(BenchmarkPipeline):
         eval_pairs = hits_to_results(per_query_ranked, list(inp.queries))
         metrics = Evaluator(k_values=config.benchmark.top_k_eval).evaluate(inp.qrels, eval_pairs)
 
-        def _probe_one(idx: int):
+        def probe_step(idx: int):
             s_idx = idx % len(query_texts)
             v_idx = idx % len(qv)
             r1 = bm25.search(str(query_texts[s_idx]), k=fusion_pool)
@@ -88,7 +88,7 @@ class HybridRerank(BenchmarkPipeline):
 
         n_iter = min(len(inp.queries), 50)
         probe = LatencyProbe(
-            fn=_probe_one,
+            fn=probe_step,
             n=n_iter,
             warmup=config.benchmark.warmup,
             rotate=list(range(n_iter)),

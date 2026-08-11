@@ -26,19 +26,19 @@ class Encoder(Reranker):
         max_length: int = 256,
         batch_size: int = 32,
     ) -> None:
-        self._slug = slug
-        self._model_id = model_id
-        self._max_length = max_length
-        self._batch_size = batch_size
-        self._model = None
+        self.slug_value = slug
+        self.model_id_value = model_id
+        self.max_length = max_length
+        self.batch_size = batch_size
+        self.model = None
 
     @property
     def slug(self) -> str:
-        return self._slug
+        return self.slug_value
 
     @property
     def model_id(self) -> str:
-        return self._model_id
+        return self.model_id_value
 
     def rerank(
         self,
@@ -48,11 +48,11 @@ class Encoder(Reranker):
     ) -> SearchResult:
         if not candidates:
             return SearchResult.empty()
-        self._ensure_model()
+        self.ensure_model()
         pairs = [(query, c.body) for c in candidates]
-        scores = self._model.predict(
+        scores = self.model.predict(
             pairs,
-            batch_size=self._batch_size,
+            batch_size=self.batch_size,
             show_progress_bar=False,
         )
         scores = np.asarray(scores, dtype=np.float64)
@@ -68,9 +68,10 @@ class Encoder(Reranker):
             ]
         )
 
-    def _ensure_model(self) -> None:
-        if self._model is not None:
+    def ensure_model(self) -> None:
+        """Lazy-load the CrossEncoder model."""
+        if self.model is not None:
             return
         from sentence_transformers import CrossEncoder
 
-        self._model = CrossEncoder(self._model_id, max_length=self._max_length)
+        self.model = CrossEncoder(self.model_id_value, max_length=self.max_length)

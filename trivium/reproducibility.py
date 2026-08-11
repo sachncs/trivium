@@ -31,7 +31,7 @@ class ReproducibilityManifest:
     @classmethod
     def gather(cls, device: str = "") -> ReproducibilityManifest:
         """Capture the current process environment."""
-        versions = cls._safe_versions()
+        versions = ReproducibilityManifest.safe_versions()
         return cls(
             python=sys.version.split()[0],
             platform=platform.platform(),
@@ -41,14 +41,14 @@ class ReproducibilityManifest:
             torch=versions.get("torch", ""),
             bm25s=versions.get("bm25s", ""),
             pydantic=versions.get("pydantic", ""),
-            faiss_omp_threads=_omp_threads(),
-            git_sha=_git_sha(),
+            faiss_omp_threads=omp_threads(),
+            git_sha=git_sha(),
             device=device,
             extras={},
         )
 
     @staticmethod
-    def _safe_versions() -> dict[str, str]:
+    def safe_versions() -> dict[str, str]:
         out: dict[str, str] = {}
         for name in ("faiss", "sentence_transformers", "torch", "bm25s", "pydantic"):
             try:
@@ -77,14 +77,14 @@ class ReproducibilityManifest:
         return base
 
 
-def _omp_threads() -> int:
+def omp_threads() -> int:
     try:
         return int(faiss.omp_get_max_threads())
     except Exception:
         return 0
 
 
-def _git_sha() -> str:
+def git_sha() -> str:
     try:
         from pathlib import Path
 

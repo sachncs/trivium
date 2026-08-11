@@ -61,11 +61,11 @@ class Bbq(Retriever):
         self.use_rescore = use_rescore
         self.k_factor = k_factor
         self.max_workers = max_workers
-        self._centroids: np.ndarray | None = None
-        self._thresholds: np.ndarray | None = None
-        self._list_files: dict[int, dict[str, Path]] = {}
-        self._list_handles: dict[int, dict[str, object]] = {}
-        self._doc_ids: list[str] = []
+        self.centroids: np.ndarray | None = None
+        self.thresholds: np.ndarray | None = None
+        self.list_files: dict[int, dict[str, Path]] = {}
+        self.list_handles: dict[int, dict[str, object]] = {}
+        self.doc_ids: list[str] = []
 
     @property
     def slug(self) -> str:
@@ -92,17 +92,17 @@ class Bbq(Retriever):
 
     def size_bytes(self) -> int:
         total = 0
-        for _cid, paths in self._list_files.items():
+        for paths in self.list_files.values():
             for p in paths.values():
                 if Path(p).exists():
                     total += Path(p).stat().st_size
-        if self._centroids is not None:
-            total += int(self._centroids.nbytes)
-        if self._thresholds is not None:
-            total += int(self._thresholds.nbytes)
+        if self.centroids is not None:
+            total += int(self.centroids.nbytes)
+        if self.thresholds is not None:
+            total += int(self.thresholds.nbytes)
         return total
 
-    def _ensure_worker_pool(self) -> ThreadPoolExecutor:
+    def ensure_worker_pool(self) -> ThreadPoolExecutor:
         workers = self.max_workers
         if workers is None:
             import os
@@ -110,7 +110,7 @@ class Bbq(Retriever):
             workers = min(32, (os.cpu_count() or 1))
         return ThreadPoolExecutor(max_workers=workers)
 
-    def _load_metadata(self) -> dict:
+    def load_metadata(self) -> dict:
         path = self.out_dir / "metadata.json"
         if not path.exists():
             return {}

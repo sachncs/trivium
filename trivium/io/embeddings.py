@@ -52,14 +52,14 @@ class EmbeddingCache:
 
     def __init__(self, cache_dir: str | Path) -> None:
         self.cache_dir = Path(cache_dir)
-        self._index: dict | None = None
+        self.cache_index: dict | None = None
 
     def index(self) -> dict:
         """Lazy-load the embedding index."""
-        if self._index is None:
+        if self.cache_index is None:
             p = self.cache_dir / self.INDEX_FILE
-            self._index = json.loads(p.read_text()) if p.exists() else {}
-        return self._index
+            self.cache_index = json.loads(p.read_text()) if p.exists() else {}
+        return self.cache_index
 
     def file_for(self, slug: str, revision: str) -> Path:
         return self.cache_dir / f"vectors_{safe_slug(slug)}__{revision}.npz"
@@ -91,4 +91,4 @@ class EmbeddingCache:
             "dimension": int(vectors.shape[1]) if vectors.ndim == 2 else 0,
         }
         (self.cache_dir / self.INDEX_FILE).write_text(json.dumps(idx, indent=2, sort_keys=True))
-        self._index = idx
+        self.cache_index = idx

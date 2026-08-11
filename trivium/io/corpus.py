@@ -36,11 +36,11 @@ class CorpusCache:
 
     def __init__(self, cache_dir: str | Path) -> None:
         self.cache_dir = Path(cache_dir)
-        self._corpus: list[Document] | None = None
-        self._scifact_seed: list[Document] | None = None
-        self._vector_ids: np.ndarray | None = None
-        self._vectors: np.ndarray | None = None
-        self._id_to_idx: dict[str, int] | None = None
+        self.corpus: list[Document] | None = None
+        self.scifact_seed: list[Document] | None = None
+        self.vector_ids: np.ndarray | None = None
+        self.vectors: np.ndarray | None = None
+        self.id_to_idx: dict[str, int] | None = None
 
     def load_scale(self, scale: int) -> list[Document]:
         """Return the corpus slice for `scale`.
@@ -50,34 +50,27 @@ class CorpusCache:
         the prefix slice of the corpus.jsonl.
         """
         if scale == 5000:
-            return list(self._get_scifact_seed())
-        return list(self._get_corpus()[:scale])
+            return list(self.get_scifact_seed())
+        return list(self.get_corpus()[:scale])
 
-    def _get_scifact_seed(self) -> list[Document]:
-        if self._scifact_seed is None:
-            self._scifact_seed = self._read_jsonl(self.cache_dir / self.SCIFACT_SEED_FILE)
-        return self._scifact_seed
+    def get_scifact_seed(self) -> list[Document]:
+        if self.scifact_seed is None:
+            self.scifact_seed = read_jsonl(self.cache_dir / self.SCIFACT_SEED_FILE)
+        return self.scifact_seed
 
-    def _get_corpus(self) -> list[Document]:
-        if self._corpus is None:
-            self._corpus = self._read_jsonl(self.cache_dir / self.CORPUS_FILE)
-        return self._corpus
-
-    @staticmethod
-    def _read_jsonl(path: Path) -> list[Document]:
-        if not path.exists():
-            return []
-        with open(path) as f:
-            return [Document.from_row(json.loads(line)) for line in f]
+    def get_corpus(self) -> list[Document]:
+        if self.corpus is None:
+            self.corpus = read_jsonl(self.cache_dir / self.CORPUS_FILE)
+        return self.corpus
 
     def load_vectors(self) -> tuple[np.ndarray, np.ndarray]:
         """Load (vectors, ids). Reads vectors.npz once and caches."""
-        if self._vectors is None:
+        if self.vectors is None:
             npz = np.load(self.cache_dir / self.VECTORS_FILE, allow_pickle=True)
-            self._vector_ids = npz["ids"]
-            self._vectors = np.asarray(npz["vectors"], dtype=np.float32)
-            self._id_to_idx = {did: i for i, did in enumerate(self._vector_ids.tolist())}
-        return self._vectors, self._vector_ids
+            self.vector_ids = npz["ids"]
+            self.vectors = np.asarray(npz["vectors"], dtype=np.float32)
+            self.id_to_idx = {did: i for i, did in enumerate(self.vector_ids.tolist())}
+        return self.vectors, self.vector_ids
 
     def vectors_for_documents(self, documents: Sequence[Document]) -> np.ndarray:
         """Return float32 vectors for the given documents, in order.
@@ -85,18 +78,18 @@ class CorpusCache:
         Vectorised via np.searchsorted. Replaces the legacy Python
         loop `_corpus_vectors` which was O(N) Python at every call.
         """
-        vectors, ids = self.load_vectors()
-        if self._id_to_idx is None:
-            self._id_to_idx = {did: i for i, did in enumerate(ids.tolist())}
+        vectors, _ = self.load_vectors()
+        if self.id_to_idx is None:
+            self.id_to_idx = {did: i for i, did in enumerate(self.vector_ids.tolist())}
 
-        positions_map = self._id_to_idx  # dict for now
+        positions_map = self.id_to_idx
 
         positions = np.fromiter(
             (positions_map[d.doc_id] for d in documents),
             dtype=np.int64,
             count=len(documents),
         )
-        return vectors[positions]
+        return vectors[positions]  # type: ignore[index]
 
     def load_queries_and_qrels(self) -> tuple[list[dict], list[dict]]:
         q = []
@@ -110,3 +103,11 @@ class CorpusCache:
             with open(p) as f:
                 r = [json.loads(line) for line in f]
         return q, r
+
+
+def read_jsonl(path: Path) -> list[Document]:
+    """Module-level helper: read JSONL file into Document list."""
+    if not path.exists():
+        return []
+    with open(path) as f:
+        return [Document.from_row(json.loads(line)) for line in f]

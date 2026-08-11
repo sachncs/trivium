@@ -25,13 +25,15 @@ from trivium.config.schema import (
 )
 
 
-def _list_pairs(value: Any) -> list[tuple[float, float]]:
+def list_pairs(value: Any) -> list[tuple[float, float]]:
+    """Convert the YAML list-of-pairs shape into a typed list."""
     if value is None:
         return []
     return [(float(a), float(b)) for a, b in value]
 
 
-def _to_int_keys(d: Any) -> dict[int, int]:
+def to_int_keys(d: Any) -> dict[int, int]:
+    """Convert YAML string-keyed mapping to int-keyed mapping."""
     if d is None:
         return {}
     return {int(k): int(v) for k, v in d.items()}
@@ -50,7 +52,6 @@ def load_config(path: str | Path) -> Config:
     bm25 = Bm25Config(**raw_bm25)
 
     raw_vector = raw.get("vector", {})
-    # Translate the legacy per-scale nlist list into the by-scale dict.
     if "nlist" in raw_vector and isinstance(raw_vector["nlist"], list):
         legacy_nlist = [int(n) for n in raw_vector["nlist"]]
         if len(legacy_nlist) != len(scales):
@@ -59,7 +60,7 @@ def load_config(path: str | Path) -> Config:
             )
         nlist_by_scale = dict(zip(scales, legacy_nlist, strict=False))
     else:
-        nlist_by_scale = _to_int_keys(raw_vector.get("nlist_by_scale", {}))
+        nlist_by_scale = to_int_keys(raw_vector.get("nlist_by_scale", {}))
     vector = VectorConfig(
         nlist_by_scale=nlist_by_scale,
         nprobe_sweep=[
@@ -82,7 +83,7 @@ def load_config(path: str | Path) -> Config:
     hybrid = HybridConfig(
         rrf_k=int(raw_hybrid.get("rrf_k", 60)),
         rrf_k_sweep=[int(x) for x in raw_hybrid.get("rrf_k_sweep", [10, 30, 60, 100, 200])],
-        rrf_weight_sweep=_list_pairs(raw_hybrid.get("rrf_weight_sweep")),
+        rrf_weight_sweep=list_pairs(raw_hybrid.get("rrf_weight_sweep")),
         candidate_pool=int(raw_hybrid.get("candidate_pool", 100)),
     )
 

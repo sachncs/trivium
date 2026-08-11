@@ -29,7 +29,7 @@ class EvaluationMetrics:
             object.__setattr__(self, "extras", {})
 
 
-_DEFAULT_MEASURES = ("map", "ndcg", "recip_rank")
+DEFAULT_MEASURES_BUILTIN = ("map", "ndcg", "recip_rank")
 
 
 class Evaluator:
@@ -46,7 +46,7 @@ class Evaluator:
         self.k_values = tuple(k_values)
         self.extra_measures = tuple(extra_measures)
         self.measures = (
-            set(_DEFAULT_MEASURES)
+            set(DEFAULT_MEASURES_BUILTIN)
             | {f"ndcg_cut.{k}" for k in self.k_values}
             | {f"recall.{k}" for k in self.k_values}
             | {f"P.{k}" for k in self.k_values if k >= 5}
@@ -87,11 +87,11 @@ class Evaluator:
         if not per_query:
             return EvaluationMetrics()
 
-        aggregated = self._aggregate(per_query)
+        aggregated = self.aggregate(per_query)
         extras = {
             self.from_measure_name(k): v
             for k, v in aggregated.items()
-            if self.from_measure_name(k) not in self._core_fields()
+            if self.from_measure_name(k) not in self.core_fields()
         }
 
         return EvaluationMetrics(
@@ -107,7 +107,7 @@ class Evaluator:
         )
 
     @staticmethod
-    def _aggregate(per_query: dict) -> dict[str, float]:
+    def aggregate(per_query: dict) -> dict[str, float]:
         out: dict[str, float] = {}
         for measure in sorted({k for v in per_query.values() for k in v}):
             vals = [v[measure] for v in per_query.values() if v.get(measure) is not None]
@@ -116,7 +116,7 @@ class Evaluator:
         return out
 
     @staticmethod
-    def _core_fields() -> set[str]:
+    def core_fields() -> set[str]:
         return {
             "ndcg_cut.10",
             "ndcg_cut.100",

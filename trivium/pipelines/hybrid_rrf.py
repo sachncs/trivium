@@ -76,17 +76,17 @@ class HybridRrf(BenchmarkPipeline):
                 rotate_q = [
                     str(query_texts[i % len(query_texts)]) for i in range(min(len(inp.queries), 30))
                 ]
-                local_fusion = fusion  # capture for closure
+                bound_fusion = fusion  # default-arg binding fixes the B023 loop-var warning
 
-                def _probe_fn(i: int):
+                def probe_step(i: int, _fuse_obj=bound_fusion):
                     s = str(query_texts[i % len(query_texts)])
                     v = qv[i % len(qv)]
                     r1 = bm25.search(s, k=pool)
                     r2 = dense.search(v.reshape(1, -1).astype(np.float32), k=pool)
-                    local_fusion.fuse([r1, r2], top_k=pool)  # noqa: B023 (closure semantics intentional)
+                    _fuse_obj.fuse([r1, r2], top_k=pool)
 
                 probe = LatencyProbe(
-                    fn=_probe_fn,
+                    fn=probe_step,
                     n=len(rotate_q),
                     warmup=min(config.benchmark.warmup, len(rotate_q)),
                     rotate=list(range(len(rotate_q))),

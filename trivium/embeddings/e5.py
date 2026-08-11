@@ -51,58 +51,53 @@ class E5(Embedder):
         max_memory_gb: float | None = None,
         device: str = "mps",
     ) -> None:
-        self._slug = slug
-        self._model_id = model_id
-        self._dimension = dimension
-        self._prompt_query = prompt_prefix_query
-        self._prompt_doc = prompt_prefix_doc
-        self._batch_size = batch_size
-        self._max_seq_length = max_seq_length
-        self._max_memory_gb = max_memory_gb
-        self._device = device
-        self._model = None
-        self._tokenizer = None
+        self.slug_value = slug
+        self.model_id_value = model_id
+        self.dimension = dimension
+        self.prompt_query = prompt_prefix_query
+        self.prompt_doc = prompt_prefix_doc
+        self.batch_size = batch_size
+        self.max_seq_length = max_seq_length
+        self.max_memory_gb = max_memory_gb
+        self.device = device
+        self.model = None
+        self.tokenizer = None
 
     @property
     def slug(self) -> str:
-        return self._slug
-
-    @property
-    def dimension(self) -> int:
-        return self._dimension
+        return self.slug_value
 
     @property
     def model_id(self) -> str:
-        return self._model_id
+        return self.model_id_value
 
     def warmup(self, sample_texts: Sequence[str] = ("warmup",)) -> None:
-        if self._model is None:
-            self._ensure_model()
-        with self._inference_mode():
-            self._tokenize([self._prompt_query + sample_texts[0]])
+        if self.model is None:
+            self.ensure_model()
+        with self.inference_mode():
+            self.tokenize_pair([self.prompt_query + sample_texts[0]])
 
     def encode_documents(self, texts: Sequence[str]) -> np.ndarray:
-        return self._encode([self._prompt_doc + t for t in texts])
+        return self.encode_prompted([self.prompt_doc + t for t in texts])
 
     def encode_queries(self, texts: Sequence[str]) -> np.ndarray:
-        return self._encode([self._prompt_query + t for t in texts])
+        return self.encode_prompted([self.prompt_query + t for t in texts])
 
-    def _encode(self, prompted: list[str]) -> np.ndarray:
-        self._ensure_model()
+    def encode_prompted(self, prompted: list[str]) -> np.ndarray:
+        self.ensure_model()
         import torch
 
         all_vectors = []
-        with self._inference_mode():
-            for start in range(0, len(prompted), self._batch_size):
-                batch = prompted[start : start + self._batch_size]
-                inputs = self._tokenize(batch)
-                outputs = self._model(**inputs, output_hidden_states=False)
+        with self.inference_mode():
+            for start in range(0, len(prompted), self.batch_size):
+                batch = prompted[start : start + self.batch_size]
+                inputs = self.tokenize_pair(batch)
+                outputs = self.model(**inputs, output_hidden_states=False)
                 last_hidden = (
                     outputs.last_hidden_state
                     if hasattr(outputs, "last_hidden_state")
                     else outputs[0]
                 )
-                # last-token pooling: index the final non-pad position per row
                 attention_mask = inputs["attention_mask"]
                 sequence_lengths = attention_mask.sum(dim=1) - 1
                 pooled = last_hidden[torch.arange(last_hidden.size(0)), sequence_lengths]
@@ -110,43 +105,45 @@ class E5(Embedder):
                 all_vectors.append(pooled.cpu().float().numpy())
         return np.concatenate(all_vectors, axis=0).astype(np.float32)
 
-    def _tokenize(self, texts: list[str]) -> dict:
-        tok = self._tokenizer(
+    def tokenize_pair(self, texts: list[str]) -> dict:
+        tok = self.tokenizer(
             texts,
             padding=True,
             truncation=True,
-            max_length=self._max_seq_length,
+            max_length=self.max_seq_length,
             return_tensors="pt",
         )
-        return {k: v.to(self._device) for k, v in tok.items()}
+        return {k: v.to(self.device) for k, v in tok.items()}
 
-    def _inference_mode(self):
+    def inference_mode(self):
+        """Return a torch.inference_mode() context manager."""
         import torch
 
         return torch.inference_mode()
 
-    def _ensure_model(self) -> None:
-        if self._model is not None:
+    def ensure_model(self) -> None:
+        """Lazy-load the model; gates on free memory."""
+        if self.model is not None:
             return
-        self._check_memory()
+        self.check_memory()
         import torch
         from transformers import AutoModel, AutoTokenizer
 
-        self._tokenizer = AutoTokenizer.from_pretrained(self._model_id)
-        dtype = torch.float16 if self._device != "cpu" else torch.float32
-        self._model = AutoModel.from_pretrained(
-            self._model_id,
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_id_value)
+        dtype = torch.float16 if self.device != "cpu" else torch.float32
+        self.model = AutoModel.from_pretrained(
+            self.model_id_value,
             torch_dtype=dtype,
-            device_map=self._device,
+            device_map=self.device,
         )
-        self._model.eval()
+        self.model.eval()
 
-    def _check_memory(self) -> None:
-        if self._max_memory_gb is not None:
-            self._validate_within(self._max_memory_gb)
+    def check_memory(self) -> None:
+        if self.max_memory_gb is not None:
+            self.validate_within(self.max_memory_gb)
             return
         try:
-            free_gb = _linux_available_memory_gb() if os.name == "posix" else 16.0
+            free_gb = linux_available_memory_gb() if os.name == "posix" else 16.0
             peak_estimate = 14.0
             if peak_estimate > 0.8 * free_gb:
                 raise RuntimeError(
@@ -157,13 +154,13 @@ class E5(Embedder):
             pass
 
     @staticmethod
-    def _validate_within(limit_gb: float) -> None:
-        free_gb = _linux_available_memory_gb() if os.name == "posix" else 16.0
+    def validate_within(limit_gb: float) -> None:
+        free_gb = linux_available_memory_gb() if os.name == "posix" else 16.0
         if limit_gb > free_gb:
             raise RuntimeError(f"max_memory_gb={limit_gb} > available {free_gb:.1f}")
 
 
-def _linux_available_memory_gb() -> float:
+def linux_available_memory_gb() -> float:
     """Best-effort free memory in GB on Linux. Returns inf on failure."""
     try:
         with open("/proc/meminfo") as f:

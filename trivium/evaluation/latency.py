@@ -102,7 +102,7 @@ class LatencyProbe:
 
     def run(self) -> LatencyStats:
         if self.warmup > 0:
-            self._warmup()
+            self.prime_cache()
         if self.cold_cache:
             drop_os_page_cache()
         samples = np.empty(self.n, dtype=np.int64)
@@ -116,7 +116,8 @@ class LatencyProbe:
             samples[i] = time.perf_counter_ns() - t0
         return LatencyStats.from_samples(samples)
 
-    def _warmup(self) -> None:
+    def prime_cache(self) -> None:
+        """Run warmup iterations to prime caches/JIT before measurement."""
         if self.rotate:
             for i in range(self.warmup):
                 self.fn(self.rotate[i % len(self.rotate)])

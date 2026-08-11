@@ -5,7 +5,8 @@ from __future__ import annotations
 import numpy as np
 
 
-def _as_float32(arr: np.ndarray) -> np.ndarray:
+def cast_float32(arr: np.ndarray) -> np.ndarray:
+    """Public helper: cast numpy array to float32 if it isn't already."""
     return arr if arr.dtype == np.float32 else arr.astype(np.float32)
 
 
@@ -22,7 +23,7 @@ class ExactSearch:
     """
 
     def __init__(self, vectors: np.ndarray) -> None:
-        self.vectors = _as_float32(vectors)
+        self.vectors = cast_float32(vectors)
         self.dimension = int(self.vectors.shape[1])
         self.index = None  # type: ignore[assignment]
 
@@ -38,7 +39,7 @@ class ExactSearch:
         """Returns (k-NN ids, scores). Single-source-of-truth signature."""
         if self.index is None:
             self.build()
-        queries = _as_float32(queries)
+        queries = cast_float32(queries)
         scores, ids = self.index.search(queries, k)
         return ids, scores
 

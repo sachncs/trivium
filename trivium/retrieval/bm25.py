@@ -34,10 +34,10 @@ class Bm25(Retriever):
         self.method = method
         self.stopwords = stopwords
         self.stemmer = stemmer
-        self._bm25 = None
-        self._tokenizer = None
-        self._doc_ids: list[str] = []
-        self._id_to_pos: dict[str, int] = {}
+        self.bm25 = None
+        self.tokenizer = None
+        self.doc_ids: list[str] = []
+        self.id_to_pos: dict[str, int] = {}
 
     @property
     def slug(self) -> str:
@@ -48,19 +48,19 @@ class Bm25(Retriever):
     ) -> None:
         if not documents:
             raise RuntimeError("Bm25.add_documents requires at least one document")
-        self._doc_ids = [d.doc_id for d in documents]
-        self._id_to_pos = {did: i for i, did in enumerate(self._doc_ids)}
+        self.doc_ids = [d.doc_id for d in documents]
+        self.id_to_pos = {did: i for i, did in enumerate(self.doc_ids)}
 
         from bm25s import BM25
         from bm25s.tokenization import Tokenizer
 
-        self._tokenizer = Tokenizer(stopwords=self.stopwords, stemmer=self.stemmer)
-        corpus_tokens = self._tokenizer.tokenize(
+        self.tokenizer = Tokenizer(stopwords=self.stopwords, stemmer=self.stemmer)
+        corpus_tokens = self.tokenizer.tokenize(
             [d.body for d in documents],
             return_as="tuple",
         )
-        self._bm25 = BM25(method=self.method, k1=self.k1, b=self.b)
-        self._bm25.index(corpus_tokens, show_progress=False)
+        self.bm25 = BM25(method=self.method, k1=self.k1, b=self.b)
+        self.bm25.index(corpus_tokens, show_progress=False)
 
     def search(self, query_vectors: np.ndarray, k: int) -> list[SearchResult]:
         """Encode the raw query text from `query_vectors` (we treat it as strings).
@@ -68,15 +68,15 @@ class Bm25(Retriever):
         bm25s has no notion of pre-computed query vectors; the input
         is treated as raw query strings. Shape: (N,) dtype U.
         """
-        self._ensure_built()
-        queries = self._coerce_query_strings(query_vectors)
-        query_tokens = self._tokenizer.tokenize(
+        self.ensure_built()
+        queries = coerce_query_strings(query_vectors)
+        query_tokens = self.tokenizer.tokenize(
             queries,
             update_vocab=False,
             return_as="tuple",
             show_progress=False,
         )
-        indices, scores = self._bm25.retrieve(query_tokens, k=k, show_progress=False)
+        indices, scores = self.bm25.retrieve(query_tokens, k=k, show_progress=False)
         indices = np.asarray(indices)
         scores = np.asarray(scores)
         results: list[SearchResult] = []
@@ -86,7 +86,7 @@ class Bm25(Retriever):
             results.append(
                 SearchResult.from_pairs(
                     [
-                        (self._doc_ids[int(ids[i])], float(sc[i]))
+                        (self.doc_ids[int(ids[i])], float(sc[i]))
                         for i in range(ids.shape[0])
                         if int(ids[i]) != -1
                     ]
@@ -99,9 +99,9 @@ class Bm25(Retriever):
         return
 
     def size_bytes(self) -> int:
-        if self._bm25 is None:
+        if self.bm25 is None:
             return 0
-        bm = self._bm25
+        bm = self.bm25
         scores_size = 0
         from contextlib import suppress
 
@@ -112,37 +112,40 @@ class Bm25(Retriever):
     def save(self, dir_path: str | Path) -> None:
         dir_path = Path(dir_path)
         dir_path.mkdir(parents=True, exist_ok=True)
-        self._bm25.save(str(dir_path), corpus=None)
-        self._tokenizer.save_vocab(save_dir=str(dir_path))
-        self._tokenizer.save_stopwords(save_dir=str(dir_path))
+        self.bm25.save(str(dir_path), corpus=None)
+        self.tokenizer.save_vocab(save_dir=str(dir_path))
+        self.tokenizer.save_stopwords(save_dir=str(dir_path))
 
     def load(self, dir_path: str | Path, mmap: bool = True) -> None:
         from bm25s import BM25
         from bm25s.tokenization import Tokenizer
 
         dir_path = Path(dir_path)
-        self._bm25 = BM25.load(str(dir_path), mmap=mmap)
-        self._tokenizer = Tokenizer(stopwords=self.stopwords, stemmer=self.stemmer)
-        self._tokenizer.load_vocab(save_dir=str(dir_path))
-        self._tokenizer.load_stopwords(save_dir=str(dir_path))
+        self.bm25 = BM25.load(str(dir_path), mmap=mmap)
+        self.tokenizer = Tokenizer(stopwords=self.stopwords, stemmer=self.stemmer)
+        self.tokenizer.load_vocab(save_dir=str(dir_path))
+        self.tokenizer.load_stopwords(save_dir=str(dir_path))
 
     def ensure_doc_positions(self) -> None:
-        """Call this after load() to populate doc_ids metadata."""
+        """Hook for callers that load a saved index and need to repopulate doc_ids."""
         # The legacy mmap save doesn't persist doc_ids. The caller
         # must provide them externally if they're needed.
         pass
 
-    def _ensure_built(self) -> None:
-        if self._bm25 is None or self._tokenizer is None:
+    def ensure_built(self) -> None:
+        if self.bm25 is None or self.tokenizer is None:
             raise RuntimeError(
                 "Bm25.search called before add_documents(); call add_documents or load first"
             )
 
-    @staticmethod
-    def _coerce_query_strings(input_) -> list[str]:
-        # Accept list[str], numpy array of strings, or a single string.
-        if isinstance(input_, str):
-            return [input_]
-        if isinstance(input_, np.ndarray):
-            return input_.astype("U").tolist()
-        return list(input_)
+
+def coerce_query_strings(input_) -> list[str]:
+    """Coerce bm25s query input into a list[str].
+
+    Accepts: a single str, list[str], numpy array of strings (any shape).
+    """
+    if isinstance(input_, str):
+        return [input_]
+    if isinstance(input_, np.ndarray):
+        return input_.astype("U").tolist()
+    return list(input_)
