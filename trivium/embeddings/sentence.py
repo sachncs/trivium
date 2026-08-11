@@ -52,7 +52,7 @@ class Sentence(Embedder):
         # Public storage; abstract `slug` property delegates to slug_value.
         self.slug_value = slug
         self.model_id_value = model_id
-        self.dimension = dimension
+        self._dimension = dimension
         self.prompt_prefix_doc = prompt_prefix_doc
         self.prompt_prefix_query = prompt_prefix_query
         self.batch_size = batch_size
@@ -68,6 +68,10 @@ class Sentence(Embedder):
     @property
     def model_id(self) -> str:
         return self.model_id_value
+
+    @property
+    def dimension(self) -> int:
+        return self._dimension
 
     def warmup(self, sample_texts: Sequence[str] = ("warmup",)) -> None:
         if self.model is None:

@@ -6,9 +6,10 @@ corpus:
     - scidocs
     - trec-covid
     - nfcorpus
-  # FEVER is sampled to pad to 1M. For 100K-scale runs, set to 0 (the three
-  # BEIR scientific corpora already give ~200K distractor candidates).
-  fever_sample: 0
+  # FEVER is sampled to pad to 1M. The three BEIR scientific corpora
+  # already give ~200K distractor candidates; 800K more from FEVER
+  # plus ~5K scifact = ~1M total.
+  fever_sample: 800000
   seed_random: 42
   dedup_jaccard_threshold: 0.85
 
@@ -24,6 +25,17 @@ embedding:
   batch_size: 128
   normalize: true
   max_seq_length: 256
+
+encoders:
+  # Single encoder for the 1M-scale DiskBBQ benchmark. Ponytail choice:
+  # 90 MB model, 384d, l2-normalised, ~5x faster than mpnet-base on CPU.
+  - slug: minilm-l6
+    model_id: sentence-transformers/all-MiniLM-L6-v2
+    dimension: 384
+    device: cpu
+    batch_size: 128
+    max_seq_length: 256
+    normalize: true
 
 bm25:
   # k1=0.9, b=0.4 is the Anserini default that reproduces beir-v1.0.0-scifact nDCG@10=0.6789

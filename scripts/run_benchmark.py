@@ -126,13 +126,33 @@ def main():
     print(f"  queries: {len(queries)}", flush=True)
 
     query_vectors: dict[str, np.ndarray] = {}
+    enc_by_slug = {e.slug: e for e in config.encoders}
     for slug in selected_encoders:
+        if slug not in enc_by_slug:
+            continue
+        entry = enc_by_slug[slug]
         try:
             embedder = get_embedder(
                 slug,
                 slug=slug,
+                model_id=entry.model_id,
+                dimension=entry.dimension,
+                batch_size=entry.batch_size,
+                max_seq_length=entry.max_seq_length,
+                normalize=entry.normalize,
+                device=entry.device,
+                prompt_prefix_doc=entry.prompt_prefix_doc,
+                prompt_prefix_query=entry.prompt_prefix_query,
             )
         except KeyError:
+            continue
+        try:
+            embedder.warmup(["warmup"])
+            qv = embedder.encode_queries([q.text for q in queries])
+            query_vectors[slug] = np.asarray(qv, dtype=np.float32)
+            print(f"  encoded {len(qv)} queries with {slug}", flush=True)
+        except Exception as exc:
+            print(f"  encoder {slug} failed: {exc}", flush=True)
             continue
 
     all_rows = []

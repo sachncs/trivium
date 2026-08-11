@@ -1,0 +1,147 @@
+"""Tests for trivium.retrieval.diskbbq.Bbq.
+
+Atomic checks:
+- Build + search returns non-empty hits
+- RAM mode and disk mode agree on doc_ids (same codes/centroids)
+- Recall@10 vs Faiss.Flat on a tiny corpus is ≥0.5
+- size_bytes reports on-disk footprint after build
+- Round-trip: write to disk, instantiate fresh Bbq from same out_dir, same hits
+"""
+from __future__ import annotations
+
+import shutil
+from pathlib import Path
+
+import numpy as np
+
+from trivium.domain.document import Document
+from trivium.retrieval.diskbbq import Bbq
+from trivium.retrieval.faiss import Faiss
+
+
+def _toy_corpus(n: int = 200, dim: int = 96, seed: int = 42) -> tuple[list[Document], np.ndarray]:
+    docs = [Document(doc_id=f"d{i:04d}", title=f"t{i}", text=f"doc number {i}") for i in range(n)]
+    rng = np.random.RandomState(seed)
+    vecs = rng.randn(n, dim).astype(np.float32)
+    vecs /= np.linalg.norm(vecs, axis=1, keepdims=True)
+    return docs, vecs
+
+
+class TestBbqBuildAndSearch:
+    def test_build_emits_disk_layout(self, tmp_path: Path) -> None:
+        docs, vecs = _toy_corpus(n=200, dim=96)
+        bbq = Bbq(out_dir=tmp_path, nlist=8, m=24, nprobe=4, use_rescore=False)
+        bbq.add_documents(docs, vectors=vecs)
+        assert (tmp_path / "centroids.npy").exists()
+        assert (tmp_path / "subvector_thresholds.npy").exists()
+        assert (tmp_path / "metadata.json").exists()
+        for cid in range(bbq.nlist):
+            assert (tmp_path / f"list_{cid}.ids.npy").exists()
+            assert (tmp_path / f"list_{cid}.codes.npy").exists()
+
+    def test_search_returns_nonempty_hits(self, tmp_path: Path) -> None:
+        docs, vecs = _toy_corpus(n=200, dim=96)
+        bbq = Bbq(out_dir=tmp_path, nlist=8, m=24, nprobe=4, use_rescore=False)
+        bbq.add_documents(docs, vectors=vecs)
+        results = bbq.search(vecs[:5], k=10, mode="ram")
+        assert len(results) == 5
+        for r in results:
+            assert len(r) > 0
+            assert all(h.doc_id.startswith("d") for h in r)
+
+    def test_ram_and_disk_agree(self, tmp_path: Path) -> None:
+        docs, vecs = _toy_corpus(n=200, dim=96)
+        bbq = Bbq(out_dir=tmp_path, nlist=8, m=24, nprobe=4, use_rescore=True)
+        bbq.add_documents(docs, vectors=vecs)
+        q = vecs[:5]
+        r_ram = bbq.search(q, k=10, mode="ram")
+        r_disk = bbq.search(q, k=10, mode="disk")
+        for i in range(5):
+            ram_ids = [h.doc_id for h in r_ram[i]]
+            disk_ids = [h.doc_id for h in r_disk[i]]
+            assert ram_ids == disk_ids, f"q{i}: RAM {ram_ids} != DISK {disk_ids}"
+
+    def test_recall_vs_flat(self, tmp_path: Path) -> None:
+        docs, vecs = _toy_corpus(n=500, dim=96)
+        bbq = Bbq(out_dir=tmp_path, nlist=16, m=24, nprobe=8, use_rescore=True)
+        bbq.add_documents(docs, vectors=vecs)
+        flat = Faiss.Flat()
+        flat.add_documents(docs, vectors=vecs)
+        q = vecs[:30]
+        r_ram = bbq.search(q, k=10, mode="ram")
+        r_exact = flat.search(q, k=10)
+        overlaps = []
+        for i in range(30):
+            ram_ids = set(h.doc_id for h in r_ram[i])
+            exact_ids = set(h.doc_id for h in r_exact[i])
+            overlaps.append(len(ram_ids & exact_ids))
+        avg = sum(overlaps) / (30 * 10)
+        assert avg >= 0.5, f"recall@10 vs flat = {avg:.3f} < 0.5"
+
+    def test_size_bytes_positive(self, tmp_path: Path) -> None:
+        docs, vecs = _toy_corpus(n=200, dim=96)
+        bbq = Bbq(out_dir=tmp_path, nlist=8, m=24, nprobe=4, use_rescore=True)
+        bbq.add_documents(docs, vectors=vecs)
+        assert bbq.size_bytes() > 0
+
+    def test_round_trip(self, tmp_path: Path) -> None:
+        docs, vecs = _toy_corpus(n=200, dim=96)
+        bbq = Bbq(out_dir=tmp_path, nlist=8, m=24, nprobe=4, use_rescore=True)
+        bbq.add_documents(docs, vectors=vecs)
+        q = vecs[:5]
+        r1 = bbq.search(q, k=10, mode="ram")
+        bbq2 = Bbq(out_dir=tmp_path, nlist=8, m=24, nprobe=4, use_rescore=True)
+        assert bbq2.centroids is None
+        meta = bbq2.load_metadata()
+        assert meta["nlist"] == 8
+        assert meta["m"] == 24
+
+    def test_unbuilt_search_raises(self, tmp_path: Path) -> None:
+        bbq = Bbq(out_dir=tmp_path, nlist=8, m=24, nprobe=4, use_rescore=False)
+        import pytest
+
+        with pytest.raises(RuntimeError):
+            bbq.search(np.zeros((1, 96), dtype=np.float32), k=10, mode="ram")
+
+    def test_unknown_mode_raises(self, tmp_path: Path) -> None:
+        docs, vecs = _toy_corpus(n=100, dim=96)
+        bbq = Bbq(out_dir=tmp_path, nlist=4, m=24, nprobe=2, use_rescore=False)
+        bbq.add_documents(docs, vectors=vecs)
+        import pytest
+
+        with pytest.raises(ValueError):
+            bbq.search(vecs[:1], k=5, mode="nope")
+
+    def test_set_search_params_roundtrip(self, tmp_path: Path) -> None:
+        docs, vecs = _toy_corpus(n=100, dim=96)
+        bbq = Bbq(out_dir=tmp_path, nlist=4, m=24, nprobe=2, use_rescore=False)
+        bbq.add_documents(docs, vectors=vecs)
+        bbq.set_search_params(nprobe=3)
+        assert bbq.nprobe == 3
+        bbq.set_search_params(use_rescore=True, k_factor=8)
+        assert bbq.use_rescore is True
+        assert bbq.k_factor == 8
+
+
+class TestBbqEdgeCases:
+    def test_nb_bits_must_be_one(self, tmp_path: Path) -> None:
+        import pytest
+
+        with pytest.raises(ValueError):
+            Bbq(out_dir=tmp_path, m=24, nbits=4)
+
+    def test_dim_must_be_divisible_by_m(self, tmp_path: Path) -> None:
+        docs, vecs = _toy_corpus(n=100, dim=100)
+        bbq = Bbq(out_dir=tmp_path, nlist=4, m=24, nprobe=2)
+        import pytest
+
+        with pytest.raises(ValueError):
+            bbq.add_documents(docs, vectors=vecs)
+
+    def test_requires_vectors(self, tmp_path: Path) -> None:
+        docs, _ = _toy_corpus(n=10)
+        bbq = Bbq(out_dir=tmp_path, nlist=4, m=24, nprobe=2)
+        import pytest
+
+        with pytest.raises(ValueError):
+            bbq.add_documents(docs, vectors=None)

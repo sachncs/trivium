@@ -48,6 +48,12 @@ try:
 
     @register_embedder("minilm-l6")
     def make_minilm(**kwargs) -> Embedder:
+        try:
+            import torch
+
+            torch.set_num_threads(1)
+        except ImportError:
+            pass
         defaults = dict(
             slug="minilm-l6",
             model_id="sentence-transformers/all-MiniLM-L6-v2",
