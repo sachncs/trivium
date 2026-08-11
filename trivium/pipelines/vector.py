@@ -11,9 +11,11 @@ from trivium.domain.pipeline_result import PipelineResult
 from trivium.evaluation.latency import LatencyProbe
 from trivium.evaluation.metrics import Evaluator, hits_to_results
 from trivium.pipelines.base import BenchmarkPipeline, PipelineInput
+from trivium.pipelines.registry import register_pipeline
 from trivium.retrieval.faiss import Faiss
 
 
+@register_pipeline("vector")
 class Vector(BenchmarkPipeline):
     """Pure-vector pipeline. Selects Flat or Ivpq based on scale."""
 

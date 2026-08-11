@@ -12,10 +12,12 @@ from trivium.evaluation.latency import LatencyProbe
 from trivium.evaluation.metrics import Evaluator, hits_to_results
 from trivium.fusion.rrf import Rrf
 from trivium.pipelines.base import BenchmarkPipeline, PipelineInput
+from trivium.pipelines.registry import register_pipeline
 from trivium.retrieval.bm25 import Bm25 as Bm25Retriever
 from trivium.retrieval.faiss import Faiss
 
 
+@register_pipeline("hybrid_rrf")
 class HybridRrf(BenchmarkPipeline):
     """BM25 + dense retrieval fused via Reciprocal Rank Fusion."""
 

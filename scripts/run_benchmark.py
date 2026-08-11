@@ -23,6 +23,11 @@ from trivium.domain.document import Document
 from trivium.domain.query import Query
 from trivium.domain.qrels import Qrels
 from trivium.embeddings.registry import get_embedder
+from trivium.pipelines import bm25 as pipelines_bm25  # noqa: F401  registers 'bm25'
+from trivium.pipelines import vector as pipelines_vector  # noqa: F401  registers 'vector'
+from trivium.pipelines import hybrid_rrf as pipelines_hybrid_rrf  # noqa: F401
+from trivium.pipelines import hybrid_rerank as pipelines_hybrid_rerank  # noqa: F401
+from trivium.pipelines import diskbbq as pipelines_diskbbq  # noqa: F401
 from trivium.evaluation.metrics import Evaluator, hits_to_results
 from trivium.io.corpus import CorpusCache
 from trivium.pipelines.base import PipelineInput
@@ -173,9 +178,10 @@ def main():
                     break  # one encoder per (pipeline, scale)
 
     repro = ReproducibilityManifest.gather()
+    repro_dict = repro.to_dict()
     for r in all_rows:
-        for k, v in repro.to_dict().items():
-            r.to_dict().setdefault(k, v)  # type: ignore[attr-defined]
+        for k, v in repro_dict.items():
+            r.extras.setdefault(k, v)
     rows_with_repro = all_rows
 
     CsvResultWriter.write(rows_with_repro, args.output)

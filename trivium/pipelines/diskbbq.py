@@ -9,8 +9,10 @@ from trivium.domain.pipeline_result import PipelineResult
 from trivium.evaluation.latency import LatencyStats
 from trivium.evaluation.metrics import EvaluationMetrics
 from trivium.pipelines.base import BenchmarkPipeline, PipelineInput
+from trivium.pipelines.registry import register_pipeline
 
 
+@register_pipeline("diskbbq")
 class BbqPipeline(BenchmarkPipeline):
     """Wraps the disk-resident Bbq retriever for orchestrator-level bookkeeping."""
 

@@ -11,9 +11,11 @@ from trivium.domain.pipeline_result import PipelineResult
 from trivium.evaluation.latency import LatencyProbe
 from trivium.evaluation.metrics import Evaluator, hits_to_results
 from trivium.pipelines.base import BenchmarkPipeline, PipelineInput
+from trivium.pipelines.registry import register_pipeline
 from trivium.retrieval.bm25 import Bm25 as Bm25Retriever
 
 
+@register_pipeline("bm25")
 class Bm25(BenchmarkPipeline):
     """Pure-BM25 pipeline. No vector path, no reranker."""
 

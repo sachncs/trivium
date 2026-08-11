@@ -36,6 +36,9 @@ class PipelineResult:
             "scale": self.scale,
             "encoder": self.encoder,
             "reranker": self.reranker,
+            # n_docs is an alias for scale for backward-compat with
+            # legacy CSV consumers.
+            "n_docs": self.scale,
             "lat_n": self.latency.n,
             "lat_mean_ms": round(self.latency.mean_ms, 4),
             "lat_p50_ms": round(self.latency.p50_ms, 4),
