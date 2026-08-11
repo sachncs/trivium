@@ -12,6 +12,7 @@ via the sentence-transformers library:
 The model is loaded lazily on first call to encode_*. The heavy
 import is deferred to keep CLI startup fast.
 """
+
 from __future__ import annotations
 
 from collections.abc import Sequence

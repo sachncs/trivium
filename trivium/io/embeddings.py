@@ -13,6 +13,7 @@ not cached. put() writes a new npz keyed on (slug, revision).
 The revision-hash includes model_id + max_seq_length + prompt
 prefixes, so a prompt-template upgrade is a cache miss.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -77,7 +78,9 @@ class EmbeddingCache:
         ids = np.asarray(npz["ids"])
         return vectors, ids
 
-    def put(self, slug: str, revision: str, vectors: np.ndarray, ids: Sequence[str], doc_count: int) -> None:
+    def put(
+        self, slug: str, revision: str, vectors: np.ndarray, ids: Sequence[str], doc_count: int
+    ) -> None:
         """Persist (vectors, ids) and record the entry in the index."""
         path = self.file_for(slug, revision)
         np.savez_compressed(path, vectors=vectors, ids=np.array(list(ids)))

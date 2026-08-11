@@ -1,7 +1,8 @@
 """EmbedderRegistry: lookup by slug and per-slug factory functions."""
+
 from __future__ import annotations
 
-from typing import Callable
+from collections.abc import Callable
 
 from trivium.embeddings.base import Embedder
 
@@ -10,9 +11,11 @@ _FACTORIES: dict[str, Callable[..., Embedder]] = {}
 
 def register_embedder(slug: str) -> Callable[[Callable[..., Embedder]], Callable[..., Embedder]]:
     """Decorator: register an Embedder factory under `slug`."""
+
     def deco(factory: Callable[..., Embedder]) -> Callable[..., Embedder]:
         _FACTORIES[slug] = factory
         return factory
+
     return deco
 
 

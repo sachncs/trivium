@@ -1,4 +1,5 @@
 """Unit tests for trivium.pipelines.helpers (public, no semi-private)."""
+
 from __future__ import annotations
 
 import numpy as np

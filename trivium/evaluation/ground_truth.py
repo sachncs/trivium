@@ -1,4 +1,5 @@
 """ExactSearch: dense exact ground-truth over IndexFlatIP."""
+
 from __future__ import annotations
 
 import numpy as np
@@ -25,7 +26,7 @@ class ExactSearch:
         self.dimension = int(self.vectors.shape[1])
         self.index = None  # type: ignore[assignment]
 
-    def build(self) -> "ExactSearch":
+    def build(self) -> ExactSearch:
         import faiss
 
         index = faiss.IndexFlatIP(self.dimension)

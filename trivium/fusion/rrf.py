@@ -5,6 +5,7 @@ score(d) = sum_i w_i / (k + rank_i(d))
 Replaces the legacy search/hybrid.py:rrf() function with a class
 that returns SearchResult (was list[tuple[str, float]]).
 """
+
 from __future__ import annotations
 
 from collections.abc import Sequence

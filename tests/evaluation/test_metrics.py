@@ -1,4 +1,5 @@
 """Unit tests for trivium.evaluation."""
+
 from __future__ import annotations
 
 import numpy as np
@@ -24,7 +25,9 @@ class TestEvaluator:
         assert 0.0 <= m.ndcg_at_10 <= 1.0
 
     def test_measure_name_roundtrip(self):
-        assert Evaluator.from_measure_name(Evaluator.to_measure_name("ndcg_cut.10")) == "ndcg_cut.10"
+        assert (
+            Evaluator.from_measure_name(Evaluator.to_measure_name("ndcg_cut.10")) == "ndcg_cut.10"
+        )
 
     def test_hits_to_results(self):
         queries = [type("Q", (), {"query_id": "q1"})()]

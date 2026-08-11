@@ -5,16 +5,19 @@ one FusionStrategy and one Reranker) into a single benchmark mode
 that the registry-driven scripts/run_benchmark.py can invoke
 without if/elif dispatch.
 """
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 
+import numpy as np
+
 from trivium.config.schema import Config
 from trivium.domain.document import Document
 from trivium.domain.pipeline_result import PipelineResult
-from trivium.domain.query import Query
 from trivium.domain.qrels import Qrels
+from trivium.domain.query import Query
 
 
 class PipelineInput:
@@ -31,8 +34,8 @@ class PipelineInput:
         queries: Sequence[Query],
         qrels: Qrels,
         encoder_slug: str,
-        query_vectors: "np.ndarray | None" = None,
-        corpus_vectors: "np.ndarray | None" = None,
+        query_vectors: np.ndarray | None = None,
+        corpus_vectors: np.ndarray | None = None,
         reranker=None,
     ) -> None:
         self.documents = documents

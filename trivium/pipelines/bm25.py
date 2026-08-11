@@ -1,4 +1,5 @@
 """Bm25 pipeline: pure BM25 mode."""
+
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -10,7 +11,7 @@ from trivium.domain.pipeline_result import PipelineResult
 from trivium.evaluation.latency import LatencyProbe
 from trivium.evaluation.metrics import Evaluator, hits_to_results
 from trivium.pipelines.base import BenchmarkPipeline, PipelineInput
-from trivium.retrieval.bm25 import Bm25
+from trivium.retrieval.bm25 import Bm25 as Bm25Retriever
 
 
 class Bm25(BenchmarkPipeline):
@@ -25,7 +26,7 @@ class Bm25(BenchmarkPipeline):
         return ["none"]
 
     def run(self, inp: PipelineInput, config: Config) -> list[PipelineResult]:
-        bm25 = Bm25(
+        bm25 = Bm25Retriever(
             k1=config.bm25.k1,
             b=config.bm25.b,
             method=config.bm25.method,
@@ -38,7 +39,10 @@ class Bm25(BenchmarkPipeline):
         query_texts = np.array([q.text for q in inp.queries])
         raw = bm25.search(query_texts, k=pool)
         # bm25.search returns list[SearchResult]
-        per_query = [[(h.doc_id, h.score) for h in (r if isinstance(r, list) else [r])[0]] if r else [] for r in raw]
+        per_query = [
+            [(h.doc_id, h.score) for h in (r if isinstance(r, list) else [r])[0]] if r else []
+            for r in raw
+        ]
 
         eval_pairs = hits_to_results(per_query, list(inp.queries))
         metrics = Evaluator(k_values=config.benchmark.top_k_eval).evaluate(inp.qrels, eval_pairs)

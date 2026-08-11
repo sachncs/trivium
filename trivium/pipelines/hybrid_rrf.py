@@ -1,4 +1,5 @@
 """HybridRrf pipeline: BM25 + vector fused via RRF."""
+
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -11,7 +12,7 @@ from trivium.evaluation.latency import LatencyProbe
 from trivium.evaluation.metrics import Evaluator, hits_to_results
 from trivium.fusion.rrf import Rrf
 from trivium.pipelines.base import BenchmarkPipeline, PipelineInput
-from trivium.retrieval.bm25 import Bm25
+from trivium.retrieval.bm25 import Bm25 as Bm25Retriever
 from trivium.retrieval.faiss import Faiss
 
 
@@ -30,7 +31,7 @@ class HybridRrf(BenchmarkPipeline):
         if inp.corpus_vectors is None or inp.query_vectors is None:
             raise ValueError("HybridRrf requires query and corpus vectors")
 
-        bm25 = Bm25(
+        bm25 = Bm25Retriever(
             k1=config.bm25.k1,
             b=config.bm25.b,
             method=config.bm25.method,
@@ -43,11 +44,9 @@ class HybridRrf(BenchmarkPipeline):
         cv = np.asarray(inp.corpus_vectors, dtype=np.float32)
         scale = len(inp.documents)
         use_exact = scale <= config.vector.min_scale_for_ivfpq
-        dense: Faiss.Flat | Faiss.Ivpq
-        if use_exact:
-            dense = Faiss.Flat()
-        else:
-            dense = Faiss.Ivpq(config=config, scale=scale)
+        dense: Faiss.Flat | Faiss.Ivpq = (
+            Faiss.Flat() if use_exact else Faiss.Ivpq(config=config, scale=scale)
+        )
         dense.add_documents(list(inp.documents), vectors=cv)
 
         nprobe = config.vector.nprobe_sweep[-1]
@@ -68,16 +67,21 @@ class HybridRrf(BenchmarkPipeline):
                 ]
                 per_query = [[(h.doc_id, h.score) for h in r] for r in fused_results]
                 eval_pairs = hits_to_results(per_query, list(inp.queries))
-                metrics = Evaluator(k_values=config.benchmark.top_k_eval).evaluate(inp.qrels, eval_pairs)
+                metrics = Evaluator(k_values=config.benchmark.top_k_eval).evaluate(
+                    inp.qrels, eval_pairs
+                )
 
-                rotate_q = [str(query_texts[i % len(query_texts)]) for i in range(min(len(inp.queries), 30))]
+                rotate_q = [
+                    str(query_texts[i % len(query_texts)]) for i in range(min(len(inp.queries), 30))
+                ]
+                local_fusion = fusion  # capture for closure
 
                 def _probe_fn(i: int):
                     s = str(query_texts[i % len(query_texts)])
                     v = qv[i % len(qv)]
                     r1 = bm25.search(s, k=pool)
                     r2 = dense.search(v.reshape(1, -1).astype(np.float32), k=pool)
-                    fusion.fuse([r1, r2], top_k=pool)
+                    local_fusion.fuse([r1, r2], top_k=pool)  # noqa: B023 (closure semantics intentional)
 
                 probe = LatencyProbe(
                     fn=_probe_fn,

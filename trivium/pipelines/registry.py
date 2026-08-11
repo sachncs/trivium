@@ -3,6 +3,7 @@
 Adding a new benchmark mode = adding a class + one decorator.
 No elif chains anywhere in trivium.
 """
+
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -16,6 +17,7 @@ def register_pipeline(name: str) -> Callable[[type[BenchmarkPipeline]], type[Ben
     def deco(cls: type[BenchmarkPipeline]) -> type[BenchmarkPipeline]:
         _FACTORIES[name] = cls
         return cls
+
     return deco
 
 

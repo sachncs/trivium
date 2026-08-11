@@ -1,4 +1,5 @@
 """HybridRerank pipeline: BM25 + vector + cross-encoder rerank."""
+
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -11,7 +12,7 @@ from trivium.evaluation.latency import LatencyProbe
 from trivium.evaluation.metrics import Evaluator, hits_to_results
 from trivium.fusion.rrf import Rrf
 from trivium.pipelines.base import BenchmarkPipeline, PipelineInput
-from trivium.retrieval.bm25 import Bm25
+from trivium.retrieval.bm25 import Bm25 as Bm25Retriever
 from trivium.retrieval.faiss import Faiss
 
 
@@ -30,7 +31,7 @@ class HybridRerank(BenchmarkPipeline):
         if inp.corpus_vectors is None or inp.query_vectors is None or inp.reranker is None:
             raise ValueError("HybridRerank requires query/corpus vectors and a reranker")
 
-        bm25 = Bm25(
+        bm25 = Bm25Retriever(
             k1=config.bm25.k1,
             b=config.bm25.b,
             method=config.bm25.method,
@@ -42,11 +43,9 @@ class HybridRerank(BenchmarkPipeline):
         cv = np.asarray(inp.corpus_vectors, dtype=np.float32)
         scale = len(inp.documents)
         use_exact = scale <= config.vector.min_scale_for_ivfpq
-        dense: Faiss.Flat | Faiss.Ivpq
-        if use_exact:
-            dense = Faiss.Flat()
-        else:
-            dense = Faiss.Ivpq(config=config, scale=scale)
+        dense: Faiss.Flat | Faiss.Ivpq = (
+            Faiss.Flat() if use_exact else Faiss.Ivpq(config=config, scale=scale)
+        )
         dense.add_documents(list(inp.documents), vectors=cv)
 
         fusion_pool = config.hybrid.candidate_pool
@@ -66,7 +65,7 @@ class HybridRerank(BenchmarkPipeline):
         ]
 
         per_query_ranked: list[list[tuple[str, float]]] = []
-        for q, fused in zip(inp.queries, fused_per_query):
+        for q, fused in zip(inp.queries, fused_per_query, strict=False):
             cands = [id_to_doc[h.doc_id] for h in fused if h.doc_id in id_to_doc][:rerank_pool]
             ranked = inp.reranker.rerank(q.text, cands, top_k=config.benchmark.top_k_eval[-1])
             per_query_ranked.append([(c.doc_id, s) for c, s in ranked])
@@ -81,7 +80,9 @@ class HybridRerank(BenchmarkPipeline):
             r2 = dense.search(qv[v_idx].reshape(1, -1).astype(np.float32), k=fusion_pool)
             fused = fusion.fuse([r1, r2], top_k=fusion_pool)
             cands = [id_to_doc[h.doc_id] for h in fused if h.doc_id in id_to_doc][:rerank_pool]
-            inp.reranker.rerank(str(query_texts[s_idx]), cands, top_k=config.benchmark.top_k_eval[-1])
+            inp.reranker.rerank(
+                str(query_texts[s_idx]), cands, top_k=config.benchmark.top_k_eval[-1]
+            )
 
         n_iter = min(len(inp.queries), 50)
         probe = LatencyProbe(

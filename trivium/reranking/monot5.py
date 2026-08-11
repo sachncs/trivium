@@ -7,6 +7,7 @@ encoder; the seq2seq decoder just produces one decision token.
 
 Memory: T5-3B is 11 GB in fp16; gate via max_memory_gb.
 """
+
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -70,6 +71,7 @@ class Monot5(Reranker):
                 for c, s in zip(
                     [candidates[i] for i in order],
                     [scores[i] for i in order],
+                    strict=False,
                 )
             ]
         )
@@ -110,7 +112,7 @@ class Monot5(Reranker):
         if self._model is not None:
             return
         import torch
-        from transformers import T5ForConditionalGeneration, AutoTokenizer
+        from transformers import AutoTokenizer, T5ForConditionalGeneration
 
         self._tokenizer = AutoTokenizer.from_pretrained(self._model_id)
         dtype = torch.float16 if self._fp16 and self._device != "cpu" else torch.float32

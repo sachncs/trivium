@@ -1,4 +1,5 @@
 """Weighted score fusion: linear combination per-doc of normalised scores."""
+
 from __future__ import annotations
 
 from collections.abc import Sequence

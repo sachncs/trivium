@@ -1,4 +1,5 @@
 """Cross-encoder reranker (sentence-transformers CrossEncoder backend)."""
+
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -62,6 +63,7 @@ class Encoder(Reranker):
                 for c, s in zip(
                     [candidates[i] for i in order],
                     [scores[i] for i in order],
+                    strict=False,
                 )
             ]
         )

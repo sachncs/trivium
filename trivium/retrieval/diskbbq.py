@@ -22,6 +22,7 @@ Until a real build method is wired, Bbq() returns an index whose
 add_documents() raises NotImplementedError; pipelines pick this
 slug only at scales >= the threshold configured by CF3.
 """
+
 from __future__ import annotations
 
 import json
@@ -70,7 +71,9 @@ class Bbq(Retriever):
     def slug(self) -> str:
         return "diskbbq"
 
-    def add_documents(self, documents: Sequence[Document], vectors: np.ndarray | None = None) -> None:
+    def add_documents(
+        self, documents: Sequence[Document], vectors: np.ndarray | None = None
+    ) -> None:
         raise NotImplementedError(
             "Bbq.add_documents is the build path; it streams writes via "
             "np.memmap with O(nlist) peak memory. Wire it in the DiskBBQ "
@@ -89,7 +92,7 @@ class Bbq(Retriever):
 
     def size_bytes(self) -> int:
         total = 0
-        for cid, paths in self._list_files.items():
+        for _cid, paths in self._list_files.items():
             for p in paths.values():
                 if Path(p).exists():
                     total += Path(p).stat().st_size

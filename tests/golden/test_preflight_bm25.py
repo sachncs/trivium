@@ -9,6 +9,7 @@ The test pins the trivium.* public API. As the refactor replaces
 bench/ and search/ modules with trivium, this test is the proof
 that the new code path reproduces the legacy result byte-for-byte.
 """
+
 from __future__ import annotations
 
 import json

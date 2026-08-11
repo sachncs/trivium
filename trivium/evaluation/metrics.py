@@ -1,8 +1,9 @@
 """Evaluator: BEIR semantics via pytrec_eval, frozen metrics dataclass."""
+
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable
 
 import pytrec_eval
 
@@ -39,7 +40,9 @@ class Evaluator:
     names in either 'ndcg_cut.10' or 'ndcg_cut_10' form.
     """
 
-    def __init__(self, k_values: Iterable[int] = (10, 100), extra_measures: Iterable[str] = ()) -> None:
+    def __init__(
+        self, k_values: Iterable[int] = (10, 100), extra_measures: Iterable[str] = ()
+    ) -> None:
         self.k_values = tuple(k_values)
         self.extra_measures = tuple(extra_measures)
         self.measures = (
@@ -126,11 +129,13 @@ class Evaluator:
         }
 
 
-def hits_to_results(per_query_hits: list[list[tuple[str, float]]], queries: list) -> dict[str, dict[str, float]]:
+def hits_to_results(
+    per_query_hits: list[list[tuple[str, float]]], queries: list
+) -> dict[str, dict[str, float]]:
     """Convert per-query hit lists into the {qid: {did: score}} shape.
 
     Public helper (replaces the legacy _hit_lists_to_results). Lives
     in trivium.evaluation because evaluation is its only consumer
     and it composes results into a structure the Evaluator consumes.
     """
-    return {q.query_id: dict(pairs) for q, pairs in zip(queries, per_query_hits)}
+    return {q.query_id: dict(pairs) for q, pairs in zip(queries, per_query_hits, strict=False)}

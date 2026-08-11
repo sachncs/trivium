@@ -1,4 +1,5 @@
 """Retriever ABC: the contract every search engine implements."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -26,7 +27,9 @@ class Retriever(ABC):
         """Short identifier used in CSV rows and registries."""
 
     @abstractmethod
-    def add_documents(self, documents: Sequence[Document], vectors: np.ndarray | None = None) -> None:
+    def add_documents(
+        self, documents: Sequence[Document], vectors: np.ndarray | None = None
+    ) -> None:
         """Index documents.
 
         Args:

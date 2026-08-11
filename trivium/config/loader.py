@@ -3,6 +3,7 @@
 The pydantic model in schema.py is the source of truth. This loader
 translates the YAML nesting into the flat-but-namespaced pydantic tree.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -56,12 +57,17 @@ def load_config(path: str | Path) -> Config:
             raise ValueError(
                 f"vector.nlist has {len(legacy_nlist)} entries but scales has {len(scales)}"
             )
-        nlist_by_scale = dict(zip(scales, legacy_nlist))
+        nlist_by_scale = dict(zip(scales, legacy_nlist, strict=False))
     else:
         nlist_by_scale = _to_int_keys(raw_vector.get("nlist_by_scale", {}))
     vector = VectorConfig(
         nlist_by_scale=nlist_by_scale,
-        nprobe_sweep=[int(x) for x in raw_vector.get("nprobe", raw_vector.get("nprobe_sweep", [8, 16, 32, 64, 128, 256]))],
+        nprobe_sweep=[
+            int(x)
+            for x in raw_vector.get(
+                "nprobe", raw_vector.get("nprobe_sweep", [8, 16, 32, 64, 128, 256])
+            )
+        ],
         m=int(raw_vector.get("m", 48)),
         nbits=int(raw_vector.get("nbits", 4)),
         use_opq=bool(raw_vector.get("use_opq", True)),
@@ -81,7 +87,13 @@ def load_config(path: str | Path) -> Config:
     )
 
     raw_rerank = raw.get("rerank", {})
-    rerank = RerankConfig(**{k: raw_rerank[k] for k in ("slug", "model_id", "max_length", "batch_size", "candidate_pool") if k in raw_rerank})
+    rerank = RerankConfig(
+        **{
+            k: raw_rerank[k]
+            for k in ("slug", "model_id", "max_length", "batch_size", "candidate_pool")
+            if k in raw_rerank
+        }
+    )
 
     raw_benchmark = raw.get("benchmark", {})
     benchmark = BenchmarkConfig(

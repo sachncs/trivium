@@ -1,7 +1,9 @@
 """RerankerRegistry: lookup by slug and per-slug factory functions."""
+
 from __future__ import annotations
 
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from trivium.reranking.base import Reranker
 
@@ -12,6 +14,7 @@ def register_reranker(slug: str) -> Callable[[Callable[..., Reranker]], Callable
     def deco(factory: Callable[..., Reranker]) -> Callable[..., Reranker]:
         _FACTORIES[slug] = factory
         return factory
+
     return deco
 
 

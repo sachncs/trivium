@@ -3,6 +3,7 @@
 Used by scripts/summarise.py and called by V7 to verify that the
 CSV exactly matches the published numbers in the README.
 """
+
 from __future__ import annotations
 
 import csv
@@ -37,7 +38,9 @@ def summarise(csv_path: str | Path) -> dict[str, Any]:
 
     per_encoder = defaultdict(list)
     for r in rows:
-        per_encoder[r.get("encoder", "")].append((int(r.get("scale", 0)), r.get("mode", ""), _safe_float(r.get("ndcg_cut.10"))))
+        per_encoder[r.get("encoder", "")].append(
+            (int(r.get("scale", 0)), r.get("mode", ""), _safe_float(r.get("ndcg_cut.10")))
+        )
 
     return {"headline": headline, "per_encoder": dict(per_encoder)}
 

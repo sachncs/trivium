@@ -1,4 +1,5 @@
 """Embedder ABC: the contract every text vectorizer implements."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

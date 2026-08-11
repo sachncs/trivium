@@ -12,6 +12,7 @@ Replaces two legacy files:
 The two divergent code paths in bench/runner.py:run_vector
 are now one method body.
 """
+
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -25,7 +26,9 @@ from trivium.domain.result import SearchResult
 from trivium.retrieval.base import Retriever
 
 
-def ivfpq_factory_str(nlist: int, m: int, nbits: int, use_opq: bool = True, use_rflat: bool = True) -> str:
+def ivfpq_factory_str(
+    nlist: int, m: int, nbits: int, use_opq: bool = True, use_rflat: bool = True
+) -> str:
     opq = "OPQ" if use_opq else ""
     rflat = ",RFlat" if use_rflat else ""
     return f"{opq}{m},IVF{nlist},PQ{m}x{nbits}fs{rflat}"
@@ -45,7 +48,9 @@ class Faiss:
             self._index = None
             self._doc_ids: list[str] = []
 
-        def add_documents(self, documents: Sequence[Document], vectors: np.ndarray | None = None) -> None:
+        def add_documents(
+            self, documents: Sequence[Document], vectors: np.ndarray | None = None
+        ) -> None:
             import faiss
 
             if vectors is None:
@@ -87,14 +92,20 @@ class Faiss:
         def slug(self) -> str:
             return "faiss_ivpq_rflat"
 
-        def __init__(self, config: VectorConfig, scale: int, nlist_override: int | None = None) -> None:
+        def __init__(
+            self, config: VectorConfig, scale: int, nlist_override: int | None = None
+        ) -> None:
             self.config = config
             self.scale = scale
-            self.nlist = nlist_override if nlist_override is not None else config.nlist_for_scale(scale)
+            self.nlist = (
+                nlist_override if nlist_override is not None else config.nlist_for_scale(scale)
+            )
             self._index = None
             self._ivf_handle: Any = None
             self._doc_ids: list[str] = []
-            self._train_size_strategy: Literal["sqrt_n", "50_x_nlist", "fixed_N"] = config.train_size_strategy
+            self._train_size_strategy: Literal["sqrt_n", "50_x_nlist", "fixed_N"] = (
+                config.train_size_strategy
+            )
             self._train_size_fixed: int = config.train_size_fixed
             self._use_opq: bool = config.use_opq
             self._use_rflat: bool = config.use_rflat
@@ -102,7 +113,9 @@ class Faiss:
             self._m: int = config.m
             self._nprobe: int = config.nprobe_sweep[0]
 
-        def add_documents(self, documents: Sequence[Document], vectors: np.ndarray | None = None) -> None:
+        def add_documents(
+            self, documents: Sequence[Document], vectors: np.ndarray | None = None
+        ) -> None:
             import faiss
 
             if vectors is None:

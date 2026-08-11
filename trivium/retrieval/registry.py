@@ -1,7 +1,9 @@
 """RetrieverRegistry: lookup by slug and per-slug factory functions."""
+
 from __future__ import annotations
 
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from trivium.retrieval.base import Retriever
 
@@ -12,6 +14,7 @@ def register_retriever(slug: str) -> Callable[[Callable[..., Retriever]], Callab
     def deco(factory: Callable[..., Retriever]) -> Callable[..., Retriever]:
         _FACTORIES[slug] = factory
         return factory
+
     return deco
 
 

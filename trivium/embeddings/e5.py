@@ -11,6 +11,7 @@ Heavy imports (torch, transformers) deferred to first use.
 Memory gate: refuses to load if estimated peak exceeds 80% of
 available RAM (or the explicit max_memory_gb override).
 """
+
 from __future__ import annotations
 
 import os
@@ -78,7 +79,7 @@ class E5(Embedder):
         if self._model is None:
             self._ensure_model()
         with self._inference_mode():
-            inputs = self._tokenize([self._prompt_query + sample_texts[0]])
+            self._tokenize([self._prompt_query + sample_texts[0]])
 
     def encode_documents(self, texts: Sequence[str]) -> np.ndarray:
         return self._encode([self._prompt_doc + t for t in texts])
@@ -96,7 +97,11 @@ class E5(Embedder):
                 batch = prompted[start : start + self._batch_size]
                 inputs = self._tokenize(batch)
                 outputs = self._model(**inputs, output_hidden_states=False)
-                last_hidden = outputs.last_hidden_state if hasattr(outputs, "last_hidden_state") else outputs[0]
+                last_hidden = (
+                    outputs.last_hidden_state
+                    if hasattr(outputs, "last_hidden_state")
+                    else outputs[0]
+                )
                 # last-token pooling: index the final non-pad position per row
                 attention_mask = inputs["attention_mask"]
                 sequence_lengths = attention_mask.sum(dim=1) - 1

@@ -1,8 +1,8 @@
 """Manifest: pydantic-persisted build manifest for corpora and embeddings."""
+
 from __future__ import annotations
 
 import hashlib
-import json
 from pathlib import Path
 from typing import Any
 
@@ -30,7 +30,7 @@ class Manifest(BaseModel):
     extras: dict[str, Any] = Field(default_factory=dict)
 
     @classmethod
-    def load(cls, path: str | Path) -> "Manifest":
+    def load(cls, path: str | Path) -> Manifest:
         return cls.model_validate_json(Path(path).read_text())
 
     def save(self, path: str | Path) -> None:

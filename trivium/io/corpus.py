@@ -10,6 +10,7 @@ Replaces three legacy patterns:
 - The hardcoded `if scale == 5000: open(scifact_seed.jsonl)`
   split. We use a single corpus file and slice it via the doc id.
 """
+
 from __future__ import annotations
 
 import json
@@ -88,11 +89,10 @@ class CorpusCache:
         if self._id_to_idx is None:
             self._id_to_idx = {did: i for i, did in enumerate(ids.tolist())}
 
-        sorted_ids = ids
-        sorted_positions = self._id_to_idx  # dict for now
+        positions_map = self._id_to_idx  # dict for now
 
         positions = np.fromiter(
-            (sorted_positions[d.doc_id] for d in documents),
+            (positions_map[d.doc_id] for d in documents),
             dtype=np.int64,
             count=len(documents),
         )

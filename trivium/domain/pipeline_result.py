@@ -4,13 +4,13 @@ The to_dict() method produces a stable-schema dict suitable for
 the CSV writer. Column set is locked by the format_version so
 schema bumps are explicit.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 
 from trivium.evaluation.latency import LatencyStats
 from trivium.evaluation.metrics import EvaluationMetrics
-
 
 FORMAT_VERSION = 2
 

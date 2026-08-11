@@ -1,4 +1,5 @@
 """Reranker ABC: the contract every cross-attention reranker implements."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

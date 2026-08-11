@@ -1,4 +1,5 @@
 """Reproducibility manifest: per-row provenance of versions and env."""
+
 from __future__ import annotations
 
 import platform
@@ -28,7 +29,7 @@ class ReproducibilityManifest:
     extras: dict = field(default_factory=dict)
 
     @classmethod
-    def gather(cls, device: str = "") -> "ReproducibilityManifest":
+    def gather(cls, device: str = "") -> ReproducibilityManifest:
         """Capture the current process environment."""
         versions = cls._safe_versions()
         return cls(

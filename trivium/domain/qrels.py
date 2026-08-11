@@ -1,4 +1,5 @@
 """Qrels: relevance judgements, BEIR nested-dict + pytrec_eval helpers."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -15,7 +16,7 @@ class Qrels:
     matrix: dict[str, dict[str, int]] = field(default_factory=dict)
 
     @classmethod
-    def from_rows(cls, rows: list[dict]) -> "Qrels":
+    def from_rows(cls, rows: list[dict]) -> Qrels:
         out: dict[str, dict[str, int]] = {}
         for r in rows:
             out.setdefault(r["qid"], {})[r["did"]] = int(r["rel"])

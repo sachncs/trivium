@@ -1,4 +1,5 @@
 """Hit: a single (doc_id, score) pair."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

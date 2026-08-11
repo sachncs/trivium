@@ -1,4 +1,5 @@
 """Unit tests for trivium.domain dataclasses."""
+
 from __future__ import annotations
 
 import pytest

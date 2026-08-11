@@ -3,6 +3,7 @@
 Module-named `helpers.py` and function-named `*_step` rather than
 semi-private `_do_*` so the no-semi-private rule holds.
 """
+
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -16,9 +17,11 @@ from trivium.evaluation.latency import LatencyProbe, LatencyStats
 from trivium.retrieval.base import Retriever
 
 
-def hits_to_run_pairs(queries: Sequence[Query], results: Sequence[SearchResult]) -> dict[str, SearchResult]:
+def hits_to_run_pairs(
+    queries: Sequence[Query], results: Sequence[SearchResult]
+) -> dict[str, SearchResult]:
     """Map query_id -> SearchResult for the runner that iterates per query."""
-    return {q.query_id: r for q, r in zip(queries, results)}
+    return {q.query_id: r for q, r in zip(queries, results, strict=False)}
 
 
 def query_doc_ids(result: SearchResult, doc_ids: list[str], top_k: int) -> list[tuple[int, float]]:
@@ -79,7 +82,7 @@ def hybrid_query_step(
     """
     results_a = retriever_a.search(query_vecs, top_k)
     results_b = retriever_b.search(query_vecs, top_k)
-    return [fusion.fuse([a, b], top_k) for a, b in zip(results_a, results_b)]
+    return [fusion.fuse([a, b], top_k) for a, b in zip(results_a, results_b, strict=False)]
 
 
 def rerank_query_step(
@@ -95,5 +98,7 @@ def rerank_query_step(
     Replaces the legacy _do_rerank_query closure.
     """
     id_to_doc = {d.doc_id: d for d in documents}
-    candidates = [id_to_doc[h.doc_id] for h in fusion_result if h.doc_id in id_to_doc][:top_k_rerank]
+    candidates = [id_to_doc[h.doc_id] for h in fusion_result if h.doc_id in id_to_doc][
+        :top_k_rerank
+    ]
     return reranker.rerank(query_text, candidates, top_k_out)

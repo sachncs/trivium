@@ -1,4 +1,5 @@
 """Unit tests for trivium.fusion."""
+
 from __future__ import annotations
 
 from trivium.domain.result import SearchResult

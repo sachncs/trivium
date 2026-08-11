@@ -11,6 +11,7 @@ runtime deep in a benchmark row. This schema:
   pattern with `config.vector.nlist_for_scale(scale)` (looked up
   in a dict by scale, raises KeyError if scale not configured).
 """
+
 from __future__ import annotations
 
 from typing import Literal

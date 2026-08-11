@@ -1,17 +1,22 @@
 """FusionRegistry: factory for FusionStrategy classes."""
+
 from __future__ import annotations
 
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from trivium.fusion.base import FusionStrategy
 
 _FACTORIES: dict[str, Callable[..., FusionStrategy]] = {}
 
 
-def register_fusion(slug: str) -> Callable[[Callable[..., FusionStrategy]], Callable[..., FusionStrategy]]:
+def register_fusion(
+    slug: str,
+) -> Callable[[Callable[..., FusionStrategy]], Callable[..., FusionStrategy]]:
     def deco(factory: Callable[..., FusionStrategy]) -> Callable[..., FusionStrategy]:
         _FACTORIES[slug] = factory
         return factory
+
     return deco
 
 

@@ -1,4 +1,5 @@
 """BGE reranker (bge-reranker-large)."""
+
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -62,6 +63,7 @@ class Bge(Reranker):
                 for c, s in zip(
                     [candidates[i] for i in order],
                     [scores[i] for i in order],
+                    strict=False,
                 )
             ]
         )

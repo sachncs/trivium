@@ -1,7 +1,8 @@
 """Document type. Single source of truth for title+text concatenation."""
+
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True, slots=True)
@@ -27,7 +28,7 @@ class Document:
         return title or text
 
     @classmethod
-    def from_row(cls, row: dict) -> "Document":
+    def from_row(cls, row: dict) -> Document:
         """Build from a dict produced by the legacy loaders."""
         return cls(
             doc_id=row["id"],

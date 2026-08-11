@@ -7,13 +7,13 @@ Fixes the legacy issues:
 - cold_cache flag drops the OS page cache before measurement (no-op
   when not supported, so this is safe on any platform).
 """
+
 from __future__ import annotations
 
-import os
 import platform
 import subprocess
 import time
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
 import numpy as np
@@ -49,7 +49,7 @@ class LatencyStats:
     n: int
 
     @classmethod
-    def from_samples(cls, samples_ns: np.ndarray) -> "LatencyStats":
+    def from_samples(cls, samples_ns: np.ndarray) -> LatencyStats:
         if samples_ns.size == 0:
             return cls(0.0, 0.0, 0.0, 0.0, 0.0, 0)
         return cls(

@@ -1,4 +1,5 @@
 """Query type."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -12,9 +13,9 @@ class Query:
     text: str
 
     @classmethod
-    def from_row(cls, row: dict) -> "Query":
+    def from_row(cls, row: dict) -> Query:
         return cls(query_id=row["id"], text=row["text"])
 
     @classmethod
-    def many(cls, rows: list[dict]) -> list["Query"]:
+    def many(cls, rows: list[dict]) -> list[Query]:
         return [cls.from_row(r) for r in rows]

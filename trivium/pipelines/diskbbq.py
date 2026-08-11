@@ -1,9 +1,8 @@
 """BbqPipeline: orchestrates the disk-resident Bbq retriever."""
+
 from __future__ import annotations
 
 from collections.abc import Sequence
-
-import numpy as np
 
 from trivium.config.schema import Config
 from trivium.domain.pipeline_result import PipelineResult
@@ -31,7 +30,9 @@ class BbqPipeline(BenchmarkPipeline):
                 encoder=inp.encoder_slug,
                 reranker="none",
                 metrics=EvaluationMetrics(),
-                latency=LatencyStats(p50_ms=0.0, p95_ms=0.0, p99_ms=0.0, p999_ms=0.0, mean_ms=0.0, n=0),
+                latency=LatencyStats(
+                    p50_ms=0.0, p95_ms=0.0, p99_ms=0.0, p999_ms=0.0, mean_ms=0.0, n=0
+                ),
                 extras={"build_status": "not_implemented_yet"},
             )
         ]

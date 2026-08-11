@@ -1,4 +1,5 @@
 """SearchResult: the unified return type for all retrievers/fusion/rerank."""
+
 from __future__ import annotations
 
 from collections.abc import Iterable, Iterator
@@ -30,19 +31,19 @@ class SearchResult:
     def __getitem__(self, idx):
         return self.hits[idx]
 
-    def top_k(self, k: int) -> "SearchResult":
+    def top_k(self, k: int) -> SearchResult:
         """Return a new SearchResult with at most k hits."""
         if k < 0:
             raise ValueError(f"k must be >= 0, got {k}")
         return SearchResult(self.hits[:k])
 
     @classmethod
-    def from_pairs(cls, pairs: Iterable[tuple[str, float]]) -> "SearchResult":
+    def from_pairs(cls, pairs: Iterable[tuple[str, float]]) -> SearchResult:
         return cls(Hit(did, float(s)) for did, s in pairs)
 
     def to_pairs(self) -> list[tuple[str, float]]:
         return [(h.doc_id, h.score) for h in self.hits]
 
     @classmethod
-    def empty(cls) -> "SearchResult":
+    def empty(cls) -> SearchResult:
         return cls(())

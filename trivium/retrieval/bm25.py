@@ -1,4 +1,5 @@
 """BM25 retriever (bm25s backend)."""
+
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -42,7 +43,9 @@ class Bm25(Retriever):
     def slug(self) -> str:
         return "bm25"
 
-    def add_documents(self, documents: Sequence[Document], vectors: np.ndarray | None = None) -> None:
+    def add_documents(
+        self, documents: Sequence[Document], vectors: np.ndarray | None = None
+    ) -> None:
         if not documents:
             raise RuntimeError("Bm25.add_documents requires at least one document")
         self._doc_ids = [d.doc_id for d in documents]
@@ -99,12 +102,11 @@ class Bm25(Retriever):
         if self._bm25 is None:
             return 0
         bm = self._bm25
-        vocab = getattr(bm, "vocab", None)
         scores_size = 0
-        try:
+        from contextlib import suppress
+
+        with suppress(Exception):
             scores_size = int(np.asarray(bm.scores["idf"]).nbytes)
-        except Exception:
-            pass
         return scores_size
 
     def save(self, dir_path: str | Path) -> None:
@@ -132,7 +134,9 @@ class Bm25(Retriever):
 
     def _ensure_built(self) -> None:
         if self._bm25 is None or self._tokenizer is None:
-            raise RuntimeError("Bm25.search called before add_documents(); call add_documents or load first")
+            raise RuntimeError(
+                "Bm25.search called before add_documents(); call add_documents or load first"
+            )
 
     @staticmethod
     def _coerce_query_strings(input_) -> list[str]:

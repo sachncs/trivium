@@ -1,4 +1,5 @@
 """Vector pipeline: pure FAISS mode (Flat below threshold, Ivpq above)."""
+
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -51,7 +52,9 @@ class Vector(BenchmarkPipeline):
             results = retriever.search(qv, k=k)
             per_query = [[(h.doc_id, h.score) for h in r] for r in results]
             eval_pairs = hits_to_results(per_query, list(inp.queries))
-            metrics = Evaluator(k_values=config.benchmark.top_k_eval).evaluate(inp.qrels, eval_pairs)
+            metrics = Evaluator(k_values=config.benchmark.top_k_eval).evaluate(
+                inp.qrels, eval_pairs
+            )
 
             rotate = [qv[i % len(qv)] for i in range(min(len(qv), 100))]
             probe = LatencyProbe(

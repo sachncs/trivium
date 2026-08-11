@@ -1,4 +1,5 @@
 """FusionStrategy ABC: combines result lists from multiple retrievers."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod

@@ -1,4 +1,5 @@
 """Shared pytest fixtures and path setup."""
+
 from __future__ import annotations
 
 import sys

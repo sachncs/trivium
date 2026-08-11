@@ -5,6 +5,7 @@ across all rows becomes the column set; rows missing a key
 output as empty cells. This is what makes V7 (backward-compat
 CSV diff) tractable.
 """
+
 from __future__ import annotations
 
 import csv
