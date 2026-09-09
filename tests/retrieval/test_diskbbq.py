@@ -66,11 +66,31 @@ class TestBbqBuildAndSearch:
         docs, vecs = _toy_corpus(n=500, dim=96)
         bbq = Bbq(out_dir=tmp_path, nlist=16, m=24, nprobe=8, use_rescore=True)
         bbq.add_documents(docs, vectors=vecs)
-        flat = Faiss.Flat()
-        flat.add_documents(docs, vectors=vecs)
+
         q = vecs[:30]
+
+        # Compute exact ground truth with a numpy matrix-multiply instead
+        # of going through faiss. This keeps the test hermetic: it does not
+        # depend on faiss IndexFlatIP, which is known to race with the
+        # tqdm monitor thread that sentence-transformers spawns on some
+        # platforms (see https://github.com/facebookresearch/faiss/issues/2906).
         r_ram = bbq.search(q, k=10, mode="ram")
-        r_exact = flat.search(q, k=10)
+        q_n = q / np.linalg.norm(q, axis=1, keepdims=True)
+        d_n = vecs / np.linalg.norm(vecs, axis=1, keepdims=True)
+        # q_n @ d_n.T gives (Q, N) cosine similarities
+        sims = q_n @ d_n.T
+        top_idx = np.argpartition(-sims, kth=10, axis=1)[:, :10]
+        # Sort the top-k by score
+        r_exact = []
+        for i, row in enumerate(top_idx):
+            row_sorted = row[np.argsort(-sims[i, row])]
+            r_exact.append(
+                [
+                    type("Hit", (), {"doc_id": docs[int(j)].doc_id, "score": float(sims[i, int(j)])})
+                    for j in row_sorted
+                ]
+            )
+
         overlaps = []
         for i in range(30):
             ram_ids = set(h.doc_id for h in r_ram[i])

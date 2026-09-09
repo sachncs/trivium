@@ -135,13 +135,15 @@ try:
     @register_embedder("e5-mistral-7b")
     def make_e5_mistral_7b(**kwargs) -> Embedder:
         """intfloat/e5-mistral-7b-instruct (14 GB, 4096d; GPU/MPS strongly preferred)."""
+        from trivium.embeddings import e5 as _live_e5
+
         defaults = {
             "slug": "e5-mistral-7b",
         }
         defaults.update(kwargs)
-        # Resolve E5 through the module each call so test-time monkey-patching
-        # of trivium.embeddings.e5.E5 takes effect without an import reload.
-        return _e5_module.E5(**defaults)
+        # Resolve E5 through the live module reference so test-time
+        # monkey-patching of trivium.embeddings.e5.E5 is honoured.
+        return _live_e5.E5(**defaults)
 
 except ImportError:
     # transformers / torch not installed; the E5 slug is simply missing.

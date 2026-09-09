@@ -7,7 +7,6 @@ import subprocess
 import sys
 from dataclasses import dataclass, field
 
-import faiss
 import numpy as np
 
 
@@ -92,10 +91,21 @@ class ReproducibilityManifest:
 
 
 def omp_threads() -> int:
+    # Run the faiss probe in a subprocess so a faulty native import or
+    # threading crash on this OS cannot take down the benchmark process.
     try:
-        return int(faiss.omp_get_max_threads())
+        r = subprocess.run(
+            [sys.executable, "-c", "import faiss; print(faiss.omp_get_max_threads())"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+        if r.returncode == 0 and r.stdout.strip().isdigit():
+            return int(r.stdout.strip())
     except Exception:
-        return 0
+        pass
+    return 0
 
 
 def git_sha() -> str:
