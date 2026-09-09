@@ -1,0 +1,42 @@
+<footer class="site-footer" role="contentinfo">
+  <div class="container site-footer-inner">
+    <div class="site-footer-brand">
+      <strong>trivium</strong>
+      <p>{{ site.tagline }}</p>
+    </div>
+    <nav class="site-footer-nav" aria-label="Footer">
+      <div class="site-footer-col">
+        <h3>Project</h3>
+        <ul>
+          <li><a href="{{ '/docs/getting-started/' | relative_url }}">Getting started</a></li>
+          <li><a href="{{ '/docs/architecture/' | relative_url }}">Architecture</a></li>
+          <li><a href="{{ '/docs/methodology/' | relative_url }}">Methodology</a></li>
+          <li><a href="https://github.com/{{ site.github_repo }}">Source on GitHub</a></li>
+        </ul>
+      </div>
+      <div class="site-footer-col">
+        <h3>Reference</h3>
+        <ul>
+          <li><a href="{{ '/docs/api/' | relative_url }}">API</a></li>
+          <li><a href="{{ '/docs/reference/config/' | relative_url }}">Config schema</a></li>
+          <li><a href="{{ '/docs/reference/cli/' | relative_url }}">CLI</a></li>
+          <li><a href="{{ '/changelog/' | relative_url }}">Changelog</a></li>
+        </ul>
+      </div>
+      <div class="site-footer-col">
+        <h3>Community</h3>
+        <ul>
+          <li><a href="{{ '/docs/contributing/' | relative_url }}">Contributing</a></li>
+          <li><a href="https://github.com/{{ site.github_repo }}/issues">Issues</a></li>
+          <li><a href="https://github.com/{{ site.github_repo }}/discussions">Discussions</a></li>
+          <li><a href="{{ '/license/' | relative_url }}">License (Apache-2.0)</a></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+  <div class="site-footer-bottom">
+    <div class="container">
+      <p>Released under the Apache-2.0 license. Built with Jekyll. © {{ site.time | date: '%Y' }} Sachin.</p>
+    </div>
+  </div>
+</footer>

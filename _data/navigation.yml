@@ -1,0 +1,60 @@
+# Site-wide primary navigation. Entries point at the page slugs in
+# the docs/ directory so URLs stay stable as content grows.
+
+- title: Home
+  url: /
+  layout: landing
+- title: Getting started
+  url: /docs/getting-started/
+  section: Getting started
+- title: Architecture
+  url: /docs/architecture/
+  section: Understand
+- title: Concepts
+  url: /docs/concepts/
+  section: Understand
+- title: Methodology
+  url: /docs/methodology/
+  section: Understand
+- title: Add an embedder
+  url: /docs/guides/add-embedder/
+  section: How-to
+- title: Add a reranker
+  url: /docs/guides/add-reranker/
+  section: How-to
+- title: Add a pipeline
+  url: /docs/guides/add-pipeline/
+  section: How-to
+- title: Tune BM25
+  url: /docs/guides/tune-bm25/
+  section: How-to
+- title: Tune the vector index
+  url: /docs/guides/tune-vector/
+  section: How-to
+- title: Config schema
+  url: /docs/reference/config/
+  section: Reference
+- title: CLI
+  url: /docs/reference/cli/
+  section: Reference
+- title: API
+  url: /docs/api/
+  section: Reference
+- title: Contributing
+  url: /docs/contributing/
+  section: Community
+- title: Changelog
+  url: /changelog/
+  section: Community
+- title: Security
+  url: /security/
+  section: Community
+- title: Support
+  url: /support/
+  section: Community
+- title: Code of conduct
+  url: /code-of-conduct/
+  section: Community
+- title: License
+  url: /license/
+  section: Community

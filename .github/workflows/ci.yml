@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+
+      - name: Install (editable + dev extras)
+        run: pip install -e ".[dev]"
+
+      - name: Lint (ruff)
+        run: |
+          ruff check .
+          ruff format --check .
+
+      - name: Type check (mypy)
+        run: mypy trivium
+        continue-on-error: true
+
+      - name: Tests (with coverage gate, skip golden)
+        run: |
+          pytest -q \
+            --cov=trivium \
+            --cov-branch \
+            --cov-report=term-missing \
+            --cov-fail-under=55 \
+            -m "not golden"
+
+      - name: Tests (golden, run only if cache is available)
+        run: pytest -q -m golden
+        continue-on-error: true
+
+      - name: Build wheel
+        run: |
+          python -m pip install --upgrade build
+          python -m build --wheel --outdir dist
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivium-wheel
+          path: dist/*.whl
+          if-no-files-found: error
