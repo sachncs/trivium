@@ -51,8 +51,22 @@ class ReproducibilityManifest:
     def safe_versions() -> dict[str, str]:
         out: dict[str, str] = {}
         for name in ("faiss", "sentence_transformers", "torch", "bm25s", "pydantic"):
+            # Use a subprocess so a faulty native import (for example a torch
+            # wheel that crashes on import on this OS) cannot abort the
+            # benchmark process.
             try:
-                out[name] = __import__(name).__version__
+                import json as _json
+                import subprocess as _sp
+
+                r = _sp.run(
+                    [sys.executable, "-c", f"import {name}; print({name}.__version__)"],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                    check=False,
+                )
+                if r.returncode == 0 and r.stdout.strip():
+                    out[name] = r.stdout.strip()
             except Exception:
                 continue
         return out

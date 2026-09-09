@@ -23,27 +23,29 @@ from trivium.domain.document import Document
 from trivium.domain.query import Query
 from trivium.domain.qrels import Qrels
 from trivium.embeddings.registry import get_embedder
-from trivium.pipelines import bm25 as pipelines_bm25  # noqa: F401  registers 'bm25'
-from trivium.pipelines import vector as pipelines_vector  # noqa: F401  registers 'vector'
-from trivium.pipelines import hybrid_rrf as pipelines_hybrid_rrf  # noqa: F401
-from trivium.pipelines import hybrid_rerank as pipelines_hybrid_rerank  # noqa: F401
-from trivium.pipelines import diskbbq as pipelines_diskbbq  # noqa: F401
 from trivium.evaluation.metrics import Evaluator, hits_to_results
 from trivium.io.corpus import CorpusCache
+from trivium.pipelines import bm25 as pipelines_bm25  # noqa: F401  registers 'bm25'
+from trivium.pipelines import diskbbq as pipelines_diskbbq  # noqa: F401
+from trivium.pipelines import hybrid_rerank as pipelines_hybrid_rerank  # noqa: F401
+from trivium.pipelines import hybrid_rrf as pipelines_hybrid_rrf  # noqa: F401
+from trivium.pipelines import vector as pipelines_vector  # noqa: F401
 from trivium.pipelines.base import PipelineInput
 from trivium.pipelines.registry import PipelineRegistry, get_pipeline
-from trivium.reranking.encoder import Encoder
-from trivium.reranking.registry import get_reranker
-from trivium.reproducibility import ReproducibilityManifest
+from trivium.reranking.registry import RerankerRegistry, get_reranker
 from trivium.reporting.csv_writer import CsvResultWriter
+from trivium.reproducibility import ReproducibilityManifest
 from trivium.retrieval.bm25 import Bm25
 
-DATA_DIR = Path.cwd() / "data" / "cache"
+
+def _data_dir() -> Path:
+    """Runtime data directory: `$PWD/data/cache` (resolved at call time)."""
+    return Path.cwd() / "data" / "cache"
 
 
 def preflight_check(config) -> bool:
     """BM25 nDCG@10 on 5K scifact must reproduce the Anserini baseline."""
-    cache = CorpusCache(DATA_DIR)
+    cache = CorpusCache(_data_dir())
     seed_docs = cache.load_scale(5000)
     if not seed_docs:
         print("  no scifact_seed.jsonl; skipping pre-flight")
@@ -74,7 +76,7 @@ def preflight_check(config) -> bool:
     tol = config.preflight.tolerance
     min_obs = config.preflight.min_observed
 
-    print(f"\n=== Pre-flight: BM25 nDCG@10 on untouched 5K scifact ===", flush=True)
+    print("\n=== Pre-flight: BM25 nDCG@10 on untouched 5K scifact ===", flush=True)
     print(f"  observed nDCG@10: {observed:.4f}", flush=True)
     print(f"  target (Anserini): {target:.4f} +/- {tol}", flush=True)
 
@@ -82,19 +84,54 @@ def preflight_check(config) -> bool:
         print(f"  FAIL: {observed:.4f} < {min_obs}. Pipeline is broken.", flush=True)
         return False
     if abs(observed - target) > tol:
-        print(f"  WARN: |delta|={abs(observed - target):.4f} > {tol}. Implementation drift from Anserini.", flush=True)
+        print(
+            f"  WARN: |delta|={abs(observed - target):.4f} > {tol}. "
+            "Implementation drift from Anserini.",
+            flush=True,
+        )
         return True
     print(f"  PASS: |delta|={abs(observed - target):.4f} within tolerance.", flush=True)
     return True
 
 
-def main():
+def _instantiate_reranker(slug: str) -> object | None:
+    """Construct a reranker by slug; return None if instantiation fails.
+
+    Errors are logged so the rest of the benchmark can proceed.
+    """
+    try:
+        return get_reranker(slug)
+    except KeyError as exc:
+        print(f"  reranker {slug!r} not registered: {exc}", flush=True)
+        return None
+    except Exception as exc:  # noqa: BLE001 - surface any model-load failure
+        print(f"  reranker {slug!r} failed to instantiate: {exc}", flush=True)
+        return None
+
+
+def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--config", default=str(default_config_path()))
-    p.add_argument("--modes", default="bm25,vector,hybrid_rrf", help="Comma-separated subset of pipeline modes")
-    p.add_argument("--scales", default=None, help="Comma-separated subset of scales, e.g. '5000,100000'")
-    p.add_argument("--encoders", default=None, help="Comma-separated subset of encoder slugs")
-    p.add_argument("--rerankers", default=None, help="Comma-separated subset of reranker slugs")
+    p.add_argument(
+        "--modes",
+        default="bm25,vector,hybrid_rrf",
+        help="Comma-separated subset of pipeline modes",
+    )
+    p.add_argument(
+        "--scales",
+        default=None,
+        help="Comma-separated subset of scales, e.g. '5000,100000'",
+    )
+    p.add_argument(
+        "--encoders",
+        default=None,
+        help="Comma-separated subset of encoder slugs (default: all configured encoders)",
+    )
+    p.add_argument(
+        "--rerankers",
+        default=None,
+        help="Comma-separated subset of reranker slugs (default: 'encoder')",
+    )
     p.add_argument("--output", default=str(Path.cwd() / "results" / "benchmark.csv"))
     p.add_argument("--skip-preflight", action="store_true")
     args = p.parse_args()
@@ -103,9 +140,17 @@ def main():
 
     if args.scales:
         config.scales = [int(x) for x in args.scales.split(",")]
-    selected_modes = args.modes.split(",")
-    selected_encoders = args.encoders.split(",") if args.encoders else [e.slug for e in config.encoders]
-    selected_rerankers = args.rerankers.split(",") if args.rerankers else ["encoder"]
+    selected_modes = [m.strip() for m in args.modes.split(",") if m.strip()]
+    selected_encoders = (
+        [e.strip() for e in args.encoders.split(",") if e.strip()]
+        if args.encoders
+        else [e.slug for e in config.encoders]
+    )
+    selected_rerankers = (
+        [r.strip() for r in args.rerankers.split(",") if r.strip()]
+        if args.rerankers
+        else ["encoder"]
+    )
 
     os.environ["PYTHONHASHSEED"] = str(config.runtime.python_hash_seed)
     os.environ.setdefault("OMP_NUM_THREADS", str(config.runtime.faiss_omp_threads))
@@ -114,21 +159,23 @@ def main():
         if not preflight_check(config):
             sys.exit(1)
 
-    cache = CorpusCache(DATA_DIR)
+    cache = CorpusCache(_data_dir())
     query_rows, qrels_rows = cache.load_queries_and_qrels()
     queries = Query.many(query_rows)
     qrels = Qrels.from_rows(qrels_rows)
 
-    print(f"\n=== Running benchmark ===", flush=True)
-    print(f"  modes:   {selected_modes}", flush=True)
-    print(f"  scales:  {config.scales}", flush=True)
-    print(f"  encoders:{selected_encoders}", flush=True)
-    print(f"  queries: {len(queries)}", flush=True)
+    print("\n=== Running benchmark ===", flush=True)
+    print(f"  modes:    {selected_modes}", flush=True)
+    print(f"  scales:   {config.scales}", flush=True)
+    print(f"  encoders: {selected_encoders}", flush=True)
+    print(f"  rerankers:{selected_rerankers}", flush=True)
+    print(f"  queries:  {len(queries)}", flush=True)
 
     query_vectors: dict[str, np.ndarray] = {}
     enc_by_slug = {e.slug: e for e in config.encoders}
     for slug in selected_encoders:
         if slug not in enc_by_slug:
+            print(f"  encoder {slug!r} not configured; skipping", flush=True)
             continue
         entry = enc_by_slug[slug]
         try:
@@ -144,16 +191,24 @@ def main():
                 prompt_prefix_doc=entry.prompt_prefix_doc,
                 prompt_prefix_query=entry.prompt_prefix_query,
             )
-        except KeyError:
+        except KeyError as exc:
+            print(f"  encoder {slug!r} not registered: {exc}", flush=True)
             continue
         try:
             embedder.warmup(["warmup"])
             qv = embedder.encode_queries([q.text for q in queries])
             query_vectors[slug] = np.asarray(qv, dtype=np.float32)
             print(f"  encoded {len(qv)} queries with {slug}", flush=True)
-        except Exception as exc:
-            print(f"  encoder {slug} failed: {exc}", flush=True)
+        except Exception as exc:  # noqa: BLE001
+            print(f"  encoder {slug!r} failed: {exc}", flush=True)
             continue
+
+    rerankers_by_slug: dict[str, object] = {}
+    for slug in selected_rerankers:
+        rr = _instantiate_reranker(slug)
+        if rr is not None:
+            rerankers_by_slug[slug] = rr
+            print(f"  loaded reranker {slug}", flush=True)
 
     all_rows = []
     for scale in config.scales:
@@ -180,11 +235,33 @@ def main():
                 )
                 rows = pipeline.run(inp, config)
                 all_rows.extend(rows)
-            else:
-                for enc_slug in selected_encoders:
-                    qv = query_vectors.get(enc_slug)
-                    if qv is None:
-                        continue
+                continue
+
+            # For hybrid_rerank, instantiate a reranker per encoder so each
+            # (mode, encoder, scale) row carries its own reranker slug.
+            rerankers_for_mode: list[tuple[str, object]] = list(rerankers_by_slug.items())
+            if mode_name == "hybrid_rerank" and not rerankers_for_mode:
+                print("  hybrid_rerank requires --rerankers; skipping mode", flush=True)
+                continue
+
+            for enc_slug in selected_encoders:
+                qv = query_vectors.get(enc_slug)
+                if qv is None:
+                    continue
+                if rerankers_for_mode:
+                    for rr_slug, rr in rerankers_for_mode:
+                        inp = PipelineInput(
+                            documents=documents,
+                            queries=queries,
+                            qrels=qrels,
+                            encoder_slug=enc_slug,
+                            query_vectors=qv,
+                            corpus_vectors=corpus_vectors,
+                            reranker=rr,
+                        )
+                        rows = pipeline.run(inp, config)
+                        all_rows.extend(rows)
+                else:
                     inp = PipelineInput(
                         documents=documents,
                         queries=queries,
@@ -195,17 +272,15 @@ def main():
                     )
                     rows = pipeline.run(inp, config)
                     all_rows.extend(rows)
-                    break  # one encoder per (pipeline, scale)
 
     repro = ReproducibilityManifest.gather()
     repro_dict = repro.to_dict()
     for r in all_rows:
         for k, v in repro_dict.items():
             r.extras.setdefault(k, v)
-    rows_with_repro = all_rows
 
-    CsvResultWriter.write(rows_with_repro, args.output)
-    print(f"\n=== Wrote {len(rows_with_repro)} rows to {args.output} ===", flush=True)
+    CsvResultWriter.write(all_rows, args.output)
+    print(f"\n=== Wrote {len(all_rows)} rows to {args.output} ===", flush=True)
 
 
 if __name__ == "__main__":
