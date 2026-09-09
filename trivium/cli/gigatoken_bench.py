@@ -7,8 +7,8 @@ loaded via CorpusCache. Reports a single GigaTokenSummary
 per (scale, tokenizer) pair so CSV readers can pick it up.
 
 Run:
-    python -m scripts.gigatoken_bench --scales 5000,100000
-    python -m scripts.gigatoken_bench --tokenizer gpt2 --output /tmp/gigabench.csv
+    python -m trivium.cli.gigatoken_bench --scales 5000,100000
+    python -m trivium.cli.gigatoken_bench --tokenizer gpt2 --output /tmp/gigabench.csv
 """
 from __future__ import annotations
 
@@ -16,19 +16,19 @@ import argparse
 import csv
 from pathlib import Path
 
-from trivium.config.loader import load_config
+from trivium.config.loader import default_config_path, load_config
 from trivium.io.corpus import CorpusCache
 from trivium.tokenizer.gigatoken import GigaToken
 
-CACHE = Path(__file__).parent.parent / "data" / "cache"
+CACHE = Path.cwd() / "data" / "cache"
 
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--config", default=str(Path(__file__).parent.parent / "configs" / "default.yaml"))
+    p.add_argument("--config", default=str(default_config_path()))
     p.add_argument("--tokenizer", default="gpt2")
     p.add_argument("--scales", default=None)
-    p.add_argument("--output", default=str(Path(__file__).parent.parent / "results" / "gigatoken_benchmark.csv"))
+    p.add_argument("--output", default=str(Path.cwd() / "results" / "gigatoken_benchmark.csv"))
     args = p.parse_args()
 
     cfg = load_config(args.config)

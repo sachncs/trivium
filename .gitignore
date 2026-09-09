@@ -1,6 +1,7 @@
 __pycache__/
 *.pyc
 *.pyo
+*.egg-info/
 data/cache/
 results/*.csv
 .DS_Store
@@ -8,3 +9,9 @@ results/*.csv
 *.pkl
 *.bin
 todo.md
+.venv/
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/

@@ -5,11 +5,22 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "trivium"
 version = "0.1.0"
-description = "Hybrid search benchmark: BM25 + dense vector + cross-encoder rerank"
+description = "Hybrid search benchmark: BM25 + dense vector + cross-encoder rerank on BEIR scifact"
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "Apache-2.0" }
-authors = [{ name = "sachin", email = "sachncs@gmail.com" }]
+authors = [{ name = "Sachin", email = "sachncs@gmail.com" }]
+keywords = ["hybrid-search", "bm25", "faiss", "beir", "information-retrieval", "benchmark", "cross-encoder", "reranker", "scifact"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Text Processing :: Indexing",
+]
 dependencies = [
     "faiss-cpu>=1.7",
     "numpy>=1.24",
@@ -35,17 +46,25 @@ dev = [
     "types-PyYAML>=6.0",
 ]
 
+[project.urls]
+Homepage = "https://sachncs.github.io/trivium/"
+Repository = "https://github.com/sachncs/trivium"
+Issues = "https://github.com/sachncs/trivium/issues"
+Changelog = "https://github.com/sachncs/trivium/blob/master/CHANGELOG.md"
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["trivium*"]
 exclude = ["bench*", "search*", "data*", "tests*"]
 
-[project.scripts]
-trivium-benchmark = "scripts.run_benchmark:main"
-trivium-prepare = "scripts.prepare_data:main"
-
 [tool.setuptools.package-data]
-"" = ["*.yaml"]
+trivium = ["configs/*.yaml"]
+
+[project.scripts]
+trivium-benchmark = "trivium.cli.run_benchmark:main"
+trivium-prepare = "trivium.cli.prepare_data:main"
+trivium-summarise = "trivium.cli.summarise:main"
+trivium-gigatoken-bench = "trivium.cli.gigatoken_bench:main"
 
 [tool.pytest.ini_options]
 markers = [

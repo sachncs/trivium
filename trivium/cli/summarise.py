@@ -2,7 +2,7 @@
 """Print headline tables from a benchmark CSV.
 
 Usage:
-    python -m scripts.summarise --csv results/benchmark.csv
+    trivium-summarise --csv results/benchmark.csv
 
 Output is the per-(scale, mode, encoder) pivot that the README
 references. summariser is the single source of truth — README

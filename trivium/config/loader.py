@@ -6,6 +6,7 @@ translates the YAML nesting into the flat-but-namespaced pydantic tree.
 
 from __future__ import annotations
 
+from importlib import resources
 from pathlib import Path
 from typing import Any
 
@@ -25,6 +26,20 @@ from trivium.config.schema import (
 )
 
 
+def default_config_path() -> Path:
+    """Locate the bundled `configs/default.yaml` regardless of install mode.
+
+    Prefers a repo-root `configs/default.yaml` if one exists next to the
+    current working directory (so contributors can edit the canonical
+    file in place). Falls back to the file shipped inside the installed
+    `trivium` package.
+    """
+    repo_local = Path.cwd() / "configs" / "default.yaml"
+    if repo_local.is_file():
+        return repo_local
+    return Path(str(resources.files("trivium.configs").joinpath("default.yaml")))
+
+
 def list_pairs(value: Any) -> list[tuple[float, float]]:
     """Convert the YAML list-of-pairs shape into a typed list."""
     if value is None:
@@ -39,8 +54,13 @@ def to_int_keys(d: Any) -> dict[int, int]:
     return {int(k): int(v) for k, v in d.items()}
 
 
-def load_config(path: str | Path) -> Config:
-    """Parse YAML at `path` and return a validated Config."""
+def load_config(path: str | Path | None = None) -> Config:
+    """Parse YAML at `path` and return a validated Config.
+
+    When `path` is None the bundled default config is used.
+    """
+    if path is None:
+        path = default_config_path()
     with open(path) as f:
         raw = yaml.safe_load(f)
 

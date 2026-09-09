@@ -18,7 +18,7 @@ from pathlib import Path
 
 import numpy as np
 
-from trivium.config.loader import load_config
+from trivium.config.loader import default_config_path, load_config
 from trivium.domain.document import Document
 from trivium.domain.query import Query
 from trivium.domain.qrels import Qrels
@@ -38,7 +38,7 @@ from trivium.reproducibility import ReproducibilityManifest
 from trivium.reporting.csv_writer import CsvResultWriter
 from trivium.retrieval.bm25 import Bm25
 
-DATA_DIR = Path(__file__).parent.parent / "data" / "cache"
+DATA_DIR = Path.cwd() / "data" / "cache"
 
 
 def preflight_check(config) -> bool:
@@ -90,12 +90,12 @@ def preflight_check(config) -> bool:
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--config", default=str(Path(__file__).parent.parent / "configs" / "default.yaml"))
+    p.add_argument("--config", default=str(default_config_path()))
     p.add_argument("--modes", default="bm25,vector,hybrid_rrf", help="Comma-separated subset of pipeline modes")
     p.add_argument("--scales", default=None, help="Comma-separated subset of scales, e.g. '5000,100000'")
     p.add_argument("--encoders", default=None, help="Comma-separated subset of encoder slugs")
     p.add_argument("--rerankers", default=None, help="Comma-separated subset of reranker slugs")
-    p.add_argument("--output", default=str(Path(__file__).parent.parent / "results" / "benchmark.csv"))
+    p.add_argument("--output", default=str(Path.cwd() / "results" / "benchmark.csv"))
     p.add_argument("--skip-preflight", action="store_true")
     args = p.parse_args()
 

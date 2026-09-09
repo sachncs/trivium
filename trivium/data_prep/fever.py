@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import random
 
-from data_prep.distractors import beir_corpus_iter
+from trivium.data_prep.distractors import beir_corpus_iter
 from trivium.domain.document import Document
 
 
