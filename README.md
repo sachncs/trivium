@@ -81,7 +81,7 @@ python -m scripts.run_benchmark --skip-preflight
 ### Embeddings
 
 - Model: `sentence-transformers/all-MiniLM-L6-v2` (384d, l2-normalized).
-- Ponytail trade-off: 5× faster than `mpnet-base-v2` on CPU at the cost of ~0.03 nDCG@10 vs BGE-large-en-v1.5.
+- Trade-off: 5× faster than `mpnet-base-v2` on CPU at the cost of ~0.03 nDCG@10 vs BGE-large-en-v1.5.
 - `IndexFlatIP` = cosine after l2-norm.
 
 ### Vector index
@@ -106,7 +106,7 @@ python -m scripts.run_benchmark --skip-preflight
 
 - BM25 + vector → RRF → top-50 → cross-encoder top-10.
 - Cross-encoder: `cross-encoder/ms-marco-MiniLM-L-6-v2` (90 MB).
-- CPU latency: ~180 ms p95 per query (batch=32, max_length=256, 50 candidates). Ponytail estimate of "20-40 ms" was 5-10× too low.
+- CPU latency: ~180 ms p95 per query (batch=32, max_length=256, 50 candidates). The original 20-40 ms estimate was 5-10× too low.
 
 ### Metrics
 

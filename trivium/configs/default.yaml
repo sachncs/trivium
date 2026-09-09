@@ -18,8 +18,8 @@ scales: [5000, 100000, 500000, 1000000]
 # 5K is the untouched scifact seed (no distractors) and runs the equivalence check.
 
 embedding:
-  # Ponytail: MiniLM-L6 over mpnet-base for ~5x speed on CPU.
-  # Trade-off: 384d not 768d. Hits BGE-small quality, not BGE-large.
+  # Trade-off: MiniLM-L6 over mpnet-base for ~5x speed on CPU.
+  # 384d not 768d. Hits BGE-small quality, not BGE-large.
   model: sentence-transformers/all-MiniLM-L6-v2
   dim: 384
   batch_size: 128
@@ -27,8 +27,8 @@ embedding:
   max_seq_length: 256
 
 encoders:
-  # Single encoder for the 1M-scale DiskBBQ benchmark. Ponytail choice:
-  # 90 MB model, 384d, l2-normalised, ~5x faster than mpnet-base on CPU.
+  # Default encoder for the 1M-scale DiskBBQ benchmark: 90 MB model,
+  # 384d, l2-normalised, ~5x faster than mpnet-base on CPU.
   - slug: minilm-l6
     model_id: sentence-transformers/all-MiniLM-L6-v2
     dimension: 384
