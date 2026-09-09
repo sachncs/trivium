@@ -110,13 +110,22 @@ class Bm25(Retriever):
         return scores_size
 
     def save(self, dir_path: str | Path) -> None:
+        """Persist the BM25 index, tokenizer vocab, stopwords, and document IDs.
+
+        bm25s' on-disk format has no place for the original document IDs,
+        so we round-trip them alongside the index. A load() with no
+        matching doc_ids.npy file will leave self.doc_ids empty (matching
+        the historical behaviour) and emit a warning.
+        """
         dir_path = Path(dir_path)
         dir_path.mkdir(parents=True, exist_ok=True)
         self.bm25.save(str(dir_path), corpus=None)
         self.tokenizer.save_vocab(save_dir=str(dir_path))
         self.tokenizer.save_stopwords(save_dir=str(dir_path))
+        np.save(dir_path / "doc_ids.npy", np.asarray(self.doc_ids, dtype=object))
 
     def load(self, dir_path: str | Path, mmap: bool = True) -> None:
+        """Reload a saved BM25 index; doc_ids are restored if doc_ids.npy is present."""
         from bm25s import BM25
         from bm25s.tokenization import Tokenizer
 
@@ -125,6 +134,17 @@ class Bm25(Retriever):
         self.tokenizer = Tokenizer(stopwords=self.stopwords, stemmer=self.stemmer)
         self.tokenizer.load_vocab(save_dir=str(dir_path))
         self.tokenizer.load_stopwords(save_dir=str(dir_path))
+
+        ids_path = dir_path / "doc_ids.npy"
+        if ids_path.is_file():
+            loaded = np.load(ids_path, allow_pickle=True).tolist()
+            self.doc_ids = [str(d) for d in loaded]
+            self.id_to_pos = {did: i for i, did in enumerate(self.doc_ids)}
+        else:
+            # Historical fallback: no doc_ids on disk. Caller can use
+            # ensure_doc_positions() if it has them elsewhere.
+            self.doc_ids = []
+            self.id_to_pos = {}
 
     def ensure_doc_positions(self) -> None:
         """Hook for callers that load a saved index and need to repopulate doc_ids."""
