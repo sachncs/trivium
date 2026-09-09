@@ -1,0 +1,48 @@
+<header class="site-header" role="banner">
+  <div class="container site-header-inner">
+    <a class="site-brand" href="{{ '/' | relative_url }}" aria-label="trivium home">
+      <img class="site-brand-logo" src="{{ '/assets/logo.svg' | relative_url }}" alt="" width="32" height="32">
+      <span class="site-brand-name">{{ site.title }}</span>
+      <span class="site-brand-tagline">{{ site.tagline }}</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <ul class="site-nav-list">
+        {%- assign primary_ids = "Getting started,Understand,How-to,Reference" | split: "," -%}
+        {%- assign primary = site.data.navigation | where_exp: "item", "item.section != nil" -%}
+        {%- for item in primary -%}
+          {%- if primary_ids contains item.section -%}
+            <li class="site-nav-item{% if page.url == item.url %} is-active{% endif %}">
+              <a href="{{ item.url | relative_url }}">{{ item.title }}</a>
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+        {%- assign community = site.data.navigation | where: "section", "Community" -%}
+        <li class="site-nav-item site-nav-item--menu">
+          <details class="nav-menu">
+            <summary>More</summary>
+            <ul class="nav-menu-list">
+              {%- for item in community -%}
+                <li><a href="{{ item.url | relative_url }}">{{ item.title }}</a></li>
+              {%- endfor -%}
+              <li><a href="https://github.com/{{ site.github_repo }}">GitHub</a></li>
+            </ul>
+          </details>
+        </li>
+        <li class="site-nav-item site-nav-item--cta">
+          <a class="btn btn-primary btn-sm" href="https://github.com/{{ site.github_repo }}">GitHub <span aria-hidden="true">→</span></a>
+        </li>
+      </ul>
+      <button class="site-nav-toggle" type="button" aria-controls="mobile-nav" aria-expanded="false">
+        <span class="visually-hidden">Toggle menu</span>
+        <span class="hamburger" aria-hidden="true"></span>
+      </button>
+    </nav>
+  </div>
+  <div id="mobile-nav" class="site-nav-mobile" hidden>
+    <ul>
+      {% for item in site.data.navigation %}
+        <li><a href="{{ item.url | relative_url }}">{{ item.title }}</a></li>
+      {% endfor %}
+    </ul>
+  </div>
+</header>

@@ -1,8 +1,85 @@
-title: "trivium"
-description: "trivium"
-theme: minima
+title: trivium
+tagline: Reproducible hybrid search benchmark
+description: >-
+  A reproducible benchmark for hybrid search engines — BM25 + dense
+  vector + cross-encoder rerank — on distractor-augmented BEIR scifact.
+  For retrieval engineers comparing fusion strategies, ML researchers
+  validating new encoders, and OSS maintainers who publish numbers they
+  can defend.
+keywords:
+  - hybrid-search
+  - bm25
+  - faiss
+  - beir
+  - scifact
+  - cross-encoder
+  - reranker
+  - information-retrieval
+  - benchmark
+
+# Custom in-repo theme; no remote or built-in theme reference.
 logo: /assets/logo.svg
+favicon: /assets/favicon.svg
+
 show_downloads: false
 permalink: /:title/
+
+github_repo: sachncs/trivium
+github_branch: master
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: page
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
+  - scope:
+      path: ""
+      type: pages
+    values:
+      layout: page
+
+collections:
+  docs:
+    output: true
+    permalink: /docs/:path/
+
 plugins:
   - jekyll-feed
+  - jekyll-seo-tag
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - README.md
+  - LICENSE
+  - CHANGELOG.md
+  - tests/
+  - trivium/
+  - trivium.egg-info/
+  - data/
+  - results/
+  - dist/
+  - build/
+  - .pytest_cache/
+  - .ruff_cache/
+  - .mypy_cache/
+  - htmlcov/
+  - .coverage
+  - pyproject.toml
+  - ruff.toml
+  - mypy.ini
+  - requirements.txt
+  - _site/
+  - .git/
+  - .github/
+  - .claude/
+  - .opencode/
+  - configs/
+  - Gemfile

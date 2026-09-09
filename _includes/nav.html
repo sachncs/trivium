@@ -1,0 +1,24 @@
+{%- comment -%}
+  Sidebar navigation grouped by section. The current page is
+  highlighted via the `is-active` class.
+{%- endcomment -%}
+{%- assign nav = site.data.navigation -%}
+{%- assign sections = "Getting started,Understand,How-to,Reference,Community" | split: "," -%}
+<ul class="sidebar-list">
+  <li class="sidebar-item{% if page.url == '/' %} is-active{% endif %}">
+    <a href="{{ '/' | relative_url }}">Home</a>
+  </li>
+</ul>
+{%- for section in sections -%}
+  {%- assign items = nav | where: "section", section -%}
+  {%- if items.size > 0 -%}
+  <h2 class="sidebar-heading">{{ section }}</h2>
+  <ul class="sidebar-list">
+    {%- for item in items -%}
+    <li class="sidebar-item{% if page.url == item.url %} is-active{% endif %}">
+      <a href="{{ item.url | relative_url }}">{{ item.title }}</a>
+    </li>
+    {%- endfor -%}
+  </ul>
+  {%- endif -%}
+{%- endfor -%}
