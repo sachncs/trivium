@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>API reference · trivium</title>
+  <meta name="description" content="A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval enginee...">
+  <meta name="keywords" content="hybrid-search, bm25, faiss, beir, scifact, cross-encoder, reranker, information-retrieval, benchmark">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="stylesheet" href="/assets/css/main.css"><!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>API reference | trivium</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="API reference" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval engineers comparing fusion strategies, ML researchers validating new encoders, and OSS maintainers who publish numbers they can defend." />
+<meta name="twitter:description" property="og:description" content="A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval engineers comparing fusion strategies, ML researchers validating new encoders, and OSS maintainers who publish numbers they can defend." />
+<meta property="og:site_name" content="trivium" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="API reference" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval engineers comparing fusion strategies, ML researchers validating new encoders, and OSS maintainers who publish numbers they can defend.","headline":"API reference","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"/assets/logo.svg"}},"url":"/docs/api/"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="/feed.xml" title="trivium" /></head>
+<body class="layout--page">
+  <a class="skip-link" href="#content">Skip to main content</a>
+  <header class="site-header" role="banner">
+  <div class="container site-header-inner">
+    <a class="site-brand" href="/" aria-label="trivium home">
+      <img class="site-brand-logo" src="/assets/logo.svg" alt="" width="32" height="32">
+      <span class="site-brand-name">trivium</span>
+      <span class="site-brand-tagline">Reproducible hybrid search benchmark</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <ul class="site-nav-list"><li class="site-nav-item">
+              <a href="/docs/getting-started/">Getting started</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/architecture/">Architecture</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/concepts/">Concepts</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/methodology/">Methodology</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/add-embedder/">Add an embedder</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/add-reranker/">Add a reranker</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/add-pipeline/">Add a pipeline</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/tune-bm25/">Tune BM25</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/tune-vector/">Tune the vector index</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/reference/config/">Config schema</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/reference/cli/">CLI</a>
+            </li><li class="site-nav-item is-active">
+              <a href="/docs/api/">API</a>
+            </li><li class="site-nav-item site-nav-item--menu">
+          <details class="nav-menu">
+            <summary>More</summary>
+            <ul class="nav-menu-list"><li><a href="/docs/contributing/">Contributing</a></li><li><a href="/changelog/">Changelog</a></li><li><a href="/security/">Security</a></li><li><a href="/support/">Support</a></li><li><a href="/code-of-conduct/">Code of conduct</a></li><li><a href="/license/">License</a></li><li><a href="https://github.com/sachncs/trivium">GitHub</a></li>
+            </ul>
+          </details>
+        </li>
+        <li class="site-nav-item site-nav-item--cta">
+          <a class="btn btn-primary btn-sm" href="https://github.com/sachncs/trivium">GitHub <span aria-hidden="true">→</span></a>
+        </li>
+      </ul>
+      <button class="site-nav-toggle" type="button" aria-controls="mobile-nav" aria-expanded="false">
+        <span class="visually-hidden">Toggle menu</span>
+        <span class="hamburger" aria-hidden="true"></span>
+      </button>
+    </nav>
+  </div>
+  <div id="mobile-nav" class="site-nav-mobile" hidden>
+    <ul>
+      
+        <li><a href="/">Home</a></li>
+      
+        <li><a href="/docs/getting-started/">Getting started</a></li>
+      
+        <li><a href="/docs/architecture/">Architecture</a></li>
+      
+        <li><a href="/docs/concepts/">Concepts</a></li>
+      
+        <li><a href="/docs/methodology/">Methodology</a></li>
+      
+        <li><a href="/docs/guides/add-embedder/">Add an embedder</a></li>
+      
+        <li><a href="/docs/guides/add-reranker/">Add a reranker</a></li>
+      
+        <li><a href="/docs/guides/add-pipeline/">Add a pipeline</a></li>
+      
+        <li><a href="/docs/guides/tune-bm25/">Tune BM25</a></li>
+      
+        <li><a href="/docs/guides/tune-vector/">Tune the vector index</a></li>
+      
+        <li><a href="/docs/reference/config/">Config schema</a></li>
+      
+        <li><a href="/docs/reference/cli/">CLI</a></li>
+      
+        <li><a href="/docs/api/">API</a></li>
+      
+        <li><a href="/docs/contributing/">Contributing</a></li>
+      
+        <li><a href="/changelog/">Changelog</a></li>
+      
+        <li><a href="/security/">Security</a></li>
+      
+        <li><a href="/support/">Support</a></li>
+      
+        <li><a href="/code-of-conduct/">Code of conduct</a></li>
+      
+        <li><a href="/license/">License</a></li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id="content" class="page">
+    <div class="page-grid">
+  <aside class="sidebar" aria-label="Documentation navigation">
+    <nav class="sidebar-nav">
+      <ul class="sidebar-list">
+  <li class="sidebar-item">
+    <a href="/">Home</a>
+  </li>
+</ul><h2 class="sidebar-heading">Getting started</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/getting-started/">Getting started</a>
+    </li></ul><h2 class="sidebar-heading">Understand</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/architecture/">Architecture</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/concepts/">Concepts</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/methodology/">Methodology</a>
+    </li></ul><h2 class="sidebar-heading">How-to</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/guides/add-embedder/">Add an embedder</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/add-reranker/">Add a reranker</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/add-pipeline/">Add a pipeline</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/tune-bm25/">Tune BM25</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/tune-vector/">Tune the vector index</a>
+    </li></ul><h2 class="sidebar-heading">Reference</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/reference/config/">Config schema</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/reference/cli/">CLI</a>
+    </li><li class="sidebar-item is-active">
+      <a href="/docs/api/">API</a>
+    </li></ul><h2 class="sidebar-heading">Community</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/contributing/">Contributing</a>
+    </li><li class="sidebar-item">
+      <a href="/changelog/">Changelog</a>
+    </li><li class="sidebar-item">
+      <a href="/security/">Security</a>
+    </li><li class="sidebar-item">
+      <a href="/support/">Support</a>
+    </li><li class="sidebar-item">
+      <a href="/code-of-conduct/">Code of conduct</a>
+    </li><li class="sidebar-item">
+      <a href="/license/">License</a>
+    </li></ul>
+    </nav>
+  </aside>
+  <article class="page-content">
+    <header class="page-header">
+      <p class="page-section">Reference</p>
+      <h1 class="page-title">API reference</h1>
+      <p class="page-subtitle">The public Python API for the embedder, reranker, retriever, and pipeline registries.</p>
+    </header>
+    <div class="page-body">
+      <p>This page is the developer-facing API reference. It covers every
+public symbol you can import after <code class="language-plaintext highlighter-rouge">pip install trivium</code>.</p>
+
+<h2 id="triviumdomain--value-types"><code class="language-plaintext highlighter-rouge">trivium.domain</code> — value types</h2>
+
+<h3 id="document"><code class="language-plaintext highlighter-rouge">Document</code></h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Document</span><span class="p">:</span>
+    <span class="n">doc_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="sh">""</span>
+    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="sh">""</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">body</span><span class="p">(</span><span class="n">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">title</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">text</span><span class="si">}</span><span class="sh">"</span><span class="p">.</span><span class="nf">strip</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h3 id="query"><code class="language-plaintext highlighter-rouge">Query</code></h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Query</span><span class="p">:</span>
+    <span class="n">query_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span>
+</code></pre></div></div>
+
+<h3 id="qrels"><code class="language-plaintext highlighter-rouge">Qrels</code></h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Qrels</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">judgments</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span> <span class="bp">...</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_rows</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">rows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Qrels</span><span class="p">:</span>
+        <span class="sh">"""</span><span class="s">rows = [{</span><span class="sh">"</span><span class="s">qid</span><span class="sh">"</span><span class="s">: ..., </span><span class="sh">"</span><span class="s">did</span><span class="sh">"</span><span class="s">: ..., </span><span class="sh">"</span><span class="s">rel</span><span class="sh">"</span><span class="s">: int}, ...]</span><span class="sh">"""</span>
+</code></pre></div></div>
+
+<h3 id="hit"><code class="language-plaintext highlighter-rouge">Hit</code></h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Hit</span><span class="p">:</span>
+    <span class="n">doc_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">score</span><span class="p">:</span> <span class="nb">float</span>
+</code></pre></div></div>
+
+<h3 id="searchresult"><code class="language-plaintext highlighter-rouge">SearchResult</code></h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SearchResult</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">hits</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Hit</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span> <span class="bp">...</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">empty</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SearchResult</span><span class="p">:</span> <span class="bp">...</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_pairs</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">pairs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">SearchResult</span><span class="p">:</span>
+        <span class="sh">"""</span><span class="s">Build from (doc_id, score) tuples.</span><span class="sh">"""</span>
+</code></pre></div></div>
+
+<h3 id="pipelineresult"><code class="language-plaintext highlighter-rouge">PipelineResult</code></h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">PipelineResult</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>            <span class="c1"># pipeline slug
+</span>    <span class="n">scale</span><span class="p">:</span> <span class="nb">int</span>           <span class="c1"># corpus size
+</span>    <span class="n">encoder</span><span class="p">:</span> <span class="nb">str</span>         <span class="c1"># encoder slug
+</span>    <span class="n">reranker</span><span class="p">:</span> <span class="nb">str</span>        <span class="c1"># reranker slug or "none"
+</span>    <span class="n">metrics</span><span class="p">:</span> <span class="n">EvaluationMetrics</span>
+    <span class="n">latency</span><span class="p">:</span> <span class="n">LatencyStats</span>
+    <span class="n">extras</span><span class="p">:</span> <span class="nb">dict</span>         <span class="c1"># rrf_k, w_bm25, nprobe, ...
+</span></code></pre></div></div>
+
+<h2 id="triviumembeddings--text-vectorizers"><code class="language-plaintext highlighter-rouge">trivium.embeddings</code> — text vectorizers</h2>
+
+<h3 id="embedder-abc"><code class="language-plaintext highlighter-rouge">Embedder</code> (ABC)</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Embedder</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">slug</span><span class="p">(</span><span class="n">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span> <span class="bp">...</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">dimension</span><span class="p">(</span><span class="n">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span> <span class="bp">...</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">encode_documents</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">texts</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="p">.</span><span class="n">ndarray</span><span class="p">:</span> <span class="bp">...</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">encode_queries</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">texts</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="p">.</span><span class="n">ndarray</span><span class="p">:</span> <span class="bp">...</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">warmup</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">sample_texts</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span> <span class="bp">...</span>
+</code></pre></div></div>
+
+<h3 id="concrete-classes">Concrete classes</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">trivium.embeddings.sentence</span> <span class="kn">import</span> <span class="n">Sentence</span>
+<span class="kn">from</span> <span class="n">trivium.embeddings.e5</span> <span class="kn">import</span> <span class="n">E5</span>
+
+<span class="c1"># Sentence wraps any sentence-transformers model
+</span><span class="n">encoder</span> <span class="o">=</span> <span class="nc">Sentence</span><span class="p">(</span>
+    <span class="n">slug</span><span class="o">=</span><span class="sh">"</span><span class="s">minilm-l6</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">model_id</span><span class="o">=</span><span class="sh">"</span><span class="s">sentence-transformers/all-MiniLM-L6-v2</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">dimension</span><span class="o">=</span><span class="mi">384</span><span class="p">,</span>
+    <span class="n">device</span><span class="o">=</span><span class="sh">"</span><span class="s">cpu</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">normalize</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># E5 wraps intfloat/e5-mistral-7b-instruct
+</span><span class="n">encoder</span> <span class="o">=</span> <span class="nc">E5</span><span class="p">(</span><span class="n">slug</span><span class="o">=</span><span class="sh">"</span><span class="s">e5-mistral-7b</span><span class="sh">"</span><span class="p">,</span> <span class="n">max_memory_gb</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="sh">"</span><span class="s">mps</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="embedderregistry-and-factory-functions"><code class="language-plaintext highlighter-rouge">EmbedderRegistry</code> and factory functions</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">trivium.embeddings.registry</span> <span class="kn">import</span> <span class="n">get_embedder</span><span class="p">,</span> <span class="n">register_embedder</span>
+
+<span class="c1"># Build from slug
+</span><span class="n">encoder</span> <span class="o">=</span> <span class="nf">get_embedder</span><span class="p">(</span><span class="sh">"</span><span class="s">minilm-l6</span><span class="sh">"</span><span class="p">)</span>              <span class="c1"># default kwargs
+</span><span class="n">encoder</span> <span class="o">=</span> <span class="nf">get_embedder</span><span class="p">(</span><span class="sh">"</span><span class="s">bge-large</span><span class="sh">"</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="sh">"</span><span class="s">cuda</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Available slugs
+</span><span class="kn">from</span> <span class="n">trivium.embeddings.registry</span> <span class="kn">import</span> <span class="n">EmbedderRegistry</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">EmbedderRegistry</span><span class="p">.</span><span class="nf">slugs</span><span class="p">())</span>
+<span class="c1"># ['bge-base', 'bge-large', 'bge-small', 'e5-mistral-7b', 'minilm-l6', 'mpnet-base']
+</span>
+<span class="c1"># Register a new slug
+</span><span class="nd">@register_embedder</span><span class="p">(</span><span class="sh">"</span><span class="s">my-encoder</span><span class="sh">"</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">make_my_encoder</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Embedder</span><span class="p">:</span>
+    <span class="bp">...</span>
+</code></pre></div></div>
+
+<h2 id="triviumretrieval--sparse--dense-retrievers"><code class="language-plaintext highlighter-rouge">trivium.retrieval</code> — sparse + dense retrievers</h2>
+
+<h3 id="retriever-abc"><code class="language-plaintext highlighter-rouge">Retriever</code> (ABC)</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Retriever</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">slug</span><span class="p">(</span><span class="n">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span> <span class="bp">...</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">add_documents</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">documents</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Document</span><span class="p">],</span>
+                     <span class="n">vectors</span><span class="p">:</span> <span class="n">np</span><span class="p">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="bp">None</span> <span class="o">=</span> <span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span> <span class="bp">...</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">query_vectors</span><span class="p">:</span> <span class="n">np</span><span class="p">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">SearchResult</span><span class="p">]:</span> <span class="bp">...</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">set_search_params</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span> <span class="bp">...</span>
+</code></pre></div></div>
+
+<h3 id="concrete-retrievers">Concrete retrievers</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">trivium.retrieval.bm25</span> <span class="kn">import</span> <span class="n">Bm25</span>
+<span class="kn">from</span> <span class="n">trivium.retrieval.faiss</span> <span class="kn">import</span> <span class="n">Faiss</span>
+<span class="kn">from</span> <span class="n">trivium.retrieval.diskbbq</span> <span class="kn">import</span> <span class="n">Bbq</span>
+
+<span class="n">bm25</span> <span class="o">=</span> <span class="nc">Bm25</span><span class="p">(</span><span class="n">k1</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="sh">"</span><span class="s">lucene</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">bm25</span><span class="p">.</span><span class="nf">add_documents</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">bm25</span><span class="p">.</span><span class="nf">search</span><span class="p">([</span><span class="sh">"</span><span class="s">query text</span><span class="sh">"</span><span class="p">],</span> <span class="n">k</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">flat</span> <span class="o">=</span> <span class="n">Faiss</span><span class="p">.</span><span class="nc">Flat</span><span class="p">()</span>
+<span class="n">flat</span><span class="p">.</span><span class="nf">add_documents</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">vectors</span><span class="o">=</span><span class="n">doc_vecs</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">flat</span><span class="p">.</span><span class="nf">search</span><span class="p">(</span><span class="n">query_vecs</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">bbq</span> <span class="o">=</span> <span class="nc">Bbq</span><span class="p">(</span><span class="n">out_dir</span><span class="o">=</span><span class="sh">"</span><span class="s">data/cache/bbq</span><span class="sh">"</span><span class="p">,</span> <span class="n">nlist</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">48</span><span class="p">,</span> <span class="n">nprobe</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+<span class="n">bbq</span><span class="p">.</span><span class="nf">add_documents</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="n">vectors</span><span class="o">=</span><span class="n">doc_vecs</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">bbq</span><span class="p">.</span><span class="nf">search</span><span class="p">(</span><span class="n">query_vecs</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="sh">"</span><span class="s">ram</span><span class="sh">"</span><span class="p">)</span>   <span class="c1"># or "disk" / "auto"
+</span></code></pre></div></div>
+
+<h3 id="save-and-load">Save and load</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">bm25</span><span class="p">.</span><span class="nf">save</span><span class="p">(</span><span class="sh">"</span><span class="s">path/to/bm25</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">bm25</span> <span class="o">=</span> <span class="nc">Bm25</span><span class="p">()</span>
+<span class="n">bm25</span><span class="p">.</span><span class="nf">load</span><span class="p">(</span><span class="sh">"</span><span class="s">path/to/bm25</span><span class="sh">"</span><span class="p">)</span>    <span class="c1"># restores doc_ids
+</span></code></pre></div></div>
+
+<h2 id="triviumfusion--score-combinators"><code class="language-plaintext highlighter-rouge">trivium.fusion</code> — score combinators</h2>
+
+<h3 id="fusionstrategy-abc"><code class="language-plaintext highlighter-rouge">FusionStrategy</code> (ABC)</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">FusionStrategy</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">slug</span><span class="p">(</span><span class="n">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span> <span class="bp">...</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">fuse</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">SearchResult</span><span class="p">],</span> <span class="n">top_k</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SearchResult</span><span class="p">:</span> <span class="bp">...</span>
+</code></pre></div></div>
+
+<h3 id="rrf-reciprocal-rank-fusion"><code class="language-plaintext highlighter-rouge">Rrf</code> (Reciprocal Rank Fusion)</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">trivium.fusion.rrf</span> <span class="kn">import</span> <span class="n">Rrf</span>
+
+<span class="n">rrf</span> <span class="o">=</span> <span class="nc">Rrf</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>     <span class="c1"># Cormack et al. 2009
+</span><span class="n">fused</span> <span class="o">=</span> <span class="n">rrf</span><span class="p">.</span><span class="nf">fuse</span><span class="p">([</span><span class="n">bm25_results</span><span class="p">,</span> <span class="n">dense_results</span><span class="p">],</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="weighted"><code class="language-plaintext highlighter-rouge">Weighted</code></h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">trivium.fusion.weighted</span> <span class="kn">import</span> <span class="n">Weighted</span>
+</code></pre></div></div>
+
+<h2 id="triviumreranking--cross-encoders"><code class="language-plaintext highlighter-rouge">trivium.reranking</code> — cross-encoders</h2>
+
+<h3 id="reranker-abc"><code class="language-plaintext highlighter-rouge">Reranker</code> (ABC)</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Reranker</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">slug</span><span class="p">(</span><span class="n">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span> <span class="bp">...</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">model_id</span><span class="p">(</span><span class="n">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span> <span class="bp">...</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">rerank</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">candidates</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Document</span><span class="p">],</span>
+                <span class="n">top_k</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SearchResult</span><span class="p">:</span> <span class="bp">...</span>
+</code></pre></div></div>
+
+<h3 id="concrete-rerankers">Concrete rerankers</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">trivium.reranking.encoder</span> <span class="kn">import</span> <span class="n">Encoder</span>
+<span class="kn">from</span> <span class="n">trivium.reranking.bge</span> <span class="kn">import</span> <span class="n">Bge</span>
+<span class="kn">from</span> <span class="n">trivium.reranking.monot5</span> <span class="kn">import</span> <span class="n">Monot5</span>
+
+<span class="c1"># Sentence-transformers CrossEncoder
+</span><span class="n">rr</span> <span class="o">=</span> <span class="nc">Encoder</span><span class="p">(</span><span class="n">slug</span><span class="o">=</span><span class="sh">"</span><span class="s">encoder</span><span class="sh">"</span><span class="p">,</span>
+             <span class="n">model_id</span><span class="o">=</span><span class="sh">"</span><span class="s">cross-encoder/ms-marco-MiniLM-L-6-v2</span><span class="sh">"</span><span class="p">,</span>
+             <span class="n">max_length</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+
+<span class="c1"># BGE (sigmoid on logit)
+</span><span class="n">rr</span> <span class="o">=</span> <span class="nc">Bge</span><span class="p">(</span><span class="n">slug</span><span class="o">=</span><span class="sh">"</span><span class="s">bge-large</span><span class="sh">"</span><span class="p">,</span> <span class="n">model_id</span><span class="o">=</span><span class="sh">"</span><span class="s">BAAI/bge-reranker-large</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># MonoT5 (T5 seq2seq)
+</span><span class="n">rr</span> <span class="o">=</span> <span class="nc">Monot5</span><span class="p">(</span><span class="n">slug</span><span class="o">=</span><span class="sh">"</span><span class="s">monot5-3b</span><span class="sh">"</span><span class="p">,</span> <span class="n">model_id</span><span class="o">=</span><span class="sh">"</span><span class="s">castorini/monot5-3b-msmarco-10k</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">fp16</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="rerankerregistry"><code class="language-plaintext highlighter-rouge">RerankerRegistry</code></h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">trivium.reranking.registry</span> <span class="kn">import</span> <span class="n">get_reranker</span><span class="p">,</span> <span class="n">register_reranker</span><span class="p">,</span> <span class="n">RerankerRegistry</span>
+
+<span class="n">rr</span> <span class="o">=</span> <span class="nf">get_reranker</span><span class="p">(</span><span class="sh">"</span><span class="s">encoder</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">rr</span> <span class="o">=</span> <span class="nf">get_reranker</span><span class="p">(</span><span class="sh">"</span><span class="s">bge-large</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">RerankerRegistry</span><span class="p">.</span><span class="nf">slugs</span><span class="p">())</span>
+<span class="c1"># ['bge-base', 'bge-large', 'encoder', 'monot5-3b']
+</span></code></pre></div></div>
+
+<h2 id="triviumpipelines--benchmark-orchestration"><code class="language-plaintext highlighter-rouge">trivium.pipelines</code> — benchmark orchestration</h2>
+
+<h3 id="benchmarkpipeline-abc"><code class="language-plaintext highlighter-rouge">BenchmarkPipeline</code> (ABC)</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">BenchmarkPipeline</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="n">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span> <span class="bp">...</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">encoders</span><span class="p">(</span><span class="n">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span> <span class="bp">...</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">inp</span><span class="p">:</span> <span class="n">PipelineInput</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">PipelineResult</span><span class="p">]:</span> <span class="bp">...</span>
+</code></pre></div></div>
+
+<h3 id="built-in-modes">Built-in modes</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">trivium.pipelines</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">bm25</span><span class="p">,</span> <span class="n">vector</span><span class="p">,</span> <span class="n">hybrid_rrf</span><span class="p">,</span> <span class="n">hybrid_rerank</span><span class="p">,</span> <span class="n">diskbbq</span><span class="p">,</span> <span class="n">hybrid_bbq</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="c1"># Importing each module registers its @register_pipeline decorated class.
+</span></code></pre></div></div>
+
+<h3 id="pipelineregistry"><code class="language-plaintext highlighter-rouge">PipelineRegistry</code></h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">trivium.pipelines.registry</span> <span class="kn">import</span> <span class="n">get_pipeline</span><span class="p">,</span> <span class="n">PipelineRegistry</span>
+
+<span class="n">pipe</span> <span class="o">=</span> <span class="nf">get_pipeline</span><span class="p">(</span><span class="sh">"</span><span class="s">hybrid_rrf</span><span class="sh">"</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">PipelineRegistry</span><span class="p">.</span><span class="nf">slugs</span><span class="p">())</span>
+<span class="c1"># ['bm25', 'vector', 'hybrid_rrf', 'hybrid_rerank', 'diskbbq', 'hybrid_bbq']
+</span></code></pre></div></div>
+
+<h3 id="pipelineinput"><code class="language-plaintext highlighter-rouge">PipelineInput</code></h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">PipelineInput</span><span class="p">:</span>
+    <span class="n">documents</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Document</span><span class="p">]</span>
+    <span class="n">queries</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Query</span><span class="p">]</span>
+    <span class="n">qrels</span><span class="p">:</span> <span class="n">Qrels</span>
+    <span class="n">encoder_slug</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">query_vectors</span><span class="p">:</span> <span class="n">np</span><span class="p">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="bp">None</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">corpus_vectors</span><span class="p">:</span> <span class="n">np</span><span class="p">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="bp">None</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">reranker</span><span class="p">:</span> <span class="n">Reranker</span> <span class="o">|</span> <span class="bp">None</span> <span class="o">=</span> <span class="bp">None</span>
+</code></pre></div></div>
+
+<h2 id="triviumconfig--configuration"><code class="language-plaintext highlighter-rouge">trivium.config</code> — configuration</h2>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">trivium.config.loader</span> <span class="kn">import</span> <span class="n">load_config</span><span class="p">,</span> <span class="n">default_config_path</span>
+
+<span class="n">cfg</span> <span class="o">=</span> <span class="nf">load_config</span><span class="p">()</span>                                <span class="c1"># default
+</span><span class="n">cfg</span> <span class="o">=</span> <span class="nf">load_config</span><span class="p">(</span><span class="sh">"</span><span class="s">path/to/custom.yaml</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The returned <code class="language-plaintext highlighter-rouge">Config</code> is a Pydantic v2 model with <code class="language-plaintext highlighter-rouge">extra="forbid"</code>.
+See <a href="../../reference/config/">Config schema</a> for every field.</p>
+
+<h2 id="triviumevaluation--metrics-and-latency"><code class="language-plaintext highlighter-rouge">trivium.evaluation</code> — metrics and latency</h2>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">trivium.evaluation.metrics</span> <span class="kn">import</span> <span class="n">Evaluator</span><span class="p">,</span> <span class="n">hits_to_results</span>
+<span class="kn">from</span> <span class="n">trivium.evaluation.latency</span> <span class="kn">import</span> <span class="n">LatencyProbe</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">Evaluator</code> wraps <code class="language-plaintext highlighter-rouge">pytrec_eval.RelevanceEvaluator</code>:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ev</span> <span class="o">=</span> <span class="nc">Evaluator</span><span class="p">(</span><span class="n">k_values</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">])</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">ev</span><span class="p">.</span><span class="nf">evaluate</span><span class="p">(</span><span class="n">qrels</span><span class="p">,</span> <span class="n">eval_pairs</span><span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">metrics</span><span class="p">.</span><span class="n">ndcg_at_10</span><span class="p">,</span> <span class="n">metrics</span><span class="p">.</span><span class="n">recall_at_10</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">LatencyProbe</code> measures per-query latency under warmup:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">probe</span> <span class="o">=</span> <span class="nc">LatencyProbe</span><span class="p">(</span><span class="n">fn</span><span class="o">=</span><span class="n">step_fn</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">warmup</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">rotate</span><span class="o">=</span><span class="nf">list</span><span class="p">(</span><span class="nf">range</span><span class="p">(</span><span class="mi">100</span><span class="p">)))</span>
+<span class="n">stats</span> <span class="o">=</span> <span class="n">probe</span><span class="p">.</span><span class="nf">run</span><span class="p">()</span>    <span class="c1"># LatencyStats(mean, std, p50, p95, ...)
+</span></code></pre></div></div>
+
+<h2 id="triviumio--corpus-cache"><code class="language-plaintext highlighter-rouge">trivium.io</code> — corpus cache</h2>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">trivium.io.corpus</span> <span class="kn">import</span> <span class="n">CorpusCache</span>
+
+<span class="n">cache</span> <span class="o">=</span> <span class="nc">CorpusCache</span><span class="p">(</span><span class="sh">"</span><span class="s">data/cache</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">seed</span> <span class="o">=</span> <span class="n">cache</span><span class="p">.</span><span class="nf">load_scale</span><span class="p">(</span><span class="mi">5000</span><span class="p">)</span>
+<span class="n">vectors</span><span class="p">,</span> <span class="n">ids</span> <span class="o">=</span> <span class="n">cache</span><span class="p">.</span><span class="nf">load_vectors</span><span class="p">()</span>
+</code></pre></div></div>
+
+<h2 id="next-steps">Next steps</h2>
+
+<ul>
+  <li>Read <a href="../../contributing/">Contributing</a> to learn the
+development workflow.</li>
+  <li>Read <a href="../../methodology/">Methodology</a> to understand the
+experimental design.</li>
+</ul>
+
+    </div>
+    
+    <nav class="page-pager" aria-label="Page navigation">
+      
+      <a class="pager-link pager-prev" href="/docs/reference/cli/">
+        <span class="pager-label">Previous</span>
+        <span class="pager-title">CLI</span>
+      </a>
+      
+      
+      <a class="pager-link pager-next" href="/docs/contributing/">
+        <span class="pager-label">Next</span>
+        <span class="pager-title">Contributing</span>
+      </a>
+      
+    </nav>
+    
+  </article>
+</div>
+
+  </main>
+  <footer class="site-footer" role="contentinfo">
+  <div class="container site-footer-inner">
+    <div class="site-footer-brand">
+      <strong>trivium</strong>
+      <p>Reproducible hybrid search benchmark</p>
+    </div>
+    <nav class="site-footer-nav" aria-label="Footer">
+      <div class="site-footer-col">
+        <h3>Project</h3>
+        <ul>
+          <li><a href="/docs/getting-started/">Getting started</a></li>
+          <li><a href="/docs/architecture/">Architecture</a></li>
+          <li><a href="/docs/methodology/">Methodology</a></li>
+          <li><a href="https://github.com/sachncs/trivium">Source on GitHub</a></li>
+        </ul>
+      </div>
+      <div class="site-footer-col">
+        <h3>Reference</h3>
+        <ul>
+          <li><a href="/docs/api/">API</a></li>
+          <li><a href="/docs/reference/config/">Config schema</a></li>
+          <li><a href="/docs/reference/cli/">CLI</a></li>
+          <li><a href="/changelog/">Changelog</a></li>
+        </ul>
+      </div>
+      <div class="site-footer-col">
+        <h3>Community</h3>
+        <ul>
+          <li><a href="/docs/contributing/">Contributing</a></li>
+          <li><a href="https://github.com/sachncs/trivium/issues">Issues</a></li>
+          <li><a href="https://github.com/sachncs/trivium/discussions">Discussions</a></li>
+          <li><a href="/license/">License (Apache-2.0)</a></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+  <div class="site-footer-bottom">
+    <div class="container">
+      <p>Released under the Apache-2.0 license. Built with Jekyll. © 2026 Sachin.</p>
+    </div>
+  </div>
+</footer>
+
+  <script src="/assets/js/main.js" defer></script>
+</body>
+</html>

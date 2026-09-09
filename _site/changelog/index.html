@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Changelog · trivium</title>
+  <meta name="description" content="A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval enginee...">
+  <meta name="keywords" content="hybrid-search, bm25, faiss, beir, scifact, cross-encoder, reranker, information-retrieval, benchmark">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="stylesheet" href="/assets/css/main.css"><!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Changelog | trivium</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Changelog" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval engineers comparing fusion strategies, ML researchers validating new encoders, and OSS maintainers who publish numbers they can defend." />
+<meta name="twitter:description" property="og:description" content="A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval engineers comparing fusion strategies, ML researchers validating new encoders, and OSS maintainers who publish numbers they can defend." />
+<meta property="og:site_name" content="trivium" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Changelog" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval engineers comparing fusion strategies, ML researchers validating new encoders, and OSS maintainers who publish numbers they can defend.","headline":"Changelog","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"/assets/logo.svg"}},"url":"/changelog/"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="/feed.xml" title="trivium" /></head>
+<body class="layout--page">
+  <a class="skip-link" href="#content">Skip to main content</a>
+  <header class="site-header" role="banner">
+  <div class="container site-header-inner">
+    <a class="site-brand" href="/" aria-label="trivium home">
+      <img class="site-brand-logo" src="/assets/logo.svg" alt="" width="32" height="32">
+      <span class="site-brand-name">trivium</span>
+      <span class="site-brand-tagline">Reproducible hybrid search benchmark</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <ul class="site-nav-list"><li class="site-nav-item">
+              <a href="/docs/getting-started/">Getting started</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/architecture/">Architecture</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/concepts/">Concepts</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/methodology/">Methodology</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/add-embedder/">Add an embedder</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/add-reranker/">Add a reranker</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/add-pipeline/">Add a pipeline</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/tune-bm25/">Tune BM25</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/tune-vector/">Tune the vector index</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/reference/config/">Config schema</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/reference/cli/">CLI</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/api/">API</a>
+            </li><li class="site-nav-item site-nav-item--menu">
+          <details class="nav-menu">
+            <summary>More</summary>
+            <ul class="nav-menu-list"><li><a href="/docs/contributing/">Contributing</a></li><li><a href="/changelog/">Changelog</a></li><li><a href="/security/">Security</a></li><li><a href="/support/">Support</a></li><li><a href="/code-of-conduct/">Code of conduct</a></li><li><a href="/license/">License</a></li><li><a href="https://github.com/sachncs/trivium">GitHub</a></li>
+            </ul>
+          </details>
+        </li>
+        <li class="site-nav-item site-nav-item--cta">
+          <a class="btn btn-primary btn-sm" href="https://github.com/sachncs/trivium">GitHub <span aria-hidden="true">→</span></a>
+        </li>
+      </ul>
+      <button class="site-nav-toggle" type="button" aria-controls="mobile-nav" aria-expanded="false">
+        <span class="visually-hidden">Toggle menu</span>
+        <span class="hamburger" aria-hidden="true"></span>
+      </button>
+    </nav>
+  </div>
+  <div id="mobile-nav" class="site-nav-mobile" hidden>
+    <ul>
+      
+        <li><a href="/">Home</a></li>
+      
+        <li><a href="/docs/getting-started/">Getting started</a></li>
+      
+        <li><a href="/docs/architecture/">Architecture</a></li>
+      
+        <li><a href="/docs/concepts/">Concepts</a></li>
+      
+        <li><a href="/docs/methodology/">Methodology</a></li>
+      
+        <li><a href="/docs/guides/add-embedder/">Add an embedder</a></li>
+      
+        <li><a href="/docs/guides/add-reranker/">Add a reranker</a></li>
+      
+        <li><a href="/docs/guides/add-pipeline/">Add a pipeline</a></li>
+      
+        <li><a href="/docs/guides/tune-bm25/">Tune BM25</a></li>
+      
+        <li><a href="/docs/guides/tune-vector/">Tune the vector index</a></li>
+      
+        <li><a href="/docs/reference/config/">Config schema</a></li>
+      
+        <li><a href="/docs/reference/cli/">CLI</a></li>
+      
+        <li><a href="/docs/api/">API</a></li>
+      
+        <li><a href="/docs/contributing/">Contributing</a></li>
+      
+        <li><a href="/changelog/">Changelog</a></li>
+      
+        <li><a href="/security/">Security</a></li>
+      
+        <li><a href="/support/">Support</a></li>
+      
+        <li><a href="/code-of-conduct/">Code of conduct</a></li>
+      
+        <li><a href="/license/">License</a></li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id="content" class="page">
+    <div class="page-grid">
+  <aside class="sidebar" aria-label="Documentation navigation">
+    <nav class="sidebar-nav">
+      <ul class="sidebar-list">
+  <li class="sidebar-item">
+    <a href="/">Home</a>
+  </li>
+</ul><h2 class="sidebar-heading">Getting started</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/getting-started/">Getting started</a>
+    </li></ul><h2 class="sidebar-heading">Understand</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/architecture/">Architecture</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/concepts/">Concepts</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/methodology/">Methodology</a>
+    </li></ul><h2 class="sidebar-heading">How-to</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/guides/add-embedder/">Add an embedder</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/add-reranker/">Add a reranker</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/add-pipeline/">Add a pipeline</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/tune-bm25/">Tune BM25</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/tune-vector/">Tune the vector index</a>
+    </li></ul><h2 class="sidebar-heading">Reference</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/reference/config/">Config schema</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/reference/cli/">CLI</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/api/">API</a>
+    </li></ul><h2 class="sidebar-heading">Community</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/contributing/">Contributing</a>
+    </li><li class="sidebar-item is-active">
+      <a href="/changelog/">Changelog</a>
+    </li><li class="sidebar-item">
+      <a href="/security/">Security</a>
+    </li><li class="sidebar-item">
+      <a href="/support/">Support</a>
+    </li><li class="sidebar-item">
+      <a href="/code-of-conduct/">Code of conduct</a>
+    </li><li class="sidebar-item">
+      <a href="/license/">License</a>
+    </li></ul>
+    </nav>
+  </aside>
+  <article class="page-content">
+    <header class="page-header">
+      <p class="page-section">Community</p>
+      <h1 class="page-title">Changelog</h1>
+      <p class="page-subtitle">Release notes for trivium.</p>
+    </header>
+    <div class="page-body">
+      <p>All notable changes to trivium are recorded here. The format
+follows <a href="https://keepachangelog.com/en/1.1.0/">Keep a Changelog</a>,
+and this project adheres to <a href="https://semver.org/">Semantic Versioning</a>.</p>
+
+<h2 id="010---2026-09-09"><a href="https://github.com/sachncs/trivium/releases/tag/v0.1.0">0.1.0</a> - 2026-09-09</h2>
+
+<h3 id="added">Added</h3>
+
+<ul>
+  <li>Hybrid search benchmark over BM25 + dense vector + cross-encoder
+rerank on distractor-augmented BEIR scifact.</li>
+  <li>Five pipeline modes: <code class="language-plaintext highlighter-rouge">bm25</code>, <code class="language-plaintext highlighter-rouge">vector</code>, <code class="language-plaintext highlighter-rouge">hybrid_rrf</code>,
+<code class="language-plaintext highlighter-rouge">hybrid_rerank</code>, <code class="language-plaintext highlighter-rouge">diskbbq</code>, <code class="language-plaintext highlighter-rouge">hybrid_bbq</code>.</li>
+  <li>Embedder registry with six first-party encoders: <code class="language-plaintext highlighter-rouge">minilm-l6</code>,
+<code class="language-plaintext highlighter-rouge">bge-small</code>, <code class="language-plaintext highlighter-rouge">bge-base</code>, <code class="language-plaintext highlighter-rouge">bge-large</code>, <code class="language-plaintext highlighter-rouge">mpnet-base</code>, and
+<code class="language-plaintext highlighter-rouge">e5-mistral-7b</code>.</li>
+  <li>Reranker registry with four first-party cross-encoders:
+<code class="language-plaintext highlighter-rouge">encoder</code> (MiniLM-L-6), <code class="language-plaintext highlighter-rouge">bge-large</code>, <code class="language-plaintext highlighter-rouge">bge-base</code>, <code class="language-plaintext highlighter-rouge">monot5-3b</code>.</li>
+  <li>Pydantic v2 config schema with <code class="language-plaintext highlighter-rouge">extra="forbid"</code> so typos in
+<code class="language-plaintext highlighter-rouge">configs/default.yaml</code> fail at load time, not deep in a benchmark
+row.</li>
+  <li>Reproducibility manifest: per-row capture of Python, OS, numpy,
+faiss, sentence-transformers, torch, bm25s, pydantic, faiss OMP
+thread count, and git SHA.</li>
+  <li>Cached embedding cache keyed on model revision hash.</li>
+  <li>Console scripts: <code class="language-plaintext highlighter-rouge">trivium-benchmark</code>, <code class="language-plaintext highlighter-rouge">trivium-prepare</code>,
+<code class="language-plaintext highlighter-rouge">trivium-summarise</code>, <code class="language-plaintext highlighter-rouge">trivium-gigatoken-bench</code>.</li>
+  <li>BM25 pre-flight equivalence test against the Anserini baseline
+(<code class="language-plaintext highlighter-rouge">0.6789 ± 0.03</code>, observed <code class="language-plaintext highlighter-rouge">0.65685</code>).</li>
+  <li>GitHub Actions CI on Python 3.12.</li>
+</ul>
+
+<h3 id="fixed">Fixed</h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">pip install trivium</code> now produces a working wheel and console
+scripts (the previous <code class="language-plaintext highlighter-rouge">[tool.setuptools.package-data]</code>
+empty-string key broke the build under setuptools ≥ 68).</li>
+  <li>DiskBBQ RAM-mode RFlat rescoring now preserves the inner-product
+score (was hard-coded to 0).</li>
+  <li><code class="language-plaintext highlighter-rouge">Bm25.save()</code> round-trips <code class="language-plaintext highlighter-rouge">doc_ids</code> across reload (previously the
+bm25s format had no place for them; reload returned zero hits).</li>
+  <li><code class="language-plaintext highlighter-rouge">--encoders a,b</code> runs both encoders (the inner <code class="language-plaintext highlighter-rouge">break</code> truncated
+to the first).</li>
+  <li><code class="language-plaintext highlighter-rouge">hybrid_rerank</code> mode receives the reranker instance end-to-end.</li>
+  <li><code class="language-plaintext highlighter-rouge">vector.nlist_by_scale</code> is now explicit and formula-derived.</li>
+  <li>Reproducibility manifest probes package versions through a
+subprocess so a faulty native import cannot abort the runner.</li>
+</ul>
+
+<h3 id="changed">Changed</h3>
+
+<ul>
+  <li>Moved <code class="language-plaintext highlighter-rouge">scripts/</code>, <code class="language-plaintext highlighter-rouge">data_prep/</code>, and <code class="language-plaintext highlighter-rouge">configs/default.yaml</code> into
+the <code class="language-plaintext highlighter-rouge">trivium</code> package so a single wheel install makes everything
+importable.</li>
+  <li>Renamed informal internal jargon (“Ponytail”) to standard
+terminology throughout README and config.</li>
+  <li>README hero rewritten to answer the four landing-page questions
+(what, audience, why, next action) above the data table.</li>
+</ul>
+
+<h3 id="honest-limitations">Honest limitations</h3>
+
+<p>This is the 0.1.0 release and the headline numbers below are the
+ones from the in-repo <code class="language-plaintext highlighter-rouge">results/benchmark.csv</code>. They are reproducible
+on the published commit; see <code class="language-plaintext highlighter-rouge">README.md §Reproducibility</code> for the
+exact env.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: right">scale</th>
+      <th>mode</th>
+      <th style="text-align: right">nDCG@10</th>
+      <th style="text-align: right">R@10</th>
+      <th style="text-align: right">R@100</th>
+      <th style="text-align: right">p50 ms</th>
+      <th style="text-align: right">p95 ms</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: right">5K</td>
+      <td>bm25</td>
+      <td style="text-align: right">0.6569</td>
+      <td style="text-align: right">0.7784</td>
+      <td style="text-align: right">0.8759</td>
+      <td style="text-align: right">0.8</td>
+      <td style="text-align: right">0.9</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">5K</td>
+      <td>vector (flat)</td>
+      <td style="text-align: right">0.6451</td>
+      <td style="text-align: right">0.7833</td>
+      <td style="text-align: right">0.9250</td>
+      <td style="text-align: right">0.1</td>
+      <td style="text-align: right">0.1</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">5K</td>
+      <td><strong>hybrid_rrf</strong></td>
+      <td style="text-align: right"><strong>0.7016</strong></td>
+      <td style="text-align: right"><strong>0.8482</strong></td>
+      <td style="text-align: right"><strong>0.9550</strong></td>
+      <td style="text-align: right">1.0</td>
+      <td style="text-align: right">1.1</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">5K</td>
+      <td>hybrid_rerank</td>
+      <td style="text-align: right">0.6820</td>
+      <td style="text-align: right">0.8062</td>
+      <td style="text-align: right">0.9303</td>
+      <td style="text-align: right">165.7</td>
+      <td style="text-align: right">167.3</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">100K</td>
+      <td>bm25</td>
+      <td style="text-align: right">0.3206</td>
+      <td style="text-align: right">0.3793</td>
+      <td style="text-align: right">0.4313</td>
+      <td style="text-align: right">5.6</td>
+      <td style="text-align: right">6.5</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">100K</td>
+      <td>vector (IVFPQ+RFlat)</td>
+      <td style="text-align: right">0.1674</td>
+      <td style="text-align: right">0.1971</td>
+      <td style="text-align: right">0.2104</td>
+      <td style="text-align: right">0.04</td>
+      <td style="text-align: right">0.05</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">100K</td>
+      <td>hybrid_rrf</td>
+      <td style="text-align: right">0.3232</td>
+      <td style="text-align: right">0.3796</td>
+      <td style="text-align: right">0.4422</td>
+      <td style="text-align: right">5.9</td>
+      <td style="text-align: right">6.8</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">100K</td>
+      <td>hybrid_rerank</td>
+      <td style="text-align: right">0.3362</td>
+      <td style="text-align: right">0.3871</td>
+      <td style="text-align: right">0.4148</td>
+      <td style="text-align: right">183.1</td>
+      <td style="text-align: right">187.7</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>What these numbers do <strong>not</strong> show:</p>
+
+<ul>
+  <li>The MiniLM-L6 (22 M parameters) encoder is the recall ceiling at
+scale. E5-Mistral-7B (<code class="language-plaintext highlighter-rouge">0.749</code> nDCG@10 dense, <code class="language-plaintext highlighter-rouge">0.777</code> reranked)
+and BGE-large-en-v1.5 (<code class="language-plaintext highlighter-rouge">0.741</code>) are the published scifact
+ceilings; we do not run those models in this benchmark.</li>
+  <li>The vector index is RAM-resident. DiskBBQ’s actual advantage is
+at 100M+ vectors where the index cannot fit in RAM.</li>
+  <li>bm25s’s <code class="language-plaintext highlighter-rouge">lucene</code> method differs from Anserini’s Lucene BM25 by
+roughly <code class="language-plaintext highlighter-rouge">0.02-0.03</code> nDCG@10 on small corpora. Our <code class="language-plaintext highlighter-rouge">0.6569</code> vs
+Anserini’s <code class="language-plaintext highlighter-rouge">0.6789</code> is the documented implementation drift.</li>
+</ul>
+
+
+    </div>
+    
+  </article>
+</div>
+
+  </main>
+  <footer class="site-footer" role="contentinfo">
+  <div class="container site-footer-inner">
+    <div class="site-footer-brand">
+      <strong>trivium</strong>
+      <p>Reproducible hybrid search benchmark</p>
+    </div>
+    <nav class="site-footer-nav" aria-label="Footer">
+      <div class="site-footer-col">
+        <h3>Project</h3>
+        <ul>
+          <li><a href="/docs/getting-started/">Getting started</a></li>
+          <li><a href="/docs/architecture/">Architecture</a></li>
+          <li><a href="/docs/methodology/">Methodology</a></li>
+          <li><a href="https://github.com/sachncs/trivium">Source on GitHub</a></li>
+        </ul>
+      </div>
+      <div class="site-footer-col">
+        <h3>Reference</h3>
+        <ul>
+          <li><a href="/docs/api/">API</a></li>
+          <li><a href="/docs/reference/config/">Config schema</a></li>
+          <li><a href="/docs/reference/cli/">CLI</a></li>
+          <li><a href="/changelog/">Changelog</a></li>
+        </ul>
+      </div>
+      <div class="site-footer-col">
+        <h3>Community</h3>
+        <ul>
+          <li><a href="/docs/contributing/">Contributing</a></li>
+          <li><a href="https://github.com/sachncs/trivium/issues">Issues</a></li>
+          <li><a href="https://github.com/sachncs/trivium/discussions">Discussions</a></li>
+          <li><a href="/license/">License (Apache-2.0)</a></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+  <div class="site-footer-bottom">
+    <div class="container">
+      <p>Released under the Apache-2.0 license. Built with Jekyll. © 2026 Sachin.</p>
+    </div>
+  </div>
+</footer>
+
+  <script src="/assets/js/main.js" defer></script>
+</body>
+</html>

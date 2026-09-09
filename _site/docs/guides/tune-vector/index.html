@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tune the vector index · trivium</title>
+  <meta name="description" content="A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval enginee...">
+  <meta name="keywords" content="hybrid-search, bm25, faiss, beir, scifact, cross-encoder, reranker, information-retrieval, benchmark">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="stylesheet" href="/assets/css/main.css"><!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Tune the vector index | trivium</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Tune the vector index" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval engineers comparing fusion strategies, ML researchers validating new encoders, and OSS maintainers who publish numbers they can defend." />
+<meta name="twitter:description" property="og:description" content="A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval engineers comparing fusion strategies, ML researchers validating new encoders, and OSS maintainers who publish numbers they can defend." />
+<meta property="og:site_name" content="trivium" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Tune the vector index" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval engineers comparing fusion strategies, ML researchers validating new encoders, and OSS maintainers who publish numbers they can defend.","headline":"Tune the vector index","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"/assets/logo.svg"}},"url":"/docs/guides/tune-vector/"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="/feed.xml" title="trivium" /></head>
+<body class="layout--page">
+  <a class="skip-link" href="#content">Skip to main content</a>
+  <header class="site-header" role="banner">
+  <div class="container site-header-inner">
+    <a class="site-brand" href="/" aria-label="trivium home">
+      <img class="site-brand-logo" src="/assets/logo.svg" alt="" width="32" height="32">
+      <span class="site-brand-name">trivium</span>
+      <span class="site-brand-tagline">Reproducible hybrid search benchmark</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <ul class="site-nav-list"><li class="site-nav-item">
+              <a href="/docs/getting-started/">Getting started</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/architecture/">Architecture</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/concepts/">Concepts</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/methodology/">Methodology</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/add-embedder/">Add an embedder</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/add-reranker/">Add a reranker</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/add-pipeline/">Add a pipeline</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/tune-bm25/">Tune BM25</a>
+            </li><li class="site-nav-item is-active">
+              <a href="/docs/guides/tune-vector/">Tune the vector index</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/reference/config/">Config schema</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/reference/cli/">CLI</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/api/">API</a>
+            </li><li class="site-nav-item site-nav-item--menu">
+          <details class="nav-menu">
+            <summary>More</summary>
+            <ul class="nav-menu-list"><li><a href="/docs/contributing/">Contributing</a></li><li><a href="/changelog/">Changelog</a></li><li><a href="/security/">Security</a></li><li><a href="/support/">Support</a></li><li><a href="/code-of-conduct/">Code of conduct</a></li><li><a href="/license/">License</a></li><li><a href="https://github.com/sachncs/trivium">GitHub</a></li>
+            </ul>
+          </details>
+        </li>
+        <li class="site-nav-item site-nav-item--cta">
+          <a class="btn btn-primary btn-sm" href="https://github.com/sachncs/trivium">GitHub <span aria-hidden="true">→</span></a>
+        </li>
+      </ul>
+      <button class="site-nav-toggle" type="button" aria-controls="mobile-nav" aria-expanded="false">
+        <span class="visually-hidden">Toggle menu</span>
+        <span class="hamburger" aria-hidden="true"></span>
+      </button>
+    </nav>
+  </div>
+  <div id="mobile-nav" class="site-nav-mobile" hidden>
+    <ul>
+      
+        <li><a href="/">Home</a></li>
+      
+        <li><a href="/docs/getting-started/">Getting started</a></li>
+      
+        <li><a href="/docs/architecture/">Architecture</a></li>
+      
+        <li><a href="/docs/concepts/">Concepts</a></li>
+      
+        <li><a href="/docs/methodology/">Methodology</a></li>
+      
+        <li><a href="/docs/guides/add-embedder/">Add an embedder</a></li>
+      
+        <li><a href="/docs/guides/add-reranker/">Add a reranker</a></li>
+      
+        <li><a href="/docs/guides/add-pipeline/">Add a pipeline</a></li>
+      
+        <li><a href="/docs/guides/tune-bm25/">Tune BM25</a></li>
+      
+        <li><a href="/docs/guides/tune-vector/">Tune the vector index</a></li>
+      
+        <li><a href="/docs/reference/config/">Config schema</a></li>
+      
+        <li><a href="/docs/reference/cli/">CLI</a></li>
+      
+        <li><a href="/docs/api/">API</a></li>
+      
+        <li><a href="/docs/contributing/">Contributing</a></li>
+      
+        <li><a href="/changelog/">Changelog</a></li>
+      
+        <li><a href="/security/">Security</a></li>
+      
+        <li><a href="/support/">Support</a></li>
+      
+        <li><a href="/code-of-conduct/">Code of conduct</a></li>
+      
+        <li><a href="/license/">License</a></li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id="content" class="page">
+    <div class="page-grid">
+  <aside class="sidebar" aria-label="Documentation navigation">
+    <nav class="sidebar-nav">
+      <ul class="sidebar-list">
+  <li class="sidebar-item">
+    <a href="/">Home</a>
+  </li>
+</ul><h2 class="sidebar-heading">Getting started</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/getting-started/">Getting started</a>
+    </li></ul><h2 class="sidebar-heading">Understand</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/architecture/">Architecture</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/concepts/">Concepts</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/methodology/">Methodology</a>
+    </li></ul><h2 class="sidebar-heading">How-to</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/guides/add-embedder/">Add an embedder</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/add-reranker/">Add a reranker</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/add-pipeline/">Add a pipeline</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/tune-bm25/">Tune BM25</a>
+    </li><li class="sidebar-item is-active">
+      <a href="/docs/guides/tune-vector/">Tune the vector index</a>
+    </li></ul><h2 class="sidebar-heading">Reference</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/reference/config/">Config schema</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/reference/cli/">CLI</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/api/">API</a>
+    </li></ul><h2 class="sidebar-heading">Community</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/contributing/">Contributing</a>
+    </li><li class="sidebar-item">
+      <a href="/changelog/">Changelog</a>
+    </li><li class="sidebar-item">
+      <a href="/security/">Security</a>
+    </li><li class="sidebar-item">
+      <a href="/support/">Support</a>
+    </li><li class="sidebar-item">
+      <a href="/code-of-conduct/">Code of conduct</a>
+    </li><li class="sidebar-item">
+      <a href="/license/">License</a>
+    </li></ul>
+    </nav>
+  </aside>
+  <article class="page-content">
+    <header class="page-header">
+      <p class="page-section">How-to</p>
+      <h1 class="page-title">Tune the vector index</h1>
+      <p class="page-subtitle">The IVFPQ + RFlat knobs, nlist formula, and the nprobe sweep.</p>
+    </header>
+    <div class="page-body">
+      <p>The vector index in trivium is FAISS
+<code class="language-plaintext highlighter-rouge">IndexOPQ48,IVF{nlist},PQ48x4fs,RFlat</code>. There are five knobs:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">vector.nlist_by_scale</code> — coarse-quantizer count per scale.</li>
+  <li><code class="language-plaintext highlighter-rouge">vector.nprobe</code> — number of coarse cells visited per query.</li>
+  <li><code class="language-plaintext highlighter-rouge">vector.m</code> — sub-quantizer count.</li>
+  <li><code class="language-plaintext highlighter-rouge">vector.nbits</code> — bits per sub-quantizer.</li>
+  <li><code class="language-plaintext highlighter-rouge">vector.k_factor</code> — RFlat refinement factor.</li>
+</ul>
+
+<h2 id="when-does-the-vector-index-run">When does the vector index run?</h2>
+
+<p>The pipeline chooses the index type by scale:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>scale</th>
+      <th>index type</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>≤ 5K</td>
+      <td><code class="language-plaintext highlighter-rouge">IndexFlatIP</code> (exact)</td>
+    </tr>
+    <tr>
+      <td>&gt; 5K</td>
+      <td><code class="language-plaintext highlighter-rouge">IndexOPQ48,IVF{nlist},PQ48x4fs,RFlat</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The threshold is configurable via
+<code class="language-plaintext highlighter-rouge">vector.min_scale_for_ivfpq</code> in the config schema. At the 5K
+scale the OPQ’s internal k-means needs more training points
+than the corpus provides, so we fall back to the exact dense
+ceiling.</p>
+
+<h2 id="the-4sqrtn-recipe-for-nlist">The <code class="language-plaintext highlighter-rouge">4·sqrt(N)</code> recipe for <code class="language-plaintext highlighter-rouge">nlist</code></h2>
+
+<p><code class="language-plaintext highlighter-rouge">nlist</code> follows the FAISS wiki recipe: <code class="language-plaintext highlighter-rouge">4·sqrt(N)</code> rounded up to
+the next power of two. The literal values are in
+<code class="language-plaintext highlighter-rouge">trivium/configs/default.yaml</code>:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: right">scale</th>
+      <th style="text-align: right"><code class="language-plaintext highlighter-rouge">4·sqrt(N)</code></th>
+      <th style="text-align: right">rounded to power of 2</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: right">5_000</td>
+      <td style="text-align: right">283</td>
+      <td style="text-align: right">512</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">100_000</td>
+      <td style="text-align: right">1_265</td>
+      <td style="text-align: right">2_048</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">500_000</td>
+      <td style="text-align: right">2_828</td>
+      <td style="text-align: right">4_096</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">1_000_000</td>
+      <td style="text-align: right">4_000</td>
+      <td style="text-align: right">4_096</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The 1M scale is intentionally capped at 4_096 (the next power of
+two would be 8_192) so coarse-quantizer training stays <code class="language-plaintext highlighter-rouge">O(N)</code>.</p>
+
+<p>If your corpus has a different dimensional profile, edit
+<code class="language-plaintext highlighter-rouge">nlist_by_scale</code>:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">vector</span><span class="pi">:</span>
+  <span class="na">nlist_by_scale</span><span class="pi">:</span>
+    <span class="na">5000</span><span class="pi">:</span> <span class="m">512</span>
+    <span class="na">100000</span><span class="pi">:</span> <span class="m">2048</span>
+    <span class="na">500000</span><span class="pi">:</span> <span class="m">4096</span>
+    <span class="na">1000000</span><span class="pi">:</span> <span class="m">4096</span>
+    <span class="na">5000000</span><span class="pi">:</span> <span class="m">8192</span>    <span class="c1"># new scale</span>
+</code></pre></div></div>
+
+<h2 id="the-nprobe-sweep">The <code class="language-plaintext highlighter-rouge">nprobe</code> sweep</h2>
+
+<p><code class="language-plaintext highlighter-rouge">vector.nprobe</code> is a list, not a scalar. The runner sweeps every
+value and keeps the Pareto-frontier row per <code class="language-plaintext highlighter-rouge">(scale, mode,
+encoder)</code> combination.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">vector</span><span class="pi">:</span>
+  <span class="na">nprobe</span><span class="pi">:</span> <span class="pi">[</span><span class="nv">8</span><span class="pi">,</span> <span class="nv">16</span><span class="pi">,</span> <span class="nv">32</span><span class="pi">,</span> <span class="nv">64</span><span class="pi">,</span> <span class="nv">128</span><span class="pi">,</span> <span class="nv">256</span><span class="pi">]</span>
+</code></pre></div></div>
+
+<p>The default sweep covers the practical operating range:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">nprobe=8</code> — fast but recall-poor at large scale.</li>
+  <li><code class="language-plaintext highlighter-rouge">nprobe=64</code> — typical Pareto-frontier value.</li>
+  <li><code class="language-plaintext highlighter-rouge">nprobe=256</code> — recall-saturated; only useful for <code class="language-plaintext highlighter-rouge">nprobe-only</code>
+ablation runs.</li>
+</ul>
+
+<p>Use <code class="language-plaintext highlighter-rouge">--nprobe-only 32</code> on the CLI to restrict the sweep to a
+single value (faster iteration when you’re tuning something else).</p>
+
+<h2 id="the-m-and-nbits-knobs">The <code class="language-plaintext highlighter-rouge">m</code> and <code class="language-plaintext highlighter-rouge">nbits</code> knobs</h2>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">m</code> — number of sub-quantizers. The default <code class="language-plaintext highlighter-rouge">48</code> matches the
+384-d MiniLM-L6 dimensions (384 / 48 = 8 dims per sub-quantizer).</li>
+  <li><code class="language-plaintext highlighter-rouge">nbits</code> — bits per sub-quantizer. The default <code class="language-plaintext highlighter-rouge">4</code> gives
+~55 bytes/vec (roughly <code class="language-plaintext highlighter-rouge">m * nbits / 8</code>).</li>
+</ul>
+
+<p>Higher <code class="language-plaintext highlighter-rouge">m</code> means more accurate but slower quantizer training.
+Lower <code class="language-plaintext highlighter-rouge">nbits</code> means smaller index but more recall loss.</p>
+
+<h2 id="the-rflat-k_factor">The RFlat <code class="language-plaintext highlighter-rouge">k_factor</code></h2>
+
+<p><code class="language-plaintext highlighter-rouge">k_factor</code> is how many approximate candidates RFlat rescores
+exactly. The default <code class="language-plaintext highlighter-rouge">4</code> means: if you ask for top-<code class="language-plaintext highlighter-rouge">k</code>, the index
+returns top-<code class="language-plaintext highlighter-rouge">4k</code> from IVFPQ, then reranks them with exact
+inner-product rescoring.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">vector</span><span class="pi">:</span>
+  <span class="na">k_factor</span><span class="pi">:</span> <span class="m">4</span>
+</code></pre></div></div>
+
+<p>Trade-off: higher <code class="language-plaintext highlighter-rouge">k_factor</code> recovers more recall at the cost of
+more exact inner products. The FAISS recommendation is <code class="language-plaintext highlighter-rouge">4</code>; we
+keep that as the default.</p>
+
+<h2 id="when-to-switch-to-indexflatip">When to switch to IndexFlatIP</h2>
+
+<p>For corpus sizes under ~10K, OPQ-IVFPQ has nothing to gain because
+the coarse quantizer needs more training points than the corpus
+provides. The pipeline falls back to <code class="language-plaintext highlighter-rouge">IndexFlatIP</code> (exact dense)
+automatically for <code class="language-plaintext highlighter-rouge">scale &lt;= vector.min_scale_for_ivfpq</code>.</p>
+
+<p>If you want to force <code class="language-plaintext highlighter-rouge">IndexFlatIP</code> at a larger scale (for example,
+to validate that the approximate index isn’t hurting recall),
+set:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">vector</span><span class="pi">:</span>
+  <span class="na">min_scale_for_ivfpq</span><span class="pi">:</span> <span class="m">1000000</span>    <span class="c1"># 1M</span>
+</code></pre></div></div>
+
+<p>Then every scale ≤ 1M uses exact dense.</p>
+
+<h2 id="the-train_size_strategy-knob">The <code class="language-plaintext highlighter-rouge">train_size_strategy</code> knob</h2>
+
+<p>OPQ-IVFPQ training needs ~50× <code class="language-plaintext highlighter-rouge">nlist</code> vectors to converge. For
+small scales we sample from the corpus itself:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">vector</span><span class="pi">:</span>
+  <span class="na">train_size_strategy</span><span class="pi">:</span> <span class="s">50_x_nlist</span>   <span class="c1"># default</span>
+  <span class="na">train_size_fixed</span><span class="pi">:</span> <span class="m">30000</span>            <span class="c1"># used when strategy = fixed_N</span>
+</code></pre></div></div>
+
+<p>Options:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">sqrt_n</code> — sample <code class="language-plaintext highlighter-rouge">sqrt(N)</code> vectors. Conservative for small
+corpora.</li>
+  <li><code class="language-plaintext highlighter-rouge">50_x_nlist</code> — sample <code class="language-plaintext highlighter-rouge">max(50 * nlist, train_size_fixed)</code>. The
+FAISS recommendation.</li>
+  <li><code class="language-plaintext highlighter-rouge">fixed_N</code> — sample exactly <code class="language-plaintext highlighter-rouge">train_size_fixed</code> vectors. Useful
+for reproducibility.</li>
+</ul>
+
+<h2 id="verify-with-the-summariser">Verify with the summariser</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>trivium-summarise <span class="nt">--csv</span> results/benchmark.csv
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">vector</code> rows show the nDCG@10 vs the exact dense ceiling at
+each scale. The IVFPQ+RFlat row should be within 0.05 nDCG of the
+<code class="language-plaintext highlighter-rouge">IndexFlatIP</code> row at the 5K scale.</p>
+
+<h2 id="diagnostics">Diagnostics</h2>
+
+<p>If vector nDCG is much lower than BM25 nDCG at a given scale:</p>
+
+<ol>
+  <li>Check the <code class="language-plaintext highlighter-rouge">nlist</code> value at that scale. A too-small <code class="language-plaintext highlighter-rouge">nlist</code>
+means each cell holds too many vectors; a too-large <code class="language-plaintext highlighter-rouge">nlist</code>
+means each cell holds too few and the coarse quantizer
+over-fits.</li>
+  <li>Sweep <code class="language-plaintext highlighter-rouge">nprobe</code>. The Pareto-frontier value is usually between
+32 and 128.</li>
+  <li>Increase <code class="language-plaintext highlighter-rouge">k_factor</code>. Values up to <code class="language-plaintext highlighter-rouge">8</code> are reasonable for
+sub-100K corpora.</li>
+  <li>Switch to <code class="language-plaintext highlighter-rouge">IndexFlatIP</code> (set <code class="language-plaintext highlighter-rouge">min_scale_for_ivfpq</code>) and check
+that recall recovers. If yes, the index is the bottleneck.</li>
+</ol>
+
+<h2 id="next-steps">Next steps</h2>
+
+<ul>
+  <li>Read <a href="../../reference/config/">Config schema</a> for the full
+schema.</li>
+  <li>Read <a href="../../methodology/">Methodology</a> for the experimental
+design.</li>
+</ul>
+
+    </div>
+    
+    <nav class="page-pager" aria-label="Page navigation">
+      
+      <a class="pager-link pager-prev" href="/docs/guides/tune-bm25/">
+        <span class="pager-label">Previous</span>
+        <span class="pager-title">Tune BM25</span>
+      </a>
+      
+      
+      <a class="pager-link pager-next" href="/docs/reference/config/">
+        <span class="pager-label">Next</span>
+        <span class="pager-title">Config schema</span>
+      </a>
+      
+    </nav>
+    
+  </article>
+</div>
+
+  </main>
+  <footer class="site-footer" role="contentinfo">
+  <div class="container site-footer-inner">
+    <div class="site-footer-brand">
+      <strong>trivium</strong>
+      <p>Reproducible hybrid search benchmark</p>
+    </div>
+    <nav class="site-footer-nav" aria-label="Footer">
+      <div class="site-footer-col">
+        <h3>Project</h3>
+        <ul>
+          <li><a href="/docs/getting-started/">Getting started</a></li>
+          <li><a href="/docs/architecture/">Architecture</a></li>
+          <li><a href="/docs/methodology/">Methodology</a></li>
+          <li><a href="https://github.com/sachncs/trivium">Source on GitHub</a></li>
+        </ul>
+      </div>
+      <div class="site-footer-col">
+        <h3>Reference</h3>
+        <ul>
+          <li><a href="/docs/api/">API</a></li>
+          <li><a href="/docs/reference/config/">Config schema</a></li>
+          <li><a href="/docs/reference/cli/">CLI</a></li>
+          <li><a href="/changelog/">Changelog</a></li>
+        </ul>
+      </div>
+      <div class="site-footer-col">
+        <h3>Community</h3>
+        <ul>
+          <li><a href="/docs/contributing/">Contributing</a></li>
+          <li><a href="https://github.com/sachncs/trivium/issues">Issues</a></li>
+          <li><a href="https://github.com/sachncs/trivium/discussions">Discussions</a></li>
+          <li><a href="/license/">License (Apache-2.0)</a></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+  <div class="site-footer-bottom">
+    <div class="container">
+      <p>Released under the Apache-2.0 license. Built with Jekyll. © 2026 Sachin.</p>
+    </div>
+  </div>
+</footer>
+
+  <script src="/assets/js/main.js" defer></script>
+</body>
+</html>

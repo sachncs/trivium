@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Support · trivium</title>
+  <meta name="description" content="A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval enginee...">
+  <meta name="keywords" content="hybrid-search, bm25, faiss, beir, scifact, cross-encoder, reranker, information-retrieval, benchmark">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="stylesheet" href="/assets/css/main.css"><!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Support | trivium</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Support" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval engineers comparing fusion strategies, ML researchers validating new encoders, and OSS maintainers who publish numbers they can defend." />
+<meta name="twitter:description" property="og:description" content="A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval engineers comparing fusion strategies, ML researchers validating new encoders, and OSS maintainers who publish numbers they can defend." />
+<meta property="og:site_name" content="trivium" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Support" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval engineers comparing fusion strategies, ML researchers validating new encoders, and OSS maintainers who publish numbers they can defend.","headline":"Support","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"/assets/logo.svg"}},"url":"/support/"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="/feed.xml" title="trivium" /></head>
+<body class="layout--page">
+  <a class="skip-link" href="#content">Skip to main content</a>
+  <header class="site-header" role="banner">
+  <div class="container site-header-inner">
+    <a class="site-brand" href="/" aria-label="trivium home">
+      <img class="site-brand-logo" src="/assets/logo.svg" alt="" width="32" height="32">
+      <span class="site-brand-name">trivium</span>
+      <span class="site-brand-tagline">Reproducible hybrid search benchmark</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <ul class="site-nav-list"><li class="site-nav-item">
+              <a href="/docs/getting-started/">Getting started</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/architecture/">Architecture</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/concepts/">Concepts</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/methodology/">Methodology</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/add-embedder/">Add an embedder</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/add-reranker/">Add a reranker</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/add-pipeline/">Add a pipeline</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/tune-bm25/">Tune BM25</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/tune-vector/">Tune the vector index</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/reference/config/">Config schema</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/reference/cli/">CLI</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/api/">API</a>
+            </li><li class="site-nav-item site-nav-item--menu">
+          <details class="nav-menu">
+            <summary>More</summary>
+            <ul class="nav-menu-list"><li><a href="/docs/contributing/">Contributing</a></li><li><a href="/changelog/">Changelog</a></li><li><a href="/security/">Security</a></li><li><a href="/support/">Support</a></li><li><a href="/code-of-conduct/">Code of conduct</a></li><li><a href="/license/">License</a></li><li><a href="https://github.com/sachncs/trivium">GitHub</a></li>
+            </ul>
+          </details>
+        </li>
+        <li class="site-nav-item site-nav-item--cta">
+          <a class="btn btn-primary btn-sm" href="https://github.com/sachncs/trivium">GitHub <span aria-hidden="true">→</span></a>
+        </li>
+      </ul>
+      <button class="site-nav-toggle" type="button" aria-controls="mobile-nav" aria-expanded="false">
+        <span class="visually-hidden">Toggle menu</span>
+        <span class="hamburger" aria-hidden="true"></span>
+      </button>
+    </nav>
+  </div>
+  <div id="mobile-nav" class="site-nav-mobile" hidden>
+    <ul>
+      
+        <li><a href="/">Home</a></li>
+      
+        <li><a href="/docs/getting-started/">Getting started</a></li>
+      
+        <li><a href="/docs/architecture/">Architecture</a></li>
+      
+        <li><a href="/docs/concepts/">Concepts</a></li>
+      
+        <li><a href="/docs/methodology/">Methodology</a></li>
+      
+        <li><a href="/docs/guides/add-embedder/">Add an embedder</a></li>
+      
+        <li><a href="/docs/guides/add-reranker/">Add a reranker</a></li>
+      
+        <li><a href="/docs/guides/add-pipeline/">Add a pipeline</a></li>
+      
+        <li><a href="/docs/guides/tune-bm25/">Tune BM25</a></li>
+      
+        <li><a href="/docs/guides/tune-vector/">Tune the vector index</a></li>
+      
+        <li><a href="/docs/reference/config/">Config schema</a></li>
+      
+        <li><a href="/docs/reference/cli/">CLI</a></li>
+      
+        <li><a href="/docs/api/">API</a></li>
+      
+        <li><a href="/docs/contributing/">Contributing</a></li>
+      
+        <li><a href="/changelog/">Changelog</a></li>
+      
+        <li><a href="/security/">Security</a></li>
+      
+        <li><a href="/support/">Support</a></li>
+      
+        <li><a href="/code-of-conduct/">Code of conduct</a></li>
+      
+        <li><a href="/license/">License</a></li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id="content" class="page">
+    <div class="page-grid">
+  <aside class="sidebar" aria-label="Documentation navigation">
+    <nav class="sidebar-nav">
+      <ul class="sidebar-list">
+  <li class="sidebar-item">
+    <a href="/">Home</a>
+  </li>
+</ul><h2 class="sidebar-heading">Getting started</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/getting-started/">Getting started</a>
+    </li></ul><h2 class="sidebar-heading">Understand</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/architecture/">Architecture</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/concepts/">Concepts</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/methodology/">Methodology</a>
+    </li></ul><h2 class="sidebar-heading">How-to</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/guides/add-embedder/">Add an embedder</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/add-reranker/">Add a reranker</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/add-pipeline/">Add a pipeline</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/tune-bm25/">Tune BM25</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/tune-vector/">Tune the vector index</a>
+    </li></ul><h2 class="sidebar-heading">Reference</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/reference/config/">Config schema</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/reference/cli/">CLI</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/api/">API</a>
+    </li></ul><h2 class="sidebar-heading">Community</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/contributing/">Contributing</a>
+    </li><li class="sidebar-item">
+      <a href="/changelog/">Changelog</a>
+    </li><li class="sidebar-item">
+      <a href="/security/">Security</a>
+    </li><li class="sidebar-item is-active">
+      <a href="/support/">Support</a>
+    </li><li class="sidebar-item">
+      <a href="/code-of-conduct/">Code of conduct</a>
+    </li><li class="sidebar-item">
+      <a href="/license/">License</a>
+    </li></ul>
+    </nav>
+  </aside>
+  <article class="page-content">
+    <header class="page-header">
+      <p class="page-section">Community</p>
+      <h1 class="page-title">Support</h1>
+      <p class="page-subtitle">How to get help with trivium.</p>
+    </header>
+    <div class="page-body">
+      <p>trivium is a personal project maintained on a best-effort basis.</p>
+
+<h2 id="questions">Questions</h2>
+
+<p>For “how do I…” questions, see the <a href="../">Documentation</a>. The
+<a href="../docs/architecture/">Architecture page</a>, <a href="../docs/api/">API reference</a>,
+and <a href="../docs/guides/">How-to guides</a> cover most patterns.</p>
+
+<p>If the docs don’t answer your question, open a <a href="https://github.com/sachncs/trivium/discussions">Discussion</a> on GitHub.</p>
+
+<h2 id="bug-reports">Bug reports</h2>
+
+<p>Open a <a href="https://github.com/sachncs/trivium/issues/new?template=bug.yml">bug report</a>.</p>
+
+<p>Include:</p>
+
+<ul>
+  <li>The trivium version (<code class="language-plaintext highlighter-rouge">pip show trivium</code>).</li>
+  <li>Python, OS, faiss, torch, and sentence-transformers versions.</li>
+  <li>The exact commands that reproduce the bug.</li>
+  <li>The full output of the failing run.</li>
+</ul>
+
+<p>If the bug is about nDCG or latency, attach
+<code class="language-plaintext highlighter-rouge">results/benchmark.csv</code> and the snippet of <code class="language-plaintext highlighter-rouge">data/cache/manifest.json</code>.</p>
+
+<h2 id="security-issues">Security issues</h2>
+
+<p>See <a href="../security/">Security</a>.</p>
+
+<h2 id="maintainer-availability">Maintainer availability</h2>
+
+<p>This is a personal project. There is no SLA on response time outside
+of the security policy. Issues and discussions are answered on a
+best-effort basis.</p>
+
+<h2 id="commercial-support">Commercial support</h2>
+
+<p>This project does not offer commercial support. Custom work on top
+of trivium is best addressed through a freelance engagement; reach
+out via email for details.</p>
+
+    </div>
+    
+  </article>
+</div>
+
+  </main>
+  <footer class="site-footer" role="contentinfo">
+  <div class="container site-footer-inner">
+    <div class="site-footer-brand">
+      <strong>trivium</strong>
+      <p>Reproducible hybrid search benchmark</p>
+    </div>
+    <nav class="site-footer-nav" aria-label="Footer">
+      <div class="site-footer-col">
+        <h3>Project</h3>
+        <ul>
+          <li><a href="/docs/getting-started/">Getting started</a></li>
+          <li><a href="/docs/architecture/">Architecture</a></li>
+          <li><a href="/docs/methodology/">Methodology</a></li>
+          <li><a href="https://github.com/sachncs/trivium">Source on GitHub</a></li>
+        </ul>
+      </div>
+      <div class="site-footer-col">
+        <h3>Reference</h3>
+        <ul>
+          <li><a href="/docs/api/">API</a></li>
+          <li><a href="/docs/reference/config/">Config schema</a></li>
+          <li><a href="/docs/reference/cli/">CLI</a></li>
+          <li><a href="/changelog/">Changelog</a></li>
+        </ul>
+      </div>
+      <div class="site-footer-col">
+        <h3>Community</h3>
+        <ul>
+          <li><a href="/docs/contributing/">Contributing</a></li>
+          <li><a href="https://github.com/sachncs/trivium/issues">Issues</a></li>
+          <li><a href="https://github.com/sachncs/trivium/discussions">Discussions</a></li>
+          <li><a href="/license/">License (Apache-2.0)</a></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+  <div class="site-footer-bottom">
+    <div class="container">
+      <p>Released under the Apache-2.0 license. Built with Jekyll. © 2026 Sachin.</p>
+    </div>
+  </div>
+</footer>
+
+  <script src="/assets/js/main.js" defer></script>
+</body>
+</html>

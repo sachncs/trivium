@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Getting started · trivium</title>
+  <meta name="description" content="A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval enginee...">
+  <meta name="keywords" content="hybrid-search, bm25, faiss, beir, scifact, cross-encoder, reranker, information-retrieval, benchmark">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="stylesheet" href="/assets/css/main.css"><!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Getting started | trivium</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Getting started" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval engineers comparing fusion strategies, ML researchers validating new encoders, and OSS maintainers who publish numbers they can defend." />
+<meta name="twitter:description" property="og:description" content="A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval engineers comparing fusion strategies, ML researchers validating new encoders, and OSS maintainers who publish numbers they can defend." />
+<meta property="og:site_name" content="trivium" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Getting started" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval engineers comparing fusion strategies, ML researchers validating new encoders, and OSS maintainers who publish numbers they can defend.","headline":"Getting started","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"/assets/logo.svg"}},"url":"/docs/getting-started/"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="/feed.xml" title="trivium" /></head>
+<body class="layout--page">
+  <a class="skip-link" href="#content">Skip to main content</a>
+  <header class="site-header" role="banner">
+  <div class="container site-header-inner">
+    <a class="site-brand" href="/" aria-label="trivium home">
+      <img class="site-brand-logo" src="/assets/logo.svg" alt="" width="32" height="32">
+      <span class="site-brand-name">trivium</span>
+      <span class="site-brand-tagline">Reproducible hybrid search benchmark</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <ul class="site-nav-list"><li class="site-nav-item is-active">
+              <a href="/docs/getting-started/">Getting started</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/architecture/">Architecture</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/concepts/">Concepts</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/methodology/">Methodology</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/add-embedder/">Add an embedder</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/add-reranker/">Add a reranker</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/add-pipeline/">Add a pipeline</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/tune-bm25/">Tune BM25</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/tune-vector/">Tune the vector index</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/reference/config/">Config schema</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/reference/cli/">CLI</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/api/">API</a>
+            </li><li class="site-nav-item site-nav-item--menu">
+          <details class="nav-menu">
+            <summary>More</summary>
+            <ul class="nav-menu-list"><li><a href="/docs/contributing/">Contributing</a></li><li><a href="/changelog/">Changelog</a></li><li><a href="/security/">Security</a></li><li><a href="/support/">Support</a></li><li><a href="/code-of-conduct/">Code of conduct</a></li><li><a href="/license/">License</a></li><li><a href="https://github.com/sachncs/trivium">GitHub</a></li>
+            </ul>
+          </details>
+        </li>
+        <li class="site-nav-item site-nav-item--cta">
+          <a class="btn btn-primary btn-sm" href="https://github.com/sachncs/trivium">GitHub <span aria-hidden="true">→</span></a>
+        </li>
+      </ul>
+      <button class="site-nav-toggle" type="button" aria-controls="mobile-nav" aria-expanded="false">
+        <span class="visually-hidden">Toggle menu</span>
+        <span class="hamburger" aria-hidden="true"></span>
+      </button>
+    </nav>
+  </div>
+  <div id="mobile-nav" class="site-nav-mobile" hidden>
+    <ul>
+      
+        <li><a href="/">Home</a></li>
+      
+        <li><a href="/docs/getting-started/">Getting started</a></li>
+      
+        <li><a href="/docs/architecture/">Architecture</a></li>
+      
+        <li><a href="/docs/concepts/">Concepts</a></li>
+      
+        <li><a href="/docs/methodology/">Methodology</a></li>
+      
+        <li><a href="/docs/guides/add-embedder/">Add an embedder</a></li>
+      
+        <li><a href="/docs/guides/add-reranker/">Add a reranker</a></li>
+      
+        <li><a href="/docs/guides/add-pipeline/">Add a pipeline</a></li>
+      
+        <li><a href="/docs/guides/tune-bm25/">Tune BM25</a></li>
+      
+        <li><a href="/docs/guides/tune-vector/">Tune the vector index</a></li>
+      
+        <li><a href="/docs/reference/config/">Config schema</a></li>
+      
+        <li><a href="/docs/reference/cli/">CLI</a></li>
+      
+        <li><a href="/docs/api/">API</a></li>
+      
+        <li><a href="/docs/contributing/">Contributing</a></li>
+      
+        <li><a href="/changelog/">Changelog</a></li>
+      
+        <li><a href="/security/">Security</a></li>
+      
+        <li><a href="/support/">Support</a></li>
+      
+        <li><a href="/code-of-conduct/">Code of conduct</a></li>
+      
+        <li><a href="/license/">License</a></li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id="content" class="page">
+    <div class="page-grid">
+  <aside class="sidebar" aria-label="Documentation navigation">
+    <nav class="sidebar-nav">
+      <ul class="sidebar-list">
+  <li class="sidebar-item">
+    <a href="/">Home</a>
+  </li>
+</ul><h2 class="sidebar-heading">Getting started</h2>
+  <ul class="sidebar-list"><li class="sidebar-item is-active">
+      <a href="/docs/getting-started/">Getting started</a>
+    </li></ul><h2 class="sidebar-heading">Understand</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/architecture/">Architecture</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/concepts/">Concepts</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/methodology/">Methodology</a>
+    </li></ul><h2 class="sidebar-heading">How-to</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/guides/add-embedder/">Add an embedder</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/add-reranker/">Add a reranker</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/add-pipeline/">Add a pipeline</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/tune-bm25/">Tune BM25</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/tune-vector/">Tune the vector index</a>
+    </li></ul><h2 class="sidebar-heading">Reference</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/reference/config/">Config schema</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/reference/cli/">CLI</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/api/">API</a>
+    </li></ul><h2 class="sidebar-heading">Community</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/contributing/">Contributing</a>
+    </li><li class="sidebar-item">
+      <a href="/changelog/">Changelog</a>
+    </li><li class="sidebar-item">
+      <a href="/security/">Security</a>
+    </li><li class="sidebar-item">
+      <a href="/support/">Support</a>
+    </li><li class="sidebar-item">
+      <a href="/code-of-conduct/">Code of conduct</a>
+    </li><li class="sidebar-item">
+      <a href="/license/">License</a>
+    </li></ul>
+    </nav>
+  </aside>
+  <article class="page-content">
+    <header class="page-header">
+      <p class="page-section">Getting started</p>
+      <h1 class="page-title">Getting started</h1>
+      <p class="page-subtitle">Install trivium, prepare the corpus, and run your first benchmark.</p>
+    </header>
+    <div class="page-body">
+      <p>This page walks you through installing trivium, preparing the
+BEIR-augmented scifact corpus, and running your first benchmark.
+Allow about 30 minutes on a laptop for the default 5K + 100K sweep.</p>
+
+<h2 id="before-you-start">Before you start</h2>
+
+<p>You need:</p>
+
+<ul>
+  <li>Python 3.12 or newer.</li>
+  <li>About 6 GB of free disk space for the BEIR corpora.</li>
+  <li>About 1 GB of free disk space for the Python dependencies.</li>
+  <li>About 2 GB of free RAM for the MiniLM-L6 model + IVFPQ index at
+the 100K scale.</li>
+</ul>
+
+<p>trivium runs on Linux, macOS, and Windows. The benchmark itself is
+CPU-only by default; a CUDA or MPS device is optional and only
+required if you register a GPU-bound encoder or reranker.</p>
+
+<h2 id="install">Install</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip <span class="nb">install </span>trivium
+</code></pre></div></div>
+
+<p>This installs four console scripts (<code class="language-plaintext highlighter-rouge">trivium-benchmark</code>,
+<code class="language-plaintext highlighter-rouge">trivium-prepare</code>, <code class="language-plaintext highlighter-rouge">trivium-summarise</code>, <code class="language-plaintext highlighter-rouge">trivium-gigatoken-bench</code>)
+and the <code class="language-plaintext highlighter-rouge">trivium</code> Python package.</p>
+
+<p>To verify the install:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>trivium-benchmark <span class="nt">--help</span>
+trivium-prepare <span class="nt">--help</span>
+</code></pre></div></div>
+
+<p>Both should print a usage block and exit 0.</p>
+
+<h3 id="install-from-source">Install from source</h3>
+
+<p>If you want to hack on the benchmark itself:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/sachncs/trivium
+<span class="nb">cd </span>trivium
+pip <span class="nb">install</span> <span class="nt">-e</span> <span class="s2">".[dev]"</span>
+</code></pre></div></div>
+
+<p>The editable install exposes the same <code class="language-plaintext highlighter-rouge">trivium</code> package, but you
+can now edit the source and re-run tests without re-installing.</p>
+
+<h2 id="prepare-the-corpus-and-embeddings">Prepare the corpus and embeddings</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>trivium-prepare <span class="nt">--max-scales</span> 100000
+</code></pre></div></div>
+
+<p>This step:</p>
+
+<ol>
+  <li>Downloads the BEIR scifact seed (5,183 documents, 300 queries,
+qrels).</li>
+  <li>Downloads scientific distractors from SCIDOCS, TREC-COVID, and
+NFCorpus, with FEVER sampled for padding past the BEIR ceiling.</li>
+  <li>Deduplicates by SHA-256 (exact) and MinHash LSH (near-dup,
+threshold 0.85).</li>
+  <li>Slices the corpus into 5K, 100K, 500K, and 1M shards, all
+true prefixes of each other.</li>
+  <li>Embeds the corpus with <code class="language-plaintext highlighter-rouge">all-MiniLM-L6-v2</code> (384d, l2-normalized).</li>
+  <li>Writes a <code class="language-plaintext highlighter-rouge">manifest.json</code> with the corpus SHA-256, encoder
+revisions, and per-scale counts.</li>
+</ol>
+
+<p>The cache lives under <code class="language-plaintext highlighter-rouge">data/cache/</code>. Expect roughly 5 minutes on a
+laptop for the 5K + 100K sweep. The 1M scale adds about 90 minutes.</p>
+
+<h2 id="run-the-benchmark">Run the benchmark</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>trivium-benchmark <span class="se">\</span>
+  <span class="nt">--modes</span> bm25,vector,hybrid_rrf,hybrid_rerank <span class="se">\</span>
+  <span class="nt">--scales</span> 5000,100000 <span class="se">\</span>
+  <span class="nt">--output</span> results/benchmark.csv
+</code></pre></div></div>
+
+<p>You should see the pre-flight check print first:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>=== Pre-flight: BM25 nDCG@10 on untouched 5K scifact ===
+  observed nDCG@10: 0.6569
+  target (Anserini): 0.6789 +/- 0.03
+  PASS: |delta|=0.0220 within tolerance.
+</code></pre></div></div>
+
+<p>If the pre-flight check fails with <code class="language-plaintext highlighter-rouge">observed &lt; 0.62</code>, the pipeline
+is broken — your tokenizer, BM25 hyperparameters, or qrels prefix
+have drifted. Stop and debug before re-running.</p>
+
+<h2 id="summarise-the-headline-rows">Summarise the headline rows</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>trivium-summarise <span class="nt">--csv</span> results/benchmark.csv
+</code></pre></div></div>
+
+<p>prints a per-(scale, mode, encoder) pivot of the headline numbers:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  scale    mode          encoder         ndcg@10    R@10   p95_ms
+   5_000    bm25          minilm-l6       0.6569  0.7784     0.90
+   5_000    vector        minilm-l6       0.6451  0.7833     0.10
+   5_000    hybrid_rrf    minilm-l6       0.7016  0.8482     1.10
+   5_000    hybrid_rerank minilm-l6       0.6820  0.8062   167.30
+ 100_000    bm25          minilm-l6       0.3206  0.3793     6.50
+ ...
+</code></pre></div></div>
+
+<p>These numbers match the headline table in the README and the
+landing page hero.</p>
+
+<h2 id="try-a-different-encoder-or-reranker">Try a different encoder or reranker</h2>
+
+<p>The runner wires encoders and rerankers through the public
+registries. Pass any registered slug with <code class="language-plaintext highlighter-rouge">--encoders</code> or
+<code class="language-plaintext highlighter-rouge">--rerankers</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>trivium-benchmark <span class="se">\</span>
+  <span class="nt">--modes</span> hybrid_rrf,hybrid_rerank <span class="se">\</span>
+  <span class="nt">--encoders</span> minilm-l6,bge-base <span class="se">\</span>
+  <span class="nt">--rerankers</span> encoder,bge-large <span class="se">\</span>
+  <span class="nt">--scales</span> 5000 <span class="se">\</span>
+  <span class="nt">--output</span> results/multi-encoder.csv
+</code></pre></div></div>
+
+<p>The benchmark emits one CSV row per <code class="language-plaintext highlighter-rouge">(mode, encoder, reranker,
+scale)</code> combination. See <a href="../guides/add-embedder/">How-to guides</a>
+for how to register your own encoder.</p>
+
+<h2 id="next-steps">Next steps</h2>
+
+<ul>
+  <li>Read <a href="../architecture/">Architecture</a> to understand the
+pipeline registry, embedder registry, reranker registry, and
+retriever ABCs.</li>
+  <li>Read <a href="../../methodology/">Methodology</a> to understand the BM25
+pre-flight invariant, the IVFPQ + RFlat story, and the corpus
+construction rules.</li>
+  <li>Read <a href="../../guides/add-embedder/">How-to: Add an embedder</a> to
+plug your own model into the benchmark.</li>
+</ul>
+
+    </div>
+    
+    <nav class="page-pager" aria-label="Page navigation">
+      
+      <a class="pager-link pager-prev" href="/">
+        <span class="pager-label">Previous</span>
+        <span class="pager-title">trivium home</span>
+      </a>
+      
+      
+      <a class="pager-link pager-next" href="/docs/architecture/">
+        <span class="pager-label">Next</span>
+        <span class="pager-title">Architecture</span>
+      </a>
+      
+    </nav>
+    
+  </article>
+</div>
+
+  </main>
+  <footer class="site-footer" role="contentinfo">
+  <div class="container site-footer-inner">
+    <div class="site-footer-brand">
+      <strong>trivium</strong>
+      <p>Reproducible hybrid search benchmark</p>
+    </div>
+    <nav class="site-footer-nav" aria-label="Footer">
+      <div class="site-footer-col">
+        <h3>Project</h3>
+        <ul>
+          <li><a href="/docs/getting-started/">Getting started</a></li>
+          <li><a href="/docs/architecture/">Architecture</a></li>
+          <li><a href="/docs/methodology/">Methodology</a></li>
+          <li><a href="https://github.com/sachncs/trivium">Source on GitHub</a></li>
+        </ul>
+      </div>
+      <div class="site-footer-col">
+        <h3>Reference</h3>
+        <ul>
+          <li><a href="/docs/api/">API</a></li>
+          <li><a href="/docs/reference/config/">Config schema</a></li>
+          <li><a href="/docs/reference/cli/">CLI</a></li>
+          <li><a href="/changelog/">Changelog</a></li>
+        </ul>
+      </div>
+      <div class="site-footer-col">
+        <h3>Community</h3>
+        <ul>
+          <li><a href="/docs/contributing/">Contributing</a></li>
+          <li><a href="https://github.com/sachncs/trivium/issues">Issues</a></li>
+          <li><a href="https://github.com/sachncs/trivium/discussions">Discussions</a></li>
+          <li><a href="/license/">License (Apache-2.0)</a></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+  <div class="site-footer-bottom">
+    <div class="container">
+      <p>Released under the Apache-2.0 license. Built with Jekyll. © 2026 Sachin.</p>
+    </div>
+  </div>
+</footer>
+
+  <script src="/assets/js/main.js" defer></script>
+</body>
+</html>

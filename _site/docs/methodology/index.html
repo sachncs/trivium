@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Methodology · trivium</title>
+  <meta name="description" content="A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval enginee...">
+  <meta name="keywords" content="hybrid-search, bm25, faiss, beir, scifact, cross-encoder, reranker, information-retrieval, benchmark">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="stylesheet" href="/assets/css/main.css"><!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Methodology | trivium</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Methodology" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval engineers comparing fusion strategies, ML researchers validating new encoders, and OSS maintainers who publish numbers they can defend." />
+<meta name="twitter:description" property="og:description" content="A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval engineers comparing fusion strategies, ML researchers validating new encoders, and OSS maintainers who publish numbers they can defend." />
+<meta property="og:site_name" content="trivium" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Methodology" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval engineers comparing fusion strategies, ML researchers validating new encoders, and OSS maintainers who publish numbers they can defend.","headline":"Methodology","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"/assets/logo.svg"}},"url":"/docs/methodology/"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="/feed.xml" title="trivium" /></head>
+<body class="layout--page">
+  <a class="skip-link" href="#content">Skip to main content</a>
+  <header class="site-header" role="banner">
+  <div class="container site-header-inner">
+    <a class="site-brand" href="/" aria-label="trivium home">
+      <img class="site-brand-logo" src="/assets/logo.svg" alt="" width="32" height="32">
+      <span class="site-brand-name">trivium</span>
+      <span class="site-brand-tagline">Reproducible hybrid search benchmark</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <ul class="site-nav-list"><li class="site-nav-item">
+              <a href="/docs/getting-started/">Getting started</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/architecture/">Architecture</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/concepts/">Concepts</a>
+            </li><li class="site-nav-item is-active">
+              <a href="/docs/methodology/">Methodology</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/add-embedder/">Add an embedder</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/add-reranker/">Add a reranker</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/add-pipeline/">Add a pipeline</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/tune-bm25/">Tune BM25</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/tune-vector/">Tune the vector index</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/reference/config/">Config schema</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/reference/cli/">CLI</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/api/">API</a>
+            </li><li class="site-nav-item site-nav-item--menu">
+          <details class="nav-menu">
+            <summary>More</summary>
+            <ul class="nav-menu-list"><li><a href="/docs/contributing/">Contributing</a></li><li><a href="/changelog/">Changelog</a></li><li><a href="/security/">Security</a></li><li><a href="/support/">Support</a></li><li><a href="/code-of-conduct/">Code of conduct</a></li><li><a href="/license/">License</a></li><li><a href="https://github.com/sachncs/trivium">GitHub</a></li>
+            </ul>
+          </details>
+        </li>
+        <li class="site-nav-item site-nav-item--cta">
+          <a class="btn btn-primary btn-sm" href="https://github.com/sachncs/trivium">GitHub <span aria-hidden="true">→</span></a>
+        </li>
+      </ul>
+      <button class="site-nav-toggle" type="button" aria-controls="mobile-nav" aria-expanded="false">
+        <span class="visually-hidden">Toggle menu</span>
+        <span class="hamburger" aria-hidden="true"></span>
+      </button>
+    </nav>
+  </div>
+  <div id="mobile-nav" class="site-nav-mobile" hidden>
+    <ul>
+      
+        <li><a href="/">Home</a></li>
+      
+        <li><a href="/docs/getting-started/">Getting started</a></li>
+      
+        <li><a href="/docs/architecture/">Architecture</a></li>
+      
+        <li><a href="/docs/concepts/">Concepts</a></li>
+      
+        <li><a href="/docs/methodology/">Methodology</a></li>
+      
+        <li><a href="/docs/guides/add-embedder/">Add an embedder</a></li>
+      
+        <li><a href="/docs/guides/add-reranker/">Add a reranker</a></li>
+      
+        <li><a href="/docs/guides/add-pipeline/">Add a pipeline</a></li>
+      
+        <li><a href="/docs/guides/tune-bm25/">Tune BM25</a></li>
+      
+        <li><a href="/docs/guides/tune-vector/">Tune the vector index</a></li>
+      
+        <li><a href="/docs/reference/config/">Config schema</a></li>
+      
+        <li><a href="/docs/reference/cli/">CLI</a></li>
+      
+        <li><a href="/docs/api/">API</a></li>
+      
+        <li><a href="/docs/contributing/">Contributing</a></li>
+      
+        <li><a href="/changelog/">Changelog</a></li>
+      
+        <li><a href="/security/">Security</a></li>
+      
+        <li><a href="/support/">Support</a></li>
+      
+        <li><a href="/code-of-conduct/">Code of conduct</a></li>
+      
+        <li><a href="/license/">License</a></li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id="content" class="page">
+    <div class="page-grid">
+  <aside class="sidebar" aria-label="Documentation navigation">
+    <nav class="sidebar-nav">
+      <ul class="sidebar-list">
+  <li class="sidebar-item">
+    <a href="/">Home</a>
+  </li>
+</ul><h2 class="sidebar-heading">Getting started</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/getting-started/">Getting started</a>
+    </li></ul><h2 class="sidebar-heading">Understand</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/architecture/">Architecture</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/concepts/">Concepts</a>
+    </li><li class="sidebar-item is-active">
+      <a href="/docs/methodology/">Methodology</a>
+    </li></ul><h2 class="sidebar-heading">How-to</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/guides/add-embedder/">Add an embedder</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/add-reranker/">Add a reranker</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/add-pipeline/">Add a pipeline</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/tune-bm25/">Tune BM25</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/tune-vector/">Tune the vector index</a>
+    </li></ul><h2 class="sidebar-heading">Reference</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/reference/config/">Config schema</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/reference/cli/">CLI</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/api/">API</a>
+    </li></ul><h2 class="sidebar-heading">Community</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/contributing/">Contributing</a>
+    </li><li class="sidebar-item">
+      <a href="/changelog/">Changelog</a>
+    </li><li class="sidebar-item">
+      <a href="/security/">Security</a>
+    </li><li class="sidebar-item">
+      <a href="/support/">Support</a>
+    </li><li class="sidebar-item">
+      <a href="/code-of-conduct/">Code of conduct</a>
+    </li><li class="sidebar-item">
+      <a href="/license/">License</a>
+    </li></ul>
+    </nav>
+  </aside>
+  <article class="page-content">
+    <header class="page-header">
+      <p class="page-section">Understand</p>
+      <h1 class="page-title">Methodology</h1>
+      <p class="page-subtitle">Corpus construction, embedding trade-offs, the IVFPQ + RFlat story, and the BM25 pre-flight invariant.</p>
+    </header>
+    <div class="page-body">
+      <p>This page documents what the benchmark measures, what it does
+NOT measure, and why each methodological choice was made.</p>
+
+<h2 id="what-we-measure">What we measure</h2>
+
+<p>For every <code class="language-plaintext highlighter-rouge">(mode, encoder, reranker, scale, hyperparameter-knob)</code>
+combination, the runner emits one CSV row with:</p>
+
+<ul>
+  <li><strong>nDCG@10</strong>: <code class="language-plaintext highlighter-rouge">pytrec_eval.RelevanceEvaluator</code> with BEIR semantics
+(macro average, log₂ gain, <code class="language-plaintext highlighter-rouge">ignore_identical_ids=True</code>,
+<code class="language-plaintext highlighter-rouge">2^rel - 1</code> gain).</li>
+  <li><strong>R@10</strong> and <strong>R@100</strong>: same evaluator.</li>
+  <li><strong>p50</strong> and <strong>p95</strong> latency in milliseconds, measured per query
+with <code class="language-plaintext highlighter-rouge">time.perf_counter_ns()</code>, 20-query warmup, single-stream.</li>
+</ul>
+
+<p>The CSV row also carries the <code class="language-plaintext highlighter-rouge">python</code>, <code class="language-plaintext highlighter-rouge">platform</code>, <code class="language-plaintext highlighter-rouge">numpy</code>,
+<code class="language-plaintext highlighter-rouge">faiss</code>, <code class="language-plaintext highlighter-rouge">sentence-transformers</code>, <code class="language-plaintext highlighter-rouge">torch</code>, <code class="language-plaintext highlighter-rouge">bm25s</code>, <code class="language-plaintext highlighter-rouge">faiss_omp_threads</code>,
+<code class="language-plaintext highlighter-rouge">git_sha</code>, encoder model id, scale, mode, and every knob from
+<code class="language-plaintext highlighter-rouge">trivium/configs/default.yaml</code>.</p>
+
+<h2 id="corpus-construction">Corpus construction</h2>
+
+<h3 id="seed">Seed</h3>
+
+<p>The 5K seed is BEIR scifact (<code class="language-plaintext highlighter-rouge">beir-v1.0.0-scifact</code>): 5,183 documents,
+300 test queries, qrels unchanged. We load it via
+<code class="language-plaintext highlighter-rouge">beir.util.download_and_unzip</code> so the canonical BEIR zip is the
+single source of truth.</p>
+
+<h3 id="distractors">Distractors</h3>
+
+<p>Distractors come from three BEIR scientific corpora:</p>
+
+<ul>
+  <li>SCIDOCS (~25.7K documents)</li>
+  <li>TREC-COVID (~171K documents)</li>
+  <li>NFCorpus (~3.6K documents)</li>
+</ul>
+
+<p>We deliberately exclude MS MARCO because the domain mismatch
+(web passages vs scientific abstracts) would inflate the
+nDCG gap between methods.</p>
+
+<p>For the 1M scale we additionally sample 800K documents from FEVER,
+the closest non-scientific BEIR corpus, to pad past the BEIR
+scientific ceiling.</p>
+
+<h3 id="dedup">Dedup</h3>
+
+<p>Dedup runs in two passes:</p>
+
+<ol>
+  <li>SHA-256 over <code class="language-plaintext highlighter-rouge">title + text</code> for exact duplicates.</li>
+  <li>MinHash LSH with Jaccard threshold 0.85 for near-duplicates.</li>
+</ol>
+
+<p>Dedup removes about 2% of the raw pool.</p>
+
+<h3 id="scale-slicing">Scale slicing</h3>
+
+<p>The benchmark exposes four scales: 5K, 100K, 500K, 1M. Each scale
+is a true prefix of the next so the scale curve is comparable.</p>
+
+<p>The slice order is fixed by <code class="language-plaintext highlighter-rouge">random.Random(42).shuffle(pool)</code> so
+the 100K scale is a prefix of the 1M scale regardless of how
+many documents actually exist after dedup.</p>
+
+<h3 id="naming">Naming</h3>
+
+<p>Each document id carries a source prefix to prevent collisions:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">scifact:&lt;id&gt;</code> for gold documents.</li>
+  <li><code class="language-plaintext highlighter-rouge">distractor:&lt;id&gt;</code> for SCIDOCS / TREC-COVID / NFCorpus / FEVER.</li>
+</ul>
+
+<h3 id="closed-world-qrels">Closed-world qrels</h3>
+
+<p>The BEIR scifact qrels are used unchanged. Unjudged distractors
+are treated as non-relevant (Voorhees 2005 pooling convention).</p>
+
+<h2 id="embeddings">Embeddings</h2>
+
+<p>The default encoder is <code class="language-plaintext highlighter-rouge">sentence-transformers/all-MiniLM-L6-v2</code>
+(384 dimensions, l2-normalised). Three reasons:</p>
+
+<ol>
+  <li><strong>Speed</strong>: roughly 5× faster than <code class="language-plaintext highlighter-rouge">mpnet-base-v2</code> on CPU.</li>
+  <li><strong>Memory</strong>: 90 MB download.</li>
+  <li><strong>Throughput</strong>: large batches at the 1M scale without a GPU.</li>
+</ol>
+
+<p>The published trade-off is roughly 0.03 nDCG@10 vs BGE-large
+(<code class="language-plaintext highlighter-rouge">BAAI/bge-large-en-v1.5</code>). The encoder registry also ships
+BGE-small, BGE-base, BGE-large, mpnet-base, and E5-Mistral-7B.
+Register any HuggingFace sentence-transformers-compatible model
+with one decorator call.</p>
+
+<p><code class="language-plaintext highlighter-rouge">IndexFlatIP</code> (the exact dense ceiling) uses cosine similarity
+over l2-normalised vectors.</p>
+
+<h2 id="vector-index">Vector index</h2>
+
+<p>At each scale the runner uses FAISS <code class="language-plaintext highlighter-rouge">IndexFlatIP</code> for ≤ 5K and the
+approximate composite index <code class="language-plaintext highlighter-rouge">IndexOPQ48,IVF{nlist},PQ48x4fs,RFlat</code>
+above 5K.</p>
+
+<h3 id="nlist">nlist</h3>
+
+<p><code class="language-plaintext highlighter-rouge">nlist</code> follows the FAISS wiki recipe: <code class="language-plaintext highlighter-rouge">4·sqrt(N)</code> rounded up to
+the next power of two. The literal values are in
+<code class="language-plaintext highlighter-rouge">trivium/configs/default.yaml</code> under <code class="language-plaintext highlighter-rouge">vector.nlist_by_scale</code>:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: right">scale</th>
+      <th style="text-align: right"><code class="language-plaintext highlighter-rouge">4·sqrt(N)</code></th>
+      <th style="text-align: right">rounded to power of 2</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: right">5_000</td>
+      <td style="text-align: right">283</td>
+      <td style="text-align: right">512</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">100_000</td>
+      <td style="text-align: right">1_265</td>
+      <td style="text-align: right">2_048</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">500_000</td>
+      <td style="text-align: right">2_828</td>
+      <td style="text-align: right">4_096</td>
+    </tr>
+    <tr>
+      <td style="text-align: right">1_000_000</td>
+      <td style="text-align: right">4_000</td>
+      <td style="text-align: right">4_096</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The 1M scale is intentionally capped at 4_096 so coarse-quantizer
+training stays <code class="language-plaintext highlighter-rouge">O(N)</code> rather than the next-power-of-two 8_192.</p>
+
+<h3 id="nprobe-sweep">nprobe sweep</h3>
+
+<p>The runner sweeps <code class="language-plaintext highlighter-rouge">nprobe</code> over {8, 16, 32, 64, 128, 256} and
+keeps the Pareto-frontier row per <code class="language-plaintext highlighter-rouge">(scale, mode, encoder)</code>
+combination.</p>
+
+<h3 id="rflat">RFlat</h3>
+
+<p><code class="language-plaintext highlighter-rouge">k_factor = 4</code> rescores 4× more candidates than <code class="language-plaintext highlighter-rouge">k</code> exactly. This
+recovers ~+5-10% ANN recall vs plain IVFPQ at the cost of one
+exact inner product per additional candidate.</p>
+
+<h2 id="bm25">BM25</h2>
+
+<p>The BM25 retriever is <code class="language-plaintext highlighter-rouge">bm25s</code> with:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">method="lucene"</code></li>
+  <li><code class="language-plaintext highlighter-rouge">k1=0.9</code></li>
+  <li><code class="language-plaintext highlighter-rouge">b=0.4</code> (Anserini defaults)</li>
+</ul>
+
+<p>The choice of <code class="language-plaintext highlighter-rouge">k1=0.9, b=0.4</code> reproduces the BEIR published
+baseline of <code class="language-plaintext highlighter-rouge">0.6789</code> nDCG@10 on scifact within ±0.03 — the
+documented bm25s-vs-Lucene drift.</p>
+
+<h3 id="the-pre-flight-invariant">The pre-flight invariant</h3>
+
+<p>Before any benchmark row is emitted, <code class="language-plaintext highlighter-rouge">trivium-benchmark</code> runs the
+BM25 nDCG@10 equivalence check on the untouched 5K scifact corpus:</p>
+
+<ul>
+  <li>If the observed value is below <code class="language-plaintext highlighter-rouge">0.62</code>, the pipeline is broken —
+exit 1.</li>
+  <li>If <code class="language-plaintext highlighter-rouge">|observed - 0.6789| &gt; 0.03</code>, the runner prints a warning
+and continues (the drift is documented).</li>
+  <li>Otherwise the runner prints <code class="language-plaintext highlighter-rouge">PASS</code>.</li>
+</ul>
+
+<p>This check is implemented as a pytest golden marker and runs in CI.
+Any refactor that changes the tokenizer, BM25 hyperparameters, or
+qrels prefix will fail the suite.</p>
+
+<h2 id="hybrid-rrf">Hybrid RRF</h2>
+
+<p>Reciprocal Rank Fusion (Cormack et al. 2009):</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>score(d) = sum_i w_i / (k + rank_i(d))
+</code></pre></div></div>
+
+<p>The runner sweeps:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">k</code> ∈ {10, 30, 60, 100, 200} (default 60).</li>
+  <li><code class="language-plaintext highlighter-rouge">w_bm25, w_vec</code> ∈ {(0.5, 0.5), (0.3, 0.7), (0.7, 0.3)}.</li>
+</ul>
+
+<p>The headline table reports the top row per scale (the
+Pareto-frontier row).</p>
+
+<h2 id="hybrid-rerank">Hybrid rerank</h2>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bm25_results  = bm25.search(queries, k=100)
+vector_results = vector.search(query_vecs, k=100)
+fused         = Rrf().fuse([bm25_results, vector_results], top_k=50)
+candidates    = [doc_lookup[h.doc_id] for h in fused][:50]
+final         = cross_encoder.rerank(query, candidates, top_k=10)
+</code></pre></div></div>
+
+<p>The default cross-encoder is <code class="language-plaintext highlighter-rouge">cross-encoder/ms-marco-MiniLM-L-6-v2</code>
+(90 MB, +180 ms p95 per query at batch 32, max_length 256, 50
+candidates).</p>
+
+<p>The published estimate was 20-40 ms; the measured value is 5-10×
+higher. The published number was wrong; updating it is a finding.</p>
+
+<h2 id="diskbbq">DiskBBQ</h2>
+
+<p>The <code class="language-plaintext highlighter-rouge">Bbq</code> retriever is an algorithmic analog of Google’s DiskBBQ
+(coarse IVF + binary-like PQ + exact refinement). It is RAM-resident
+in this benchmark. DiskBBQ’s actual advantage is at 100M+ vectors
+where the index cannot fit in RAM.</p>
+
+<p>Three search modes:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">ram</code>: in-memory arrays (fastest at small scale).</li>
+  <li><code class="language-plaintext highlighter-rouge">disk</code>: lazy-load only the top-<code class="language-plaintext highlighter-rouge">nprobe</code> lists via
+<code class="language-plaintext highlighter-rouge">ThreadPoolExecutor</code>.</li>
+  <li><code class="language-plaintext highlighter-rouge">auto</code>: <code class="language-plaintext highlighter-rouge">disk</code> if the on-disk footprint exceeds
+<code class="language-plaintext highlighter-rouge">auto_disk_threshold_bytes</code>; else <code class="language-plaintext highlighter-rouge">ram</code>.</li>
+</ul>
+
+<h2 id="reproducibility">Reproducibility</h2>
+
+<p>Every CSV row carries the <code class="language-plaintext highlighter-rouge">python</code>, <code class="language-plaintext highlighter-rouge">platform</code>, <code class="language-plaintext highlighter-rouge">numpy</code>, <code class="language-plaintext highlighter-rouge">faiss</code>,
+<code class="language-plaintext highlighter-rouge">sentence_transformers</code>, <code class="language-plaintext highlighter-rouge">torch</code>, <code class="language-plaintext highlighter-rouge">bm25s</code>, <code class="language-plaintext highlighter-rouge">faiss_omp_threads</code>,
+and <code class="language-plaintext highlighter-rouge">git_sha</code>. <code class="language-plaintext highlighter-rouge">ReproducibilityManifest.gather()</code> runs at the end
+of every benchmark invocation and merges its fields into each
+row.</p>
+
+<h2 id="honest-limitations">Honest limitations</h2>
+
+<p>This is the 0.1.0 release and the headline numbers are
+reproducible on the published commit. The benchmark does NOT
+measure:</p>
+
+<ul>
+  <li>E5-Mistral-7B (14 GB, 4096d) ceiling (<code class="language-plaintext highlighter-rouge">0.749</code> nDCG@10 dense).</li>
+  <li>BGE-large-en-v1.5 (1.34 GB, 1024d) ceiling (<code class="language-plaintext highlighter-rouge">0.741</code>).</li>
+  <li>MonoT5-3B rerank ceiling (<code class="language-plaintext highlighter-rouge">0.777</code>).</li>
+  <li>The vector index is RAM-resident; DiskBBQ’s actual advantage
+is at 100M+ vectors.</li>
+  <li>bm25s’s <code class="language-plaintext highlighter-rouge">lucene</code> method differs from Anserini’s Lucene BM25 by
+roughly 0.02-0.03 nDCG@10 on small corpora.</li>
+</ul>
+
+<p>These are listed explicitly in the README and CHANGELOG so
+no reader is misled.</p>
+
+    </div>
+    
+    <nav class="page-pager" aria-label="Page navigation">
+      
+      <a class="pager-link pager-prev" href="/docs/concepts/">
+        <span class="pager-label">Previous</span>
+        <span class="pager-title">Concepts</span>
+      </a>
+      
+      
+      <a class="pager-link pager-next" href="/docs/guides/add-embedder/">
+        <span class="pager-label">Next</span>
+        <span class="pager-title">Add an embedder</span>
+      </a>
+      
+    </nav>
+    
+  </article>
+</div>
+
+  </main>
+  <footer class="site-footer" role="contentinfo">
+  <div class="container site-footer-inner">
+    <div class="site-footer-brand">
+      <strong>trivium</strong>
+      <p>Reproducible hybrid search benchmark</p>
+    </div>
+    <nav class="site-footer-nav" aria-label="Footer">
+      <div class="site-footer-col">
+        <h3>Project</h3>
+        <ul>
+          <li><a href="/docs/getting-started/">Getting started</a></li>
+          <li><a href="/docs/architecture/">Architecture</a></li>
+          <li><a href="/docs/methodology/">Methodology</a></li>
+          <li><a href="https://github.com/sachncs/trivium">Source on GitHub</a></li>
+        </ul>
+      </div>
+      <div class="site-footer-col">
+        <h3>Reference</h3>
+        <ul>
+          <li><a href="/docs/api/">API</a></li>
+          <li><a href="/docs/reference/config/">Config schema</a></li>
+          <li><a href="/docs/reference/cli/">CLI</a></li>
+          <li><a href="/changelog/">Changelog</a></li>
+        </ul>
+      </div>
+      <div class="site-footer-col">
+        <h3>Community</h3>
+        <ul>
+          <li><a href="/docs/contributing/">Contributing</a></li>
+          <li><a href="https://github.com/sachncs/trivium/issues">Issues</a></li>
+          <li><a href="https://github.com/sachncs/trivium/discussions">Discussions</a></li>
+          <li><a href="/license/">License (Apache-2.0)</a></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+  <div class="site-footer-bottom">
+    <div class="container">
+      <p>Released under the Apache-2.0 license. Built with Jekyll. © 2026 Sachin.</p>
+    </div>
+  </div>
+</footer>
+
+  <script src="/assets/js/main.js" defer></script>
+</body>
+</html>

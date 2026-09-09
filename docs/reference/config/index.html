@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Config schema · trivium</title>
+  <meta name="description" content="A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval enginee...">
+  <meta name="keywords" content="hybrid-search, bm25, faiss, beir, scifact, cross-encoder, reranker, information-retrieval, benchmark">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="stylesheet" href="/assets/css/main.css"><!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Config schema | trivium</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Config schema" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval engineers comparing fusion strategies, ML researchers validating new encoders, and OSS maintainers who publish numbers they can defend." />
+<meta name="twitter:description" property="og:description" content="A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval engineers comparing fusion strategies, ML researchers validating new encoders, and OSS maintainers who publish numbers they can defend." />
+<meta property="og:site_name" content="trivium" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Config schema" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval engineers comparing fusion strategies, ML researchers validating new encoders, and OSS maintainers who publish numbers they can defend.","headline":"Config schema","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"/assets/logo.svg"}},"url":"/docs/reference/config/"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="/feed.xml" title="trivium" /></head>
+<body class="layout--page">
+  <a class="skip-link" href="#content">Skip to main content</a>
+  <header class="site-header" role="banner">
+  <div class="container site-header-inner">
+    <a class="site-brand" href="/" aria-label="trivium home">
+      <img class="site-brand-logo" src="/assets/logo.svg" alt="" width="32" height="32">
+      <span class="site-brand-name">trivium</span>
+      <span class="site-brand-tagline">Reproducible hybrid search benchmark</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <ul class="site-nav-list"><li class="site-nav-item">
+              <a href="/docs/getting-started/">Getting started</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/architecture/">Architecture</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/concepts/">Concepts</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/methodology/">Methodology</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/add-embedder/">Add an embedder</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/add-reranker/">Add a reranker</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/add-pipeline/">Add a pipeline</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/tune-bm25/">Tune BM25</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/tune-vector/">Tune the vector index</a>
+            </li><li class="site-nav-item is-active">
+              <a href="/docs/reference/config/">Config schema</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/reference/cli/">CLI</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/api/">API</a>
+            </li><li class="site-nav-item site-nav-item--menu">
+          <details class="nav-menu">
+            <summary>More</summary>
+            <ul class="nav-menu-list"><li><a href="/docs/contributing/">Contributing</a></li><li><a href="/changelog/">Changelog</a></li><li><a href="/security/">Security</a></li><li><a href="/support/">Support</a></li><li><a href="/code-of-conduct/">Code of conduct</a></li><li><a href="/license/">License</a></li><li><a href="https://github.com/sachncs/trivium">GitHub</a></li>
+            </ul>
+          </details>
+        </li>
+        <li class="site-nav-item site-nav-item--cta">
+          <a class="btn btn-primary btn-sm" href="https://github.com/sachncs/trivium">GitHub <span aria-hidden="true">→</span></a>
+        </li>
+      </ul>
+      <button class="site-nav-toggle" type="button" aria-controls="mobile-nav" aria-expanded="false">
+        <span class="visually-hidden">Toggle menu</span>
+        <span class="hamburger" aria-hidden="true"></span>
+      </button>
+    </nav>
+  </div>
+  <div id="mobile-nav" class="site-nav-mobile" hidden>
+    <ul>
+      
+        <li><a href="/">Home</a></li>
+      
+        <li><a href="/docs/getting-started/">Getting started</a></li>
+      
+        <li><a href="/docs/architecture/">Architecture</a></li>
+      
+        <li><a href="/docs/concepts/">Concepts</a></li>
+      
+        <li><a href="/docs/methodology/">Methodology</a></li>
+      
+        <li><a href="/docs/guides/add-embedder/">Add an embedder</a></li>
+      
+        <li><a href="/docs/guides/add-reranker/">Add a reranker</a></li>
+      
+        <li><a href="/docs/guides/add-pipeline/">Add a pipeline</a></li>
+      
+        <li><a href="/docs/guides/tune-bm25/">Tune BM25</a></li>
+      
+        <li><a href="/docs/guides/tune-vector/">Tune the vector index</a></li>
+      
+        <li><a href="/docs/reference/config/">Config schema</a></li>
+      
+        <li><a href="/docs/reference/cli/">CLI</a></li>
+      
+        <li><a href="/docs/api/">API</a></li>
+      
+        <li><a href="/docs/contributing/">Contributing</a></li>
+      
+        <li><a href="/changelog/">Changelog</a></li>
+      
+        <li><a href="/security/">Security</a></li>
+      
+        <li><a href="/support/">Support</a></li>
+      
+        <li><a href="/code-of-conduct/">Code of conduct</a></li>
+      
+        <li><a href="/license/">License</a></li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id="content" class="page">
+    <div class="page-grid">
+  <aside class="sidebar" aria-label="Documentation navigation">
+    <nav class="sidebar-nav">
+      <ul class="sidebar-list">
+  <li class="sidebar-item">
+    <a href="/">Home</a>
+  </li>
+</ul><h2 class="sidebar-heading">Getting started</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/getting-started/">Getting started</a>
+    </li></ul><h2 class="sidebar-heading">Understand</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/architecture/">Architecture</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/concepts/">Concepts</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/methodology/">Methodology</a>
+    </li></ul><h2 class="sidebar-heading">How-to</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/guides/add-embedder/">Add an embedder</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/add-reranker/">Add a reranker</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/add-pipeline/">Add a pipeline</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/tune-bm25/">Tune BM25</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/tune-vector/">Tune the vector index</a>
+    </li></ul><h2 class="sidebar-heading">Reference</h2>
+  <ul class="sidebar-list"><li class="sidebar-item is-active">
+      <a href="/docs/reference/config/">Config schema</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/reference/cli/">CLI</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/api/">API</a>
+    </li></ul><h2 class="sidebar-heading">Community</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/contributing/">Contributing</a>
+    </li><li class="sidebar-item">
+      <a href="/changelog/">Changelog</a>
+    </li><li class="sidebar-item">
+      <a href="/security/">Security</a>
+    </li><li class="sidebar-item">
+      <a href="/support/">Support</a>
+    </li><li class="sidebar-item">
+      <a href="/code-of-conduct/">Code of conduct</a>
+    </li><li class="sidebar-item">
+      <a href="/license/">License</a>
+    </li></ul>
+    </nav>
+  </aside>
+  <article class="page-content">
+    <header class="page-header">
+      <p class="page-section">Reference</p>
+      <h1 class="page-title">Config schema</h1>
+      <p class="page-subtitle">Every field in trivium/configs/default.yaml.</p>
+    </header>
+    <div class="page-body">
+      <p>The config file is loaded by <code class="language-plaintext highlighter-rouge">trivium.config.loader.load_config</code>
+into a Pydantic v2 model with <code class="language-plaintext highlighter-rouge">extra="forbid"</code>. A typo in any
+field name raises <code class="language-plaintext highlighter-rouge">ValueError</code> at load time, not deep in a
+benchmark row.</p>
+
+<p>The full Pydantic model lives in
+<code class="language-plaintext highlighter-rouge">trivium/config/schema.py</code>; this page is the developer-facing
+reference.</p>
+
+<h2 id="top-level-keys">Top-level keys</h2>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">version</span><span class="pi">:</span> <span class="m">1</span>
+
+<span class="na">corpus</span><span class="pi">:</span>        <span class="c1"># corpus construction rules</span>
+<span class="na">scales</span><span class="pi">:</span>        <span class="c1"># [5000, 100000, 500000, 1000000]</span>
+<span class="na">encoders</span><span class="pi">:</span>      <span class="c1"># list of EncoderEntry</span>
+<span class="na">bm25</span><span class="pi">:</span>          <span class="c1"># BM25Config</span>
+<span class="na">vector</span><span class="pi">:</span>        <span class="c1"># VectorConfig</span>
+<span class="na">hybrid</span><span class="pi">:</span>        <span class="c1"># HybridConfig</span>
+<span class="na">rerank</span><span class="pi">:</span>        <span class="c1"># RerankConfig</span>
+<span class="na">benchmark</span><span class="pi">:</span>     <span class="c1"># BenchmarkConfig</span>
+<span class="na">preflight</span><span class="pi">:</span>     <span class="c1"># PreflightConfig</span>
+<span class="na">runtime</span><span class="pi">:</span>       <span class="c1"># RuntimeConfig</span>
+</code></pre></div></div>
+
+<h2 id="corpus"><code class="language-plaintext highlighter-rouge">corpus</code></h2>
+
+<p><code class="language-plaintext highlighter-rouge">CorpusConfig</code></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>field</th>
+      <th>type</th>
+      <th>default</th>
+      <th>description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">seed</code></td>
+      <td>str</td>
+      <td><code class="language-plaintext highlighter-rouge">"scifact"</code></td>
+      <td>BEIR seed corpus.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">distractors</code></td>
+      <td>list</td>
+      <td><code class="language-plaintext highlighter-rouge">["scidocs", "trec-covid", "nfcorpus"]</code></td>
+      <td>Distractor sources.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">fever_sample</code></td>
+      <td>int</td>
+      <td><code class="language-plaintext highlighter-rouge">0</code></td>
+      <td>FEVER documents to sample for padding past the BEIR ceiling.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">seed_random</code></td>
+      <td>int</td>
+      <td><code class="language-plaintext highlighter-rouge">42</code></td>
+      <td>Random seed for the per-scale shuffle.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">dedup_jaccard_threshold</code></td>
+      <td>float</td>
+      <td><code class="language-plaintext highlighter-rouge">0.85</code></td>
+      <td>MinHash LSH threshold for near-duplicate detection.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="scales"><code class="language-plaintext highlighter-rouge">scales</code></h2>
+
+<p><code class="language-plaintext highlighter-rouge">list[int]</code> — the corpus sizes to benchmark at. Each scale is a
+true prefix of the next.</p>
+
+<p>Default: <code class="language-plaintext highlighter-rouge">[5000, 100000, 500000, 1000000]</code>.</p>
+
+<h2 id="encoders"><code class="language-plaintext highlighter-rouge">encoders</code></h2>
+
+<p><code class="language-plaintext highlighter-rouge">list[EncoderEntry]</code> — the encoder slugs to use by default.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">encoders</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">slug</span><span class="pi">:</span> <span class="s">minilm-l6</span>
+    <span class="na">model_id</span><span class="pi">:</span> <span class="s">sentence-transformers/all-MiniLM-L6-v2</span>
+    <span class="na">dimension</span><span class="pi">:</span> <span class="m">384</span>
+    <span class="na">device</span><span class="pi">:</span> <span class="s">cpu</span>
+    <span class="na">batch_size</span><span class="pi">:</span> <span class="m">128</span>
+    <span class="na">max_seq_length</span><span class="pi">:</span> <span class="m">256</span>
+    <span class="na">normalize</span><span class="pi">:</span> <span class="kc">true</span>
+    <span class="na">prompt_prefix_doc</span><span class="pi">:</span> <span class="s2">"</span><span class="s">"</span>
+    <span class="na">prompt_prefix_query</span><span class="pi">:</span> <span class="s2">"</span><span class="s">"</span>
+</code></pre></div></div>
+
+<table>
+  <thead>
+    <tr>
+      <th>field</th>
+      <th>type</th>
+      <th>description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">slug</code></td>
+      <td>str</td>
+      <td>Identifier; must be registered via <code class="language-plaintext highlighter-rouge">@register_embedder</code>.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">model_id</code></td>
+      <td>str</td>
+      <td>HuggingFace model id.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">dimension</code></td>
+      <td>int</td>
+      <td>Embedding dimension (must match the model).</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">device</code></td>
+      <td>str</td>
+      <td><code class="language-plaintext highlighter-rouge">cpu</code>, <code class="language-plaintext highlighter-rouge">cuda</code>, or <code class="language-plaintext highlighter-rouge">mps</code>.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">batch_size</code></td>
+      <td>int</td>
+      <td>Encoding batch size.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">max_seq_length</code></td>
+      <td>int</td>
+      <td>Tokeniser max length.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">normalize</code></td>
+      <td>bool</td>
+      <td>L2-normalise vectors (recommended for cosine).</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">prompt_prefix_doc</code></td>
+      <td>str</td>
+      <td>Optional passage-side prefix.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">prompt_prefix_query</code></td>
+      <td>str</td>
+      <td>Optional query-side prefix.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="bm25"><code class="language-plaintext highlighter-rouge">bm25</code></h2>
+
+<p><code class="language-plaintext highlighter-rouge">Bm25Config</code></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>field</th>
+      <th>type</th>
+      <th>default</th>
+      <th>description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">method</code></td>
+      <td>str</td>
+      <td><code class="language-plaintext highlighter-rouge">"lucene"</code></td>
+      <td>bm25s method: <code class="language-plaintext highlighter-rouge">"lucene"</code>, <code class="language-plaintext highlighter-rouge">"atire"</code>, or <code class="language-plaintext highlighter-rouge">"bm25l"</code>.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">k1</code></td>
+      <td>float</td>
+      <td><code class="language-plaintext highlighter-rouge">0.9</code></td>
+      <td>Term-frequency saturation. <strong>Do not change without updating the pre-flight target.</strong></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">b</code></td>
+      <td>float</td>
+      <td><code class="language-plaintext highlighter-rouge">0.4</code></td>
+      <td>Document-length normalisation. <strong>Same caveat.</strong></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">candidate_pool</code></td>
+      <td>int</td>
+      <td><code class="language-plaintext highlighter-rouge">100</code></td>
+      <td>Top-k candidates per query for BM25-only modes.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">stopwords</code></td>
+      <td>str</td>
+      <td><code class="language-plaintext highlighter-rouge">"en"</code></td>
+      <td>Stopword list (passed to bm25s.tokenization.Tokenizer).</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">stemmer</code></td>
+      <td>str | None</td>
+      <td><code class="language-plaintext highlighter-rouge">null</code></td>
+      <td>Stemmer (e.g. <code class="language-plaintext highlighter-rouge">"snowball"</code>); null for none.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="vector"><code class="language-plaintext highlighter-rouge">vector</code></h2>
+
+<p><code class="language-plaintext highlighter-rouge">VectorConfig</code></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>field</th>
+      <th>type</th>
+      <th>default</th>
+      <th>description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">nlist_by_scale</code></td>
+      <td>dict[int, int]</td>
+      <td>(see below)</td>
+      <td>Coarse-quantizer count per scale.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">nprobe_sweep</code></td>
+      <td>list[int]</td>
+      <td><code class="language-plaintext highlighter-rouge">[8, 16, 32, 64, 128, 256]</code></td>
+      <td>Number of cells visited per query.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">m</code></td>
+      <td>int</td>
+      <td><code class="language-plaintext highlighter-rouge">48</code></td>
+      <td>Sub-quantizer count.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">nbits</code></td>
+      <td>int</td>
+      <td><code class="language-plaintext highlighter-rouge">4</code></td>
+      <td>Bits per sub-quantizer.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">use_opq</code></td>
+      <td>bool</td>
+      <td><code class="language-plaintext highlighter-rouge">true</code></td>
+      <td>Apply OPQ rotation before PQ.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">use_rflat</code></td>
+      <td>bool</td>
+      <td><code class="language-plaintext highlighter-rouge">true</code></td>
+      <td>Apply exact refinement after PQ.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">k_factor</code></td>
+      <td>int</td>
+      <td><code class="language-plaintext highlighter-rouge">4</code></td>
+      <td>Re-score top <code class="language-plaintext highlighter-rouge">k_factor * k</code> candidates.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">min_scale_for_ivfpq</code></td>
+      <td>int</td>
+      <td><code class="language-plaintext highlighter-rouge">5000</code></td>
+      <td>Below this scale, use IndexFlatIP.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">train_size_strategy</code></td>
+      <td><code class="language-plaintext highlighter-rouge">"sqrt_n"</code> | <code class="language-plaintext highlighter-rouge">"50_x_nlist"</code> | <code class="language-plaintext highlighter-rouge">"fixed_N"</code></td>
+      <td><code class="language-plaintext highlighter-rouge">"50_x_nlist"</code></td>
+      <td>OPQ-IVFPQ training-sample strategy.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">train_size_fixed</code></td>
+      <td>int</td>
+      <td><code class="language-plaintext highlighter-rouge">30_000</code></td>
+      <td>Sample size when strategy is <code class="language-plaintext highlighter-rouge">fixed_N</code>.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Default <code class="language-plaintext highlighter-rouge">nlist_by_scale</code> is the formula-derived
+<code class="language-plaintext highlighter-rouge">{5000: 512, 100000: 2048, 500000: 4096, 1000000: 4096}</code> (see
+<a href="../../methodology/">Methodology</a> for the rationale).</p>
+
+<h2 id="hybrid"><code class="language-plaintext highlighter-rouge">hybrid</code></h2>
+
+<p><code class="language-plaintext highlighter-rouge">HybridConfig</code></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>field</th>
+      <th>type</th>
+      <th>default</th>
+      <th>description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">rrf_k</code></td>
+      <td>int</td>
+      <td><code class="language-plaintext highlighter-rouge">60</code></td>
+      <td>Default RRF smoothing constant.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">rrf_k_sweep</code></td>
+      <td>list[int]</td>
+      <td><code class="language-plaintext highlighter-rouge">[10, 30, 60, 100, 200]</code></td>
+      <td>Sweep over RRF k.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">rrf_weight_sweep</code></td>
+      <td>list[tuple[float, float]]</td>
+      <td><code class="language-plaintext highlighter-rouge">[(0.5, 0.5), (0.3, 0.7), (0.7, 0.3)]</code></td>
+      <td>Sweep over BM25-vs-vector weights.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">candidate_pool</code></td>
+      <td>int</td>
+      <td><code class="language-plaintext highlighter-rouge">100</code></td>
+      <td>Top-k candidates per query for hybrid modes.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="rerank"><code class="language-plaintext highlighter-rouge">rerank</code></h2>
+
+<p><code class="language-plaintext highlighter-rouge">RerankConfig</code></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>field</th>
+      <th>type</th>
+      <th>default</th>
+      <th>description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">slug</code></td>
+      <td>str</td>
+      <td><code class="language-plaintext highlighter-rouge">"encoder"</code></td>
+      <td>Reranker slug (must be registered).</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">model_id</code></td>
+      <td>str</td>
+      <td><code class="language-plaintext highlighter-rouge">"cross-encoder/ms-marco-MiniLM-L-6-v2"</code></td>
+      <td>HuggingFace model id.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">max_length</code></td>
+      <td>int</td>
+      <td><code class="language-plaintext highlighter-rouge">256</code></td>
+      <td>Tokeniser max length.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">batch_size</code></td>
+      <td>int</td>
+      <td><code class="language-plaintext highlighter-rouge">32</code></td>
+      <td>Rerank batch size.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">candidate_pool</code></td>
+      <td>int</td>
+      <td><code class="language-plaintext highlighter-rouge">50</code></td>
+      <td>Top-k candidates fed to the reranker (smaller than <code class="language-plaintext highlighter-rouge">hybrid.candidate_pool</code> because rerank is expensive).</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="benchmark"><code class="language-plaintext highlighter-rouge">benchmark</code></h2>
+
+<p><code class="language-plaintext highlighter-rouge">BenchmarkConfig</code></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>field</th>
+      <th>type</th>
+      <th>default</th>
+      <th>description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">warmup</code></td>
+      <td>int</td>
+      <td><code class="language-plaintext highlighter-rouge">20</code></td>
+      <td>Number of warmup queries discarded before timing.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">iters</code></td>
+      <td>int</td>
+      <td><code class="language-plaintext highlighter-rouge">3</code></td>
+      <td>Iterations per measurement (averaged into latency).</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">top_k_eval</code></td>
+      <td>list[int]</td>
+      <td><code class="language-plaintext highlighter-rouge">[10, 100]</code></td>
+      <td>Cutoffs for nDCG and recall.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="preflight"><code class="language-plaintext highlighter-rouge">preflight</code></h2>
+
+<p><code class="language-plaintext highlighter-rouge">PreflightConfig</code></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>field</th>
+      <th>type</th>
+      <th>default</th>
+      <th>description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">target_ndcg10</code></td>
+      <td>float</td>
+      <td><code class="language-plaintext highlighter-rouge">0.6789</code></td>
+      <td>Anserini BM25 nDCG@10 on BEIR scifact.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">tolerance</code></td>
+      <td>float</td>
+      <td><code class="language-plaintext highlighter-rouge">0.03</code></td>
+      <td>Drift band; runner warns if <code class="language-plaintext highlighter-rouge">|observed - target| &gt; tolerance</code>.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">min_observed</code></td>
+      <td>float</td>
+      <td><code class="language-plaintext highlighter-rouge">0.62</code></td>
+      <td>Bug detector; runner fails if <code class="language-plaintext highlighter-rouge">observed &lt; min_observed</code>.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="runtime"><code class="language-plaintext highlighter-rouge">runtime</code></h2>
+
+<p><code class="language-plaintext highlighter-rouge">RuntimeConfig</code></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>field</th>
+      <th>type</th>
+      <th>default</th>
+      <th>description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">random_seed</code></td>
+      <td>int</td>
+      <td><code class="language-plaintext highlighter-rouge">42</code></td>
+      <td>NumPy / Python random seed.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">python_hash_seed</code></td>
+      <td>int</td>
+      <td><code class="language-plaintext highlighter-rouge">42</code></td>
+      <td><code class="language-plaintext highlighter-rouge">PYTHONHASHSEED</code> value (set in env before benchmark).</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">faiss_omp_threads</code></td>
+      <td>int</td>
+      <td><code class="language-plaintext highlighter-rouge">1</code></td>
+      <td>OpenMP thread count for FAISS. Set to <code class="language-plaintext highlighter-rouge">os.cpu_count()</code> for parallel benches.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="loading">Loading</h2>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">trivium.config.loader</span> <span class="kn">import</span> <span class="n">load_config</span><span class="p">,</span> <span class="n">default_config_path</span>
+
+<span class="n">cfg</span> <span class="o">=</span> <span class="nf">load_config</span><span class="p">()</span>                                 <span class="c1"># bundled default
+</span><span class="n">cfg</span> <span class="o">=</span> <span class="nf">load_config</span><span class="p">(</span><span class="sh">"</span><span class="s">/path/to/custom.yaml</span><span class="sh">"</span><span class="p">)</span>           <span class="c1"># explicit path
+</span></code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">default_config_path()</code> returns:</p>
+
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">$PWD/configs/default.yaml</code> if it exists (so contributors
+can edit the canonical file in place).</li>
+  <li>Otherwise, <code class="language-plaintext highlighter-rouge">trivium/configs/default.yaml</code> from the installed
+package.</li>
+</ol>
+
+<h2 id="next-steps">Next steps</h2>
+
+<ul>
+  <li>Read <a href="../../reference/cli/">CLI</a> for the runner flags.</li>
+  <li>Read <a href="../../api/">API</a> for the public Python API.</li>
+</ul>
+
+    </div>
+    
+    <nav class="page-pager" aria-label="Page navigation">
+      
+      <a class="pager-link pager-prev" href="/docs/guides/tune-vector/">
+        <span class="pager-label">Previous</span>
+        <span class="pager-title">Tune the vector index</span>
+      </a>
+      
+      
+      <a class="pager-link pager-next" href="/docs/reference/cli/">
+        <span class="pager-label">Next</span>
+        <span class="pager-title">CLI</span>
+      </a>
+      
+    </nav>
+    
+  </article>
+</div>
+
+  </main>
+  <footer class="site-footer" role="contentinfo">
+  <div class="container site-footer-inner">
+    <div class="site-footer-brand">
+      <strong>trivium</strong>
+      <p>Reproducible hybrid search benchmark</p>
+    </div>
+    <nav class="site-footer-nav" aria-label="Footer">
+      <div class="site-footer-col">
+        <h3>Project</h3>
+        <ul>
+          <li><a href="/docs/getting-started/">Getting started</a></li>
+          <li><a href="/docs/architecture/">Architecture</a></li>
+          <li><a href="/docs/methodology/">Methodology</a></li>
+          <li><a href="https://github.com/sachncs/trivium">Source on GitHub</a></li>
+        </ul>
+      </div>
+      <div class="site-footer-col">
+        <h3>Reference</h3>
+        <ul>
+          <li><a href="/docs/api/">API</a></li>
+          <li><a href="/docs/reference/config/">Config schema</a></li>
+          <li><a href="/docs/reference/cli/">CLI</a></li>
+          <li><a href="/changelog/">Changelog</a></li>
+        </ul>
+      </div>
+      <div class="site-footer-col">
+        <h3>Community</h3>
+        <ul>
+          <li><a href="/docs/contributing/">Contributing</a></li>
+          <li><a href="https://github.com/sachncs/trivium/issues">Issues</a></li>
+          <li><a href="https://github.com/sachncs/trivium/discussions">Discussions</a></li>
+          <li><a href="/license/">License (Apache-2.0)</a></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+  <div class="site-footer-bottom">
+    <div class="container">
+      <p>Released under the Apache-2.0 license. Built with Jekyll. © 2026 Sachin.</p>
+    </div>
+  </div>
+</footer>
+
+  <script src="/assets/js/main.js" defer></script>
+</body>
+</html>

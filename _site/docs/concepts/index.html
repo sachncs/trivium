@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Concepts · trivium</title>
+  <meta name="description" content="A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval enginee...">
+  <meta name="keywords" content="hybrid-search, bm25, faiss, beir, scifact, cross-encoder, reranker, information-retrieval, benchmark">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="stylesheet" href="/assets/css/main.css"><!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Concepts | trivium</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Concepts" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval engineers comparing fusion strategies, ML researchers validating new encoders, and OSS maintainers who publish numbers they can defend." />
+<meta name="twitter:description" property="og:description" content="A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval engineers comparing fusion strategies, ML researchers validating new encoders, and OSS maintainers who publish numbers they can defend." />
+<meta property="og:site_name" content="trivium" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Concepts" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. For retrieval engineers comparing fusion strategies, ML researchers validating new encoders, and OSS maintainers who publish numbers they can defend.","headline":"Concepts","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"/assets/logo.svg"}},"url":"/docs/concepts/"}</script>
+<!-- End Jekyll SEO tag -->
+<link type="application/atom+xml" rel="alternate" href="/feed.xml" title="trivium" /></head>
+<body class="layout--page">
+  <a class="skip-link" href="#content">Skip to main content</a>
+  <header class="site-header" role="banner">
+  <div class="container site-header-inner">
+    <a class="site-brand" href="/" aria-label="trivium home">
+      <img class="site-brand-logo" src="/assets/logo.svg" alt="" width="32" height="32">
+      <span class="site-brand-name">trivium</span>
+      <span class="site-brand-tagline">Reproducible hybrid search benchmark</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <ul class="site-nav-list"><li class="site-nav-item">
+              <a href="/docs/getting-started/">Getting started</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/architecture/">Architecture</a>
+            </li><li class="site-nav-item is-active">
+              <a href="/docs/concepts/">Concepts</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/methodology/">Methodology</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/add-embedder/">Add an embedder</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/add-reranker/">Add a reranker</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/add-pipeline/">Add a pipeline</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/tune-bm25/">Tune BM25</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/guides/tune-vector/">Tune the vector index</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/reference/config/">Config schema</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/reference/cli/">CLI</a>
+            </li><li class="site-nav-item">
+              <a href="/docs/api/">API</a>
+            </li><li class="site-nav-item site-nav-item--menu">
+          <details class="nav-menu">
+            <summary>More</summary>
+            <ul class="nav-menu-list"><li><a href="/docs/contributing/">Contributing</a></li><li><a href="/changelog/">Changelog</a></li><li><a href="/security/">Security</a></li><li><a href="/support/">Support</a></li><li><a href="/code-of-conduct/">Code of conduct</a></li><li><a href="/license/">License</a></li><li><a href="https://github.com/sachncs/trivium">GitHub</a></li>
+            </ul>
+          </details>
+        </li>
+        <li class="site-nav-item site-nav-item--cta">
+          <a class="btn btn-primary btn-sm" href="https://github.com/sachncs/trivium">GitHub <span aria-hidden="true">→</span></a>
+        </li>
+      </ul>
+      <button class="site-nav-toggle" type="button" aria-controls="mobile-nav" aria-expanded="false">
+        <span class="visually-hidden">Toggle menu</span>
+        <span class="hamburger" aria-hidden="true"></span>
+      </button>
+    </nav>
+  </div>
+  <div id="mobile-nav" class="site-nav-mobile" hidden>
+    <ul>
+      
+        <li><a href="/">Home</a></li>
+      
+        <li><a href="/docs/getting-started/">Getting started</a></li>
+      
+        <li><a href="/docs/architecture/">Architecture</a></li>
+      
+        <li><a href="/docs/concepts/">Concepts</a></li>
+      
+        <li><a href="/docs/methodology/">Methodology</a></li>
+      
+        <li><a href="/docs/guides/add-embedder/">Add an embedder</a></li>
+      
+        <li><a href="/docs/guides/add-reranker/">Add a reranker</a></li>
+      
+        <li><a href="/docs/guides/add-pipeline/">Add a pipeline</a></li>
+      
+        <li><a href="/docs/guides/tune-bm25/">Tune BM25</a></li>
+      
+        <li><a href="/docs/guides/tune-vector/">Tune the vector index</a></li>
+      
+        <li><a href="/docs/reference/config/">Config schema</a></li>
+      
+        <li><a href="/docs/reference/cli/">CLI</a></li>
+      
+        <li><a href="/docs/api/">API</a></li>
+      
+        <li><a href="/docs/contributing/">Contributing</a></li>
+      
+        <li><a href="/changelog/">Changelog</a></li>
+      
+        <li><a href="/security/">Security</a></li>
+      
+        <li><a href="/support/">Support</a></li>
+      
+        <li><a href="/code-of-conduct/">Code of conduct</a></li>
+      
+        <li><a href="/license/">License</a></li>
+      
+    </ul>
+  </div>
+</header>
+
+  <main id="content" class="page">
+    <div class="page-grid">
+  <aside class="sidebar" aria-label="Documentation navigation">
+    <nav class="sidebar-nav">
+      <ul class="sidebar-list">
+  <li class="sidebar-item">
+    <a href="/">Home</a>
+  </li>
+</ul><h2 class="sidebar-heading">Getting started</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/getting-started/">Getting started</a>
+    </li></ul><h2 class="sidebar-heading">Understand</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/architecture/">Architecture</a>
+    </li><li class="sidebar-item is-active">
+      <a href="/docs/concepts/">Concepts</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/methodology/">Methodology</a>
+    </li></ul><h2 class="sidebar-heading">How-to</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/guides/add-embedder/">Add an embedder</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/add-reranker/">Add a reranker</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/add-pipeline/">Add a pipeline</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/tune-bm25/">Tune BM25</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/guides/tune-vector/">Tune the vector index</a>
+    </li></ul><h2 class="sidebar-heading">Reference</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/reference/config/">Config schema</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/reference/cli/">CLI</a>
+    </li><li class="sidebar-item">
+      <a href="/docs/api/">API</a>
+    </li></ul><h2 class="sidebar-heading">Community</h2>
+  <ul class="sidebar-list"><li class="sidebar-item">
+      <a href="/docs/contributing/">Contributing</a>
+    </li><li class="sidebar-item">
+      <a href="/changelog/">Changelog</a>
+    </li><li class="sidebar-item">
+      <a href="/security/">Security</a>
+    </li><li class="sidebar-item">
+      <a href="/support/">Support</a>
+    </li><li class="sidebar-item">
+      <a href="/code-of-conduct/">Code of conduct</a>
+    </li><li class="sidebar-item">
+      <a href="/license/">License</a>
+    </li></ul>
+    </nav>
+  </aside>
+  <article class="page-content">
+    <header class="page-header">
+      <p class="page-section">Understand</p>
+      <h1 class="page-title">Concepts</h1>
+      <p class="page-subtitle">The domain types the benchmark is built on.</p>
+    </header>
+    <div class="page-body">
+      <p>trivium models a retrieval benchmark with five small value
+types. They live in <code class="language-plaintext highlighter-rouge">trivium.domain</code>.</p>
+
+<h2 id="document"><code class="language-plaintext highlighter-rouge">Document</code></h2>
+
+<p>A <code class="language-plaintext highlighter-rouge">Document</code> is the unit indexed by a retriever and ranked by a
+reranker.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">trivium.domain.document</span> <span class="kn">import</span> <span class="n">Document</span>
+
+<span class="n">doc</span> <span class="o">=</span> <span class="nc">Document</span><span class="p">(</span><span class="n">doc_id</span><span class="o">=</span><span class="sh">"</span><span class="s">scifact:42</span><span class="sh">"</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="sh">"</span><span class="s">Coffee and sleep</span><span class="sh">"</span><span class="p">,</span>
+               <span class="n">text</span><span class="o">=</span><span class="sh">"</span><span class="s">Coffee reduces slow-wave sleep by 18% ...</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">doc_id</code> is the canonical id; every retrieval hit references the
+same id. <code class="language-plaintext highlighter-rouge">title</code> and <code class="language-plaintext highlighter-rouge">text</code> are concatenated into <code class="language-plaintext highlighter-rouge">doc.body</code> so
+the BM25 tokeniser sees a single string.</p>
+
+<p>The id namespace convention is:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">scifact:&lt;id&gt;</code> for gold documents in the BEIR scifact seed.</li>
+  <li><code class="language-plaintext highlighter-rouge">distractor:&lt;id&gt;</code> for the SCIDOCS / TREC-COVID / NFCorpus / FEVER
+distractors.</li>
+</ul>
+
+<p>The strict prefix prevents collisions across sources.</p>
+
+<h2 id="query"><code class="language-plaintext highlighter-rouge">Query</code></h2>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">trivium.domain.query</span> <span class="kn">import</span> <span class="n">Query</span>
+
+<span class="n">query</span> <span class="o">=</span> <span class="nc">Query</span><span class="p">(</span><span class="n">query_id</span><span class="o">=</span><span class="sh">"</span><span class="s">q12</span><span class="sh">"</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="sh">"</span><span class="s">Does coffee affect sleep?</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>A <code class="language-plaintext highlighter-rouge">Query</code> is what the user types. The benchmark stores the raw
+text; the embedder chooses the encoding template.</p>
+
+<h2 id="qrels"><code class="language-plaintext highlighter-rouge">Qrels</code></h2>
+
+<p>A <code class="language-plaintext highlighter-rouge">Qrels</code> (query relevance judgments) maps <code class="language-plaintext highlighter-rouge">query_id</code> to a
+<code class="language-plaintext highlighter-rouge">doc_id -&gt; relevance</code> mapping.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">trivium.domain.qrels</span> <span class="kn">import</span> <span class="n">Qrels</span>
+
+<span class="n">qrels</span> <span class="o">=</span> <span class="n">Qrels</span><span class="p">.</span><span class="nf">from_rows</span><span class="p">([</span>
+    <span class="p">{</span><span class="sh">"</span><span class="s">qid</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">q12</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">did</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">scifact:42</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">rel</span><span class="sh">"</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+    <span class="p">{</span><span class="sh">"</span><span class="s">qid</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">q12</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">did</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">scifact:99</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">rel</span><span class="sh">"</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
+<span class="p">])</span>
+</code></pre></div></div>
+
+<p>The benchmark uses the closed-world assumption: unjudged
+distractors are treated as non-relevant, following the Voorhees
+2005 pooling convention.</p>
+
+<h2 id="searchresult-and-hit"><code class="language-plaintext highlighter-rouge">SearchResult</code> and <code class="language-plaintext highlighter-rouge">Hit</code></h2>
+
+<p>A <code class="language-plaintext highlighter-rouge">SearchResult</code> is the per-query output of a retriever or a
+reranker. It contains a sequence of <code class="language-plaintext highlighter-rouge">Hit</code>s.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">trivium.domain.result</span> <span class="kn">import</span> <span class="n">SearchResult</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">SearchResult</span><span class="p">.</span><span class="nf">from_pairs</span><span class="p">([</span>
+    <span class="p">(</span><span class="sh">"</span><span class="s">scifact:42</span><span class="sh">"</span><span class="p">,</span> <span class="mf">0.91</span><span class="p">),</span>
+    <span class="p">(</span><span class="sh">"</span><span class="s">scifact:99</span><span class="sh">"</span><span class="p">,</span> <span class="mf">0.42</span><span class="p">),</span>
+<span class="p">])</span>
+<span class="n">hits</span> <span class="o">=</span> <span class="nf">list</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>  <span class="c1"># [Hit(doc_id=..., score=...), ...]
+</span></code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">from_pairs</code> is the constructor used by every retriever; <code class="language-plaintext highlighter-rouge">Hit</code> is
+the <code class="language-plaintext highlighter-rouge">(doc_id, score)</code> tuple with named attributes.</p>
+
+<p>A retriever returns <code class="language-plaintext highlighter-rouge">list[SearchResult]</code>, one per query:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">results</span> <span class="o">=</span> <span class="n">retriever</span><span class="p">.</span><span class="nf">search</span><span class="p">(</span><span class="n">query_vectors</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="c1"># results[i] is the top-k hits for query i
+</span></code></pre></div></div>
+
+<p>A <code class="language-plaintext highlighter-rouge">FusionStrategy</code> consumes that list and emits one fused
+<code class="language-plaintext highlighter-rouge">SearchResult</code> per query.</p>
+
+<h2 id="pipelineresult"><code class="language-plaintext highlighter-rouge">PipelineResult</code></h2>
+
+<p>A <code class="language-plaintext highlighter-rouge">PipelineResult</code> is the per-row CSV emission. Each pipeline run
+returns one or more of these (RRF sweeps over <code class="language-plaintext highlighter-rouge">k</code> and weights
+emit multiple rows from a single run).</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">PipelineResult</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>                  <span class="c1"># pipeline slug
+</span>    <span class="n">scale</span><span class="p">:</span> <span class="nb">int</span>                 <span class="c1"># corpus size at this row
+</span>    <span class="n">encoder</span><span class="p">:</span> <span class="nb">str</span>               <span class="c1"># encoder slug
+</span>    <span class="n">reranker</span><span class="p">:</span> <span class="nb">str</span>              <span class="c1"># reranker slug or "none"
+</span>    <span class="n">metrics</span><span class="p">:</span> <span class="n">EvaluationMetrics</span> <span class="c1"># nDCG@10, R@10, R@100, etc.
+</span>    <span class="n">latency</span><span class="p">:</span> <span class="n">LatencyStats</span>      <span class="c1"># p50, p95, mean, std, n
+</span>    <span class="n">extras</span><span class="p">:</span> <span class="nb">dict</span>               <span class="c1"># rrf_k, w_bm25, nprobe, ...
+</span></code></pre></div></div>
+
+<p>The CSV writer flattens this into one row; <code class="language-plaintext highlighter-rouge">extras</code> keys are
+deduplicated against the metric names so they don’t collide with
+the headline columns.</p>
+
+<h2 id="domain-modules">Domain modules</h2>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>trivium/domain/
+├── __init__.py
+├── document.py        # Document
+├── hit.py             # Hit
+├── pipeline_result.py # PipelineResult, LatencyStats-shaped result
+├── qrels.py           # Qrels
+├── query.py           # Query
+└── result.py          # SearchResult
+</code></pre></div></div>
+
+<p>All five types are pure data classes. They are constructed and
+consumed by every layer above, but they have no dependency on
+faiss, bm25s, sentence-transformers, or torch — so you can build
+tests against them without paying the import cost.</p>
+
+<h2 id="next-steps">Next steps</h2>
+
+<ul>
+  <li>Read <a href="../../methodology/">Methodology</a> for the experimental
+design.</li>
+  <li>Read the <a href="../../api/">API reference</a> for every public symbol.</li>
+</ul>
+
+    </div>
+    
+    <nav class="page-pager" aria-label="Page navigation">
+      
+      <a class="pager-link pager-prev" href="/docs/architecture/">
+        <span class="pager-label">Previous</span>
+        <span class="pager-title">Architecture</span>
+      </a>
+      
+      
+      <a class="pager-link pager-next" href="/docs/methodology/">
+        <span class="pager-label">Next</span>
+        <span class="pager-title">Methodology</span>
+      </a>
+      
+    </nav>
+    
+  </article>
+</div>
+
+  </main>
+  <footer class="site-footer" role="contentinfo">
+  <div class="container site-footer-inner">
+    <div class="site-footer-brand">
+      <strong>trivium</strong>
+      <p>Reproducible hybrid search benchmark</p>
+    </div>
+    <nav class="site-footer-nav" aria-label="Footer">
+      <div class="site-footer-col">
+        <h3>Project</h3>
+        <ul>
+          <li><a href="/docs/getting-started/">Getting started</a></li>
+          <li><a href="/docs/architecture/">Architecture</a></li>
+          <li><a href="/docs/methodology/">Methodology</a></li>
+          <li><a href="https://github.com/sachncs/trivium">Source on GitHub</a></li>
+        </ul>
+      </div>
+      <div class="site-footer-col">
+        <h3>Reference</h3>
+        <ul>
+          <li><a href="/docs/api/">API</a></li>
+          <li><a href="/docs/reference/config/">Config schema</a></li>
+          <li><a href="/docs/reference/cli/">CLI</a></li>
+          <li><a href="/changelog/">Changelog</a></li>
+        </ul>
+      </div>
+      <div class="site-footer-col">
+        <h3>Community</h3>
+        <ul>
+          <li><a href="/docs/contributing/">Contributing</a></li>
+          <li><a href="https://github.com/sachncs/trivium/issues">Issues</a></li>
+          <li><a href="https://github.com/sachncs/trivium/discussions">Discussions</a></li>
+          <li><a href="/license/">License (Apache-2.0)</a></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+  <div class="site-footer-bottom">
+    <div class="container">
+      <p>Released under the Apache-2.0 license. Built with Jekyll. © 2026 Sachin.</p>
+    </div>
+  </div>
+</footer>
+
+  <script src="/assets/js/main.js" defer></script>
+</body>
+</html>
