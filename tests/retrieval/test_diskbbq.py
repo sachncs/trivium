@@ -13,6 +13,7 @@ import shutil
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from trivium.domain.document import Document
 from trivium.retrieval.diskbbq import Bbq
@@ -145,3 +146,37 @@ class TestBbqEdgeCases:
 
         with pytest.raises(ValueError):
             bbq.add_documents(docs, vectors=None)
+
+    def test_ram_rescore_emits_nonzero_scores(self, tmp_path: Path) -> None:
+        """Regression: RAM-mode rescore used to overwrite the inner-product score with 0.
+
+        Reported in issue #4. With use_rescore=True, every hit must carry the
+        actual <vec, query> similarity, not a placeholder 0.0.
+        """
+        docs, vecs = _toy_corpus(n=200, dim=96)
+        bbq = Bbq(out_dir=tmp_path, nlist=8, m=24, nprobe=4, use_rescore=True)
+        bbq.add_documents(docs, vectors=vecs)
+        results = bbq.search(vecs[:5], k=10, mode="ram")
+        assert len(results) == 5
+        for r in results:
+            assert len(r) > 0
+            # At least one hit must have a strictly positive score; with random
+            # GF(2) codes no hit's inner product is exactly 0 by chance.
+            assert any(h.score != 0.0 for h in r), "RAM-mode rescore emitted score=0 for every hit"
+
+    def test_ram_rescore_scores_match_disk_rescore(self, tmp_path: Path) -> None:
+        """RAM and disk modes must report the same scores for the same hits."""
+        docs, vecs = _toy_corpus(n=200, dim=96)
+        bbq = Bbq(out_dir=tmp_path, nlist=8, m=24, nprobe=4, use_rescore=True)
+        bbq.add_documents(docs, vectors=vecs)
+        q = vecs[:5]
+        r_ram = bbq.search(q, k=10, mode="ram")
+        r_disk = bbq.search(q, k=10, mode="disk")
+        for i in range(5):
+            ram_by_id = {h.doc_id: h.score for h in r_ram[i]}
+            disk_by_id = {h.doc_id: h.score for h in r_disk[i]}
+            for did, score in ram_by_id.items():
+                assert did in disk_by_id, f"q{i}: RAM hit {did} missing from disk"
+                assert score == pytest.approx(disk_by_id[did], abs=1e-6), (
+                    f"q{i}: score mismatch for {did}: ram={score} disk={disk_by_id[did]}"
+                )

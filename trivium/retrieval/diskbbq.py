@@ -402,7 +402,7 @@ class Bbq(Retriever):
                     vec = self._ram_floats[int(cid)][int(j)]
                     refined.append((float(vec @ q), int(cid), int(j)))
                 refined.sort(key=lambda t: -t[0])
-                top = [(0, c, j) for _, c, j in refined[:k]]
+                top = [(s, c, j) for s, c, j in refined[:k]]
             else:
                 top = top[:k]
             pairs = [
