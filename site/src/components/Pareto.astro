@@ -1,0 +1,258 @@
+---
+interface Point {
+  label: string;
+  scale: string;
+  x: number; // log latency (ms)
+  y: number; // recall@10
+  winner?: boolean;
+  color: "brand" | "accent" | "ink";
+}
+
+const points: Point[] = [
+  { label: "vector (flat)", scale: "5K", x: 0.1, y: 0.7833, color: "ink" },
+  { label: "bm25", scale: "5K", x: 0.9, y: 0.7784, color: "ink" },
+  { label: "hybrid_rrf", scale: "5K", x: 1.1, y: 0.8482, color: "brand", winner: true },
+  { label: "hybrid_rerank", scale: "5K", x: 167.3, y: 0.8062, color: "accent" },
+  { label: "vector (IVFPQ)", scale: "100K", x: 0.05, y: 0.1971, color: "ink" },
+  { label: "bm25", scale: "100K", x: 6.5, y: 0.3793, color: "ink" },
+  { label: "hybrid_rrf", scale: "100K", x: 6.8, y: 0.3796, color: "brand", winner: true },
+  { label: "hybrid_rerank", scale: "100K", x: 187.7, y: 0.3871, color: "accent" },
+];
+
+// Compute plot coordinates on a 600x340 SVG canvas.
+const W = 600;
+const H = 340;
+const pad = { top: 20, right: 24, bottom: 36, left: 56 };
+
+const xMin = 0.03;
+const xMax = 250;
+const xRange = xMax - xMin;
+
+const yMin = 0.15;
+const yMax = 0.9;
+const yRange = yMax - yMin;
+
+const xScale = (x: number) => {
+  const logX = Math.log10(Math.max(x, xMin));
+  const logMin = Math.log10(xMin);
+  const logMax = Math.log10(xMax);
+  return pad.left + ((logX - logMin) / (logMax - logMin)) * (W - pad.left - pad.right);
+};
+
+const yScale = (y: number) => H - pad.bottom - ((y - yMin) / yRange) * (H - pad.top - pad.bottom);
+
+const gridLines = [0.2, 0.4, 0.6, 0.8].map((v) => ({
+  y: yScale(v),
+  label: v.toFixed(1),
+}));
+const xTicks = [0.1, 1, 10, 100].map((v) => ({
+  x: xScale(v),
+  label: v >= 1 ? `${v}` : `${v}`,
+}));
+---
+
+<div class="pareto" role="figure" aria-label="Pareto frontier of recall versus latency for the headline methods">
+  <div class="pareto-head">
+    <span class="pareto-title">Pareto frontier</span>
+    <span class="pareto-sub">Recall@10 vs p95 latency · log scale</span>
+  </div>
+  <svg viewBox={`0 0 ${W} ${H}`} class="pareto-svg" aria-hidden="true">
+    <defs>
+      <linearGradient id="winnerFill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="rgb(99 102 241)" stop-opacity="0.4" />
+        <stop offset="1" stop-color="rgb(99 102 241)" stop-opacity="0" />
+      </linearGradient>
+    </defs>
+
+    {gridLines.map((g) => (
+      <g>
+        <line x1={pad.left} y1={g.y} x2={W - pad.right} y2={g.y} class="grid-line" />
+        <text x={pad.left - 8} y={g.y + 4} class="axis-label">{g.label}</text>
+      </g>
+    ))}
+
+    {xTicks.map((t) => (
+      <g>
+        <line x1={t.x} y1={H - pad.bottom} x2={t.x} y2={H - pad.bottom + 4} class="tick" />
+        <text x={t.x} y={H - pad.bottom + 18} class="axis-label" text-anchor="middle">{t.label === "1" ? "1 ms" : t.label === "10" ? "10 ms" : t.label === "100" ? "100 ms" : "0.1 ms"}</text>
+      </g>
+    ))}
+
+    <text x={W / 2} y={H - 6} class="axis-title" text-anchor="middle">p95 latency (log scale, ms)</text>
+    <text x={14} y={H / 2} class="axis-title" transform={`rotate(-90 14 ${H / 2})`} text-anchor="middle">Recall@10</text>
+
+    {points.map((p) => (
+      <g transform={`translate(${xScale(p.x)}, ${yScale(p.y)})`} class={`point ${p.winner ? "is-winner" : ""} point-${p.color}`}>
+        {p.winner && (
+          <>
+            <circle r="14" class="winner-glow" />
+            <circle r="10" class="winner-ring" />
+          </>
+        )}
+        <circle r={p.winner ? 6 : 4.5} class="dot" />
+        <text x={p.winner ? 14 : 10} y={4} class="point-label">{p.label}{p.scale === "100K" ? " (100K)" : ""}</text>
+      </g>
+    ))}
+  </svg>
+
+  <ul class="pareto-legend" aria-label="Legend">
+    <li><span class="legend-dot legend-dot-brand"></span> hybrid_rrf (winner)</li>
+    <li><span class="legend-dot legend-dot-accent"></span> hybrid_rerank</li>
+    <li><span class="legend-dot legend-dot-ink"></span> bm25 / vector</li>
+  </ul>
+</div>
+
+<style>
+  .pareto {
+    margin-top: 2.5rem;
+    padding: 1.75rem;
+    background: rgb(var(--c-surface));
+    border: 1px solid rgb(var(--c-border));
+    border-radius: 1.5rem;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px rgb(15 23 42 / 0.04);
+  }
+  [data-theme="dark"] .pareto {
+    background: rgb(var(--c-surface-raised));
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.3);
+  }
+  .pareto-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .pareto-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.0625rem;
+    letter-spacing: -0.015em;
+    color: rgb(var(--c-text));
+  }
+  .pareto-sub {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: rgb(var(--c-text-mute));
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .pareto-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .pareto-svg :global(.grid-line) {
+    stroke: rgb(var(--c-border-subtle));
+    stroke-width: 1;
+    stroke-dasharray: 3 4;
+  }
+  .pareto-svg :global(.tick) {
+    stroke: rgb(var(--c-border-strong));
+    stroke-width: 1;
+  }
+  .pareto-svg :global(.axis-label) {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    fill: rgb(var(--c-text-mute));
+  }
+  .pareto-svg :global(.axis-title) {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    fill: rgb(var(--c-text-mute));
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .pareto-svg :global(.dot) {
+    fill: rgb(var(--c-text-soft));
+    stroke: rgb(var(--c-surface));
+    stroke-width: 2;
+    transition: all 0.2s var(--ease-smooth);
+  }
+  [data-theme="dark"] .pareto-svg :global(.dot) {
+    stroke: rgb(var(--c-surface-raised));
+  }
+  .pareto-svg :global(.point-brand .dot) {
+    fill: rgb(var(--c-brand-600));
+  }
+  [data-theme="dark"] .pareto-svg :global(.point-brand .dot) {
+    fill: rgb(var(--c-brand-400));
+  }
+  .pareto-svg :global(.point-accent .dot) {
+    fill: rgb(var(--c-accent-600));
+  }
+  [data-theme="dark"] .pareto-svg :global(.point-accent .dot) {
+    fill: rgb(var(--c-accent-400));
+  }
+  .pareto-svg :global(.point.is-winner .dot) {
+    fill: white;
+    stroke: rgb(var(--c-brand-600));
+    stroke-width: 2.5;
+  }
+  [data-theme="dark"] .pareto-svg :global(.point.is-winner .dot) {
+    stroke: rgb(var(--c-brand-400));
+  }
+  .pareto-svg :global(.winner-ring) {
+    fill: none;
+    stroke: rgb(var(--c-brand-500));
+    stroke-width: 1.5;
+    stroke-dasharray: 2 3;
+    opacity: 0.6;
+    animation: drift 6s ease-in-out infinite;
+    transform-origin: center;
+  }
+  .pareto-svg :global(.winner-glow) {
+    fill: url(#winnerFill);
+  }
+  .pareto-svg :global(.point-label) {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    fill: rgb(var(--c-text));
+    font-weight: 500;
+  }
+  .pareto-svg :global(.point.is-winner .point-label) {
+    font-weight: 600;
+    fill: rgb(var(--c-text));
+  }
+  .pareto-svg :global(.point:hover .dot) {
+    transform: scale(1.3);
+    transform-origin: center;
+  }
+  .pareto-legend {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: rgb(var(--c-text-mute));
+  }
+  .pareto-legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .legend-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+  }
+  .legend-dot-brand {
+    background: rgb(var(--c-brand-600));
+  }
+  [data-theme="dark"] .legend-dot-brand {
+    background: rgb(var(--c-brand-400));
+  }
+  .legend-dot-accent {
+    background: rgb(var(--c-accent-600));
+  }
+  [data-theme="dark"] .legend-dot-accent {
+    background: rgb(var(--c-accent-400));
+  }
+  .legend-dot-ink {
+    background: rgb(var(--c-ink-400));
+  }
+</style>

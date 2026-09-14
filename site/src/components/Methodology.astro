@@ -1,0 +1,218 @@
+---
+const honestItems = [
+  {
+    label: "IS",
+    title: "A reproducible, defensive hybrid search benchmark.",
+    description:
+      "Every CSV row carries Python, OS, NumPy, faiss, sentence-transformers, torch, bm25s, OMP threads, and git SHA. The BM25 pre-flight pins the BM25 implementation to the published Anserini baseline (0.6789 ± 0.03).",
+    tone: "positive",
+  },
+  {
+    label: "IS NOT",
+    title: "A SOTA benchmark.",
+    description:
+      "E5-Mistral-7B (0.749), BGE-large (0.741), and MonoT5-3B rerank (0.777) are the published scifact ceilings. We don't run those models. The hybrid advantage we show is from MiniLM-L6 and a small CE reranker.",
+    tone: "warning",
+  },
+  {
+    label: "IS NOT",
+    title: "A disk-aware benchmark.",
+    description:
+      "The vector index is RAM-resident. DiskBBQ's actual advantage is at 100M+ vectors where the index cannot fit in RAM. The DiskBBQ mode in trivium is an algorithmic analog.",
+    tone: "warning",
+  },
+  {
+    label: "IS",
+    title: "A library you can build on.",
+    description:
+      "Bm25, Faiss.Flat, Rrf, get_reranker — composable primitives. The benchmark is the reference workload; the public API is what you ship.",
+    tone: "positive",
+  },
+];
+---
+
+<section id="methodology" class="methodology section" aria-labelledby="methodology-title">
+  <div class="container-page">
+    <header class="section-head" data-reveal>
+      <span class="eyebrow">Methodology</span>
+      <h2 id="methodology-title" class="section-title heading-section">
+        Honest about what this
+        <span class="text-gradient">is and isn't.</span>
+      </h2>
+      <p class="section-lede">
+        A good benchmark is defined as much by what it doesn't claim as by what it
+        measures. trivium publishes its limits in the same place it publishes its
+        numbers.
+      </p>
+    </header>
+
+    <div class="method-grid">
+      {honestItems.map((item, i) => (
+        <article class:list={["method-card", `method-${item.tone}`]} data-reveal data-reveal-delay={((i % 2) + 1).toString()}>
+          <span class:list={["method-label", `method-label-${item.tone}`]}>{item.label}</span>
+          <h3 class="method-title">{item.title}</h3>
+          <p>{item.description}</p>
+        </article>
+      ))}
+    </div>
+
+    <div class="method-cta" data-reveal>
+      <div class="method-cta-inner">
+        <div>
+          <h3 class="method-cta-title">Read the full methodology</h3>
+          <p class="method-cta-body">
+            Corpus construction, embedding trade-offs, the IVFPQ + RFlat story,
+            the BM25 pre-flight invariant — every knob in <code>configs/default.yaml</code>
+            documented in the README.
+          </p>
+        </div>
+        <a class="btn btn-secondary btn-lg" href="https://github.com/sachncs/trivium#methodology" rel="noopener">
+          <span>Methodology</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M7 17L17 7M9 7h8v8" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .method-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+  @media (max-width: 720px) {
+    .method-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .method-card {
+    padding: 1.75rem;
+    background: rgb(var(--c-surface));
+    border: 1px solid rgb(var(--c-border));
+    border-radius: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+  [data-theme="dark"] .method-card {
+    background: rgb(var(--c-surface-raised));
+  }
+  .method-positive {
+    border-color: rgb(var(--c-brand-200));
+    background: linear-gradient(180deg, rgb(var(--c-brand-50) / 0.4), transparent 40%), rgb(var(--c-surface));
+  }
+  [data-theme="dark"] .method-positive {
+    background: linear-gradient(180deg, rgb(var(--c-brand-950) / 0.5), transparent 40%), rgb(var(--c-surface-raised));
+    border-color: rgb(var(--c-brand-800));
+  }
+  .method-warning {
+    border-color: rgb(var(--c-accent-200));
+    background: linear-gradient(180deg, rgb(var(--c-accent-50) / 0.4), transparent 40%), rgb(var(--c-surface));
+  }
+  [data-theme="dark"] .method-warning {
+    background: linear-gradient(180deg, rgb(var(--c-accent-950) / 0.4), transparent 40%), rgb(var(--c-surface-raised));
+    border-color: rgb(var(--c-accent-800));
+  }
+  .method-label {
+    align-self: flex-start;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.25rem 0.55rem;
+    border-radius: 9999px;
+    font-weight: 600;
+  }
+  .method-label-positive {
+    background: rgb(var(--c-brand-600));
+    color: white;
+  }
+  [data-theme="dark"] .method-label-positive {
+    background: rgb(var(--c-brand-400));
+    color: rgb(var(--c-ink-950));
+  }
+  .method-label-warning {
+    background: rgb(var(--c-accent-600));
+    color: white;
+  }
+  [data-theme="dark"] .method-label-warning {
+    background: rgb(var(--c-accent-400));
+    color: rgb(var(--c-ink-950));
+  }
+  .method-title {
+    font-family: var(--font-display);
+    font-size: 1.1875rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+  }
+  .method-card p {
+    font-size: 0.9375rem;
+    color: rgb(var(--c-text-soft));
+    line-height: 1.65;
+  }
+
+  .method-cta {
+    padding: 2rem;
+    background: rgb(var(--c-ink-950));
+    border-radius: 1.5rem;
+    color: rgb(var(--c-ink-50));
+    overflow: hidden;
+    position: relative;
+  }
+  [data-theme="dark"] .method-cta {
+    background: rgb(var(--c-ink-950));
+    border: 1px solid rgb(var(--c-ink-800));
+  }
+  .method-cta::before {
+    content: "";
+    position: absolute;
+    inset: -50%;
+    background: radial-gradient(ellipse 60% 50% at 50% 50%, rgb(var(--c-brand-700) / 0.3), transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .method-cta-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    position: relative;
+    z-index: 1;
+    flex-wrap: wrap;
+  }
+  .method-cta-title {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: rgb(var(--c-ink-50));
+    margin-bottom: 0.5rem;
+  }
+  .method-cta-body {
+    font-size: 0.9375rem;
+    color: rgb(var(--c-ink-300));
+    line-height: 1.55;
+    max-width: 560px;
+  }
+  .method-cta-body code {
+    font-family: var(--font-mono);
+    background: rgb(var(--c-ink-800));
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+    font-size: 0.875em;
+  }
+  .method-cta .btn-secondary {
+    background: rgb(var(--c-ink-50));
+    color: rgb(var(--c-ink-900));
+    border-color: rgb(var(--c-ink-50));
+  }
+  .method-cta .btn-secondary:hover {
+    background: white;
+    border-color: white;
+  }
+</style>

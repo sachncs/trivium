@@ -1,0 +1,180 @@
+---
+import { features } from "../lib/results.ts";
+
+const iconPaths: Record<string, string> = {
+  sparkles:
+    "M9 2v3M9 19v3M2 9h3M19 9h3M5.6 5.6l2.1 2.1M14.3 14.3l2.1 2.1M5.6 14.3l2.1-2.1M14.3 7.7l2.1-2.1 M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z",
+  puzzle:
+    "M19 11h-1V8a2 2 0 0 0-2-2h-3V5a2 2 0 1 0-4 0v1H6a2 2 0 0 0-2 2v3h1a2 2 0 1 1 0 4H4v3a2 2 0 0 0 2 2h3v-1a2 2 0 1 1 4 0v1h3a2 2 0 0 0 2-2v-3h1a2 2 0 1 0 0-4z",
+  shield:
+    "M12 2L4 6v6c0 5 3.5 9.5 8 10 4.5-.5 8-5 8-10V6l-8-4z M9 12l2 2 4-4",
+  gauge:
+    "M12 14l4-4 M3 12a9 9 0 1 1 18 0 M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z",
+  branch:
+    "M6 3v12 M18 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M18 9a9 9 0 0 1-9 9",
+  terminal:
+    "M4 17l5-5-5-5 M12 19h8",
+};
+
+const colorClass: Record<string, string> = {
+  brand: "feature-card-brand",
+  accent: "feature-card-accent",
+  ink: "feature-card-ink",
+};
+---
+
+<section id="features" class="features section" aria-labelledby="features-title">
+  <div class="container-page">
+    <header class="section-head" data-reveal>
+      <span class="eyebrow">Features</span>
+      <h2 id="features-title" class="section-title heading-section">
+        Six guarantees a benchmark should have.
+      </h2>
+      <p class="section-lede">
+        trivium ships with the things most benchmarks don't. A pre-flight that fails fast.
+        A reproducibility manifest on every CSV row. A registry you can extend without forking.
+      </p>
+    </header>
+
+    <div class="features-grid">
+      {features.map((f, i) => (
+        <article class:list={["feature-card", colorClass[f.color]]} data-reveal data-reveal-delay={((i % 3) + 1).toString()}>
+          <div class="feature-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d={iconPaths[f.icon]} />
+            </svg>
+          </div>
+          <h3 class="feature-title">{f.title}</h3>
+          <p class="feature-description">{f.description}</p>
+          <p class="feature-detail">{f.detail}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  @media (max-width: 980px) {
+    .features-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 640px) {
+    .features-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .feature-card {
+    position: relative;
+    padding: 1.75rem;
+    background: rgb(var(--c-surface));
+    border: 1px solid rgb(var(--c-border));
+    border-radius: 1.25rem;
+    overflow: hidden;
+    transition: all 0.3s var(--ease-smooth);
+  }
+  [data-theme="dark"] .feature-card {
+    background: rgb(var(--c-surface-raised));
+  }
+  .feature-card:hover {
+    border-color: rgb(var(--c-border-strong));
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgb(15 23 42 / 0.04), 0 0 0 1px rgb(15 23 42 / 0.02);
+  }
+  [data-theme="dark"] .feature-card:hover {
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.3), 0 0 0 1px rgb(255 255 255 / 0.04);
+  }
+  .feature-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.3s var(--ease-smooth);
+  }
+  .feature-card-brand::after {
+    background: radial-gradient(ellipse 60% 80% at 100% 0%, rgb(var(--c-brand-100) / 0.5), transparent 70%);
+  }
+  [data-theme="dark"] .feature-card-brand::after {
+    background: radial-gradient(ellipse 60% 80% at 100% 0%, rgb(var(--c-brand-900) / 0.3), transparent 70%);
+  }
+  .feature-card-accent::after {
+    background: radial-gradient(ellipse 60% 80% at 100% 0%, rgb(var(--c-accent-100) / 0.5), transparent 70%);
+  }
+  [data-theme="dark"] .feature-card-accent::after {
+    background: radial-gradient(ellipse 60% 80% at 100% 0%, rgb(var(--c-accent-900) / 0.3), transparent 70%);
+  }
+  .feature-card-ink::after {
+    background: radial-gradient(ellipse 60% 80% at 100% 0%, rgb(var(--c-ink-100) / 0.5), transparent 70%);
+  }
+  [data-theme="dark"] .feature-card-ink::after {
+    background: radial-gradient(ellipse 60% 80% at 100% 0%, rgb(var(--c-ink-800) / 0.3), transparent 70%);
+  }
+  .feature-card:hover::after {
+    opacity: 1;
+  }
+  .feature-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 0.75rem;
+    margin-bottom: 1.25rem;
+    transition: transform 0.3s var(--ease-smooth);
+  }
+  .feature-card-brand .feature-icon {
+    background: rgb(var(--c-brand-100));
+    color: rgb(var(--c-brand-700));
+  }
+  [data-theme="dark"] .feature-card-brand .feature-icon {
+    background: rgb(var(--c-brand-900));
+    color: rgb(var(--c-brand-300));
+  }
+  .feature-card-accent .feature-icon {
+    background: rgb(var(--c-accent-100));
+    color: rgb(var(--c-accent-700));
+  }
+  [data-theme="dark"] .feature-card-accent .feature-icon {
+    background: rgb(var(--c-accent-900));
+    color: rgb(var(--c-accent-300));
+  }
+  .feature-card-ink .feature-icon {
+    background: rgb(var(--c-ink-100));
+    color: rgb(var(--c-ink-700));
+  }
+  [data-theme="dark"] .feature-card-ink .feature-icon {
+    background: rgb(var(--c-ink-800));
+    color: rgb(var(--c-ink-300));
+  }
+  .feature-card:hover .feature-icon {
+    transform: scale(1.06) rotate(-3deg);
+  }
+  .feature-title {
+    font-family: var(--font-display);
+    font-size: 1.1875rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.6rem;
+    color: rgb(var(--c-text));
+  }
+  .feature-description {
+    font-size: 0.9375rem;
+    color: rgb(var(--c-text-soft));
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  .feature-detail {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: rgb(var(--c-text-mute));
+    padding-top: 1rem;
+    border-top: 1px dashed rgb(var(--c-border));
+    line-height: 1.5;
+  }
+</style>

@@ -1,0 +1,330 @@
+---
+import { scaleResults } from "../lib/results.ts";
+---
+
+<section id="results" class="results section" aria-labelledby="results-title">
+  <div class="container-page">
+    <header class="section-head" data-reveal>
+      <span class="eyebrow">Headline numbers</span>
+      <h2 id="results-title" class="section-title heading-section">
+        Reproducible. Honest.
+        <br />
+        <span class="text-gradient">Hybrids actually win.</span>
+      </h2>
+      <p class="section-lede">
+        At 5K untouched scifact, hybrid RRF beats BM25 by <strong>+0.045 nDCG@10</strong> and
+        pure vector by <strong>+0.057</strong>. At 100K with 95K scientific distractors, the
+        encoder hits its recall ceiling and BM25 ties. Every number comes from a single
+        <code>trivium-benchmark</code> invocation.
+      </p>
+    </header>
+
+    <div class="results-card" data-reveal data-reveal-delay="1">
+      <div class="results-table-wrap">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th scope="col">Scale</th>
+              <th scope="col">Mode</th>
+              <th scope="col" class="num">nDCG@10</th>
+              <th scope="col" class="num">R@10</th>
+              <th scope="col" class="num">R@100</th>
+              <th scope="col" class="num">p50 ms</th>
+              <th scope="col" class="num">p95 ms</th>
+            </tr>
+          </thead>
+          <tbody>
+            {scaleResults.map((row) => (
+              <tr class:list={["results-row", row.winner ? "is-winner" : ""]}>
+                <td class="scale">{row.scale}</td>
+                <td class="mode">
+                  {row.winner && (
+                    <span class="winner-pip" aria-hidden="true">
+                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                        <path d="M2 5l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </span>
+                  )}
+                  <span>{row.mode}</span>
+                </td>
+                <td class="num">{row.ndcg}</td>
+                <td class="num">{row.recall}</td>
+                <td class="num">—</td>
+                <td class="num">—</td>
+                <td class="num">{row.latency}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="results-foot">
+        <div class="results-meta">
+          <div>
+            <span class="meta-key">Source</span>
+            <code>results/benchmark.csv</code>
+          </div>
+          <div>
+            <span class="meta-key">Rows</span>
+            <span>38 — ablations over RRF k, weight sweep, IVFPQ nprobe</span>
+          </div>
+        </div>
+        <a class="btn btn-link" href="https://github.com/sachncs/trivium#headline-results">
+          See full breakdown
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M7 17L17 7M9 7h8v8" />
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="results-insights" data-reveal data-reveal-delay="2">
+      <div class="insight insight-positive">
+        <div class="insight-head">
+          <span class="insight-tag">5K</span>
+          <h3 class="insight-title">Hybrids actually win</h3>
+        </div>
+        <p>
+          Hybrid RRF pulls +0.045 nDCG@10 over BM25 — and +0.057 over pure vector. This is the
+          headline: hybrid wins on the smallest test set, where the dense encoder has full recall
+          and BM25 has full lexical precision.
+        </p>
+      </div>
+      <div class="insight insight-warning">
+        <div class="insight-head">
+          <span class="insight-tag">100K</span>
+          <h3 class="insight-title">The encoder is the bottleneck</h3>
+        </div>
+        <p>
+          At 100K the nDCG ceiling collapses for every method because MiniLM-L6 (22M params)
+          can't pull gold documents out of 95K distractors. The exact dense ceiling is 0.2957;
+          IVFPQ+RFlat drops to 0.1674. Hybrid RRF ties BM25; rerank adds a small +0.015 lift.
+        </p>
+      </div>
+      <div class="insight insight-neutral">
+        <div class="insight-head">
+          <span class="insight-tag">Latency</span>
+          <h3 class="insight-title">Real numbers, not estimates</h3>
+        </div>
+        <p>
+          Cross-encoder rerank costs <strong>~180 ms p95</strong> per query — 5–10× the original
+          estimate. Updating the published number is a finding. Use hybrid_rrf unless you need
+          the last 0.015.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .section-head {
+    max-width: 760px;
+    margin: 0 auto 3rem;
+    text-align: center;
+  }
+  .section-head .eyebrow {
+    margin-bottom: 1rem;
+  }
+  .section-title {
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    letter-spacing: -0.035em;
+    margin-bottom: 1.25rem;
+    text-wrap: balance;
+  }
+  .section-lede {
+    font-size: 1.0625rem;
+    color: rgb(var(--c-text-soft));
+    line-height: 1.65;
+    text-wrap: pretty;
+  }
+  .section-lede strong {
+    color: rgb(var(--c-text));
+    font-weight: 600;
+  }
+  .section-lede code {
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+    padding: 0.15em 0.45em;
+    background: rgb(var(--c-surface-inset));
+    border-radius: 5px;
+  }
+
+  .results-card {
+    background: rgb(var(--c-surface));
+    border: 1px solid rgb(var(--c-border));
+    border-radius: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 12px 32px rgb(15 23 42 / 0.04);
+  }
+  [data-theme="dark"] .results-card {
+    background: rgb(var(--c-surface-raised));
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 12px 32px rgb(0 0 0 / 0.3);
+  }
+  .results-table-wrap {
+    overflow-x: auto;
+  }
+  .results-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    min-width: 720px;
+  }
+  .results-table th {
+    text-align: left;
+    padding: 1rem 1.25rem;
+    font-weight: 500;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgb(var(--c-text-mute));
+    background: rgb(var(--c-surface-sunken));
+    border-bottom: 1px solid rgb(var(--c-border-subtle));
+  }
+  .results-table th.num {
+    text-align: right;
+  }
+  .results-table td {
+    padding: 1rem 1.25rem;
+    color: rgb(var(--c-text));
+    border-bottom: 1px solid rgb(var(--c-border-subtle));
+  }
+  .results-row:last-child td {
+    border-bottom: 0;
+  }
+  .results-table td.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .results-table td.scale {
+    color: rgb(var(--c-text-mute));
+    font-weight: 500;
+  }
+  .results-table td.mode {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .results-row.is-winner td {
+    background: linear-gradient(90deg, rgb(var(--c-brand-50) / 0.5), transparent 60%);
+  }
+  [data-theme="dark"] .results-row.is-winner td {
+    background: linear-gradient(90deg, rgb(var(--c-brand-900) / 0.25), transparent 60%);
+  }
+  .winner-pip {
+    display: inline-grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 9999px;
+    background: rgb(var(--c-brand-600));
+    color: white;
+    flex-shrink: 0;
+  }
+  [data-theme="dark"] .winner-pip {
+    background: rgb(var(--c-brand-400));
+    color: rgb(var(--c-ink-950));
+  }
+  .results-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid rgb(var(--c-border-subtle));
+    background: rgb(var(--c-surface-sunken) / 0.5);
+  }
+  .results-meta {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .results-meta > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .meta-key {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgb(var(--c-text-mute));
+  }
+  .results-meta code {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: rgb(var(--c-text));
+  }
+
+  .results-insights {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 3rem;
+  }
+  @media (max-width: 820px) {
+    .results-insights {
+      grid-template-columns: 1fr;
+    }
+  }
+  .insight {
+    padding: 1.5rem;
+    border: 1px solid rgb(var(--c-border));
+    border-radius: 1rem;
+    background: rgb(var(--c-surface));
+  }
+  [data-theme="dark"] .insight {
+    background: rgb(var(--c-surface-raised));
+  }
+  .insight-head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.85rem;
+  }
+  .insight-tag {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.2rem 0.5rem;
+    border-radius: 9999px;
+    color: rgb(var(--c-text));
+    background: rgb(var(--c-surface-inset));
+  }
+  .insight-positive .insight-tag {
+    background: rgb(var(--c-brand-100));
+    color: rgb(var(--c-brand-800));
+  }
+  [data-theme="dark"] .insight-positive .insight-tag {
+    background: rgb(var(--c-brand-900));
+    color: rgb(var(--c-brand-200));
+  }
+  .insight-warning .insight-tag {
+    background: rgb(var(--c-accent-100));
+    color: rgb(var(--c-accent-800));
+  }
+  [data-theme="dark"] .insight-warning .insight-tag {
+    background: rgb(var(--c-accent-900));
+    color: rgb(var(--c-accent-200));
+  }
+  .insight-title {
+    font-family: var(--font-display);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+  .insight p {
+    font-size: 0.875rem;
+    color: rgb(var(--c-text-soft));
+    line-height: 1.6;
+    margin: 0;
+  }
+  .insight p strong {
+    color: rgb(var(--c-text));
+    font-weight: 600;
+  }
+</style>

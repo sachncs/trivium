@@ -1,0 +1,266 @@
+---
+import { pipelineSteps } from "../lib/results.ts";
+---
+
+<section id="architecture" class="architecture section" aria-labelledby="architecture-title">
+  <div class="container-page">
+    <header class="section-head" data-reveal>
+      <span class="eyebrow">Architecture</span>
+      <h2 id="architecture-title" class="section-title heading-section">
+        One pipeline. Every knob exposed.
+      </h2>
+      <p class="section-lede">
+        trivium wires together a corpus, an embedder, retrievers, a fusion
+        strategy, and a reranker behind a single decorator. Every hyperparameter
+        lives in <code>configs/default.yaml</code>. Every CSV row records the
+        configuration that produced it.
+      </p>
+    </header>
+
+    <div class="pipeline" data-reveal data-reveal-delay="1">
+      <div class="pipeline-track" role="list">
+        {pipelineSteps.map((step, i) => (
+          <div class="pipeline-step" role="listitem" style={`--i: ${i}`}>
+            <div class="step-num">{String(i + 1).padStart(2, "0")}</div>
+            <div class="step-label">{step.label}</div>
+            <div class="step-description">{step.description}</div>
+          </div>
+        ))}
+      </div>
+      <div class="pipeline-line" aria-hidden="true"></div>
+    </div>
+
+    <div class="arch-grid">
+      <article class="arch-card" data-reveal data-reveal-delay="1">
+        <div class="arch-card-head">
+          <span class="arch-tag arch-tag-brand">Retrievers</span>
+          <h3 class="arch-card-title">Pick two, fuse them</h3>
+        </div>
+        <p>
+          BM25 (bm25s, Lucene defaults) and Faiss (Flat, IVFPQ, OPQ + RFlat) are
+          first-class retrievers. The retriever contract returns
+          <code>list[SearchResult]</code> with hits, scores, and latency.
+        </p>
+        <div class="arch-list">
+          <code>Bm25(method="lucene", k1=0.9, b=0.4)</code>
+          <code>Faiss.Flat(metric="ip")</code>
+          <code>Faiss.IVFPQ(nlist, m=48, nbits=4)</code>
+        </div>
+      </article>
+
+      <article class="arch-card" data-reveal data-reveal-delay="2">
+        <div class="arch-card-head">
+          <span class="arch-tag arch-tag-accent">Fusion</span>
+          <h3 class="arch-card-title">Cormack et al. 2009</h3>
+        </div>
+        <p>
+          RRF is the default. <code>score(d) = Σ wᵢ / (k + rankᵢ(d))</code>. Sweep
+          over k ∈ {10, 30, 60, 100, 200} and weights ∈ {(0.5,0.5), (0.3,0.7),
+          (0.7,0.3)}. The Pareto frontier lives in the CSV.
+        </p>
+        <div class="arch-list">
+          <code>Rrf(k=60).fuse(ranker_lists, top_k=50)</code>
+          <code>WeightedRrf(weights=(0.4, 0.6))</code>
+          <code>Custom fusion via registry</code>
+        </div>
+      </article>
+
+      <article class="arch-card" data-reveal data-reveal-delay="3">
+        <div class="arch-card-head">
+          <span class="arch-tag arch-tag-ink">Reranking</span>
+          <h3 class="arch-card-title">Cross-encoder at the gate</h3>
+        </div>
+        <p>
+          Rerankers run on the fused top-50 and emit top-10. The MiniLM-L6 CE costs
+          ~180 ms p95; BGE-large adds more lift; MonoT5-3B is a published ceiling
+          we don't run by default.
+        </p>
+        <div class="arch-list">
+          <code>get_reranker("minilm-ce")</code>
+          <code>get_reranker("bge-large")</code>
+          <code>get_reranker("monot5-3b")</code>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<style>
+  .pipeline {
+    position: relative;
+    margin-bottom: 3rem;
+  }
+  .pipeline-track {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.75rem;
+    position: relative;
+    z-index: 1;
+  }
+  @media (max-width: 980px) {
+    .pipeline-track {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 540px) {
+    .pipeline-track {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .pipeline-line {
+    position: absolute;
+    top: 50%;
+    left: 4%;
+    right: 4%;
+    height: 1px;
+    background: linear-gradient(90deg, rgb(var(--c-brand-300)) 0%, rgb(var(--c-accent-300)) 100%);
+    z-index: 0;
+  }
+  @media (max-width: 980px) {
+    .pipeline-line {
+      display: none;
+    }
+  }
+  .pipeline-step {
+    padding: 1.25rem 1rem;
+    background: rgb(var(--c-surface));
+    border: 1px solid rgb(var(--c-border));
+    border-radius: 1rem;
+    transition: all 0.3s var(--ease-smooth);
+    position: relative;
+  }
+  [data-theme="dark"] .pipeline-step {
+    background: rgb(var(--c-surface-raised));
+  }
+  .pipeline-step:hover {
+    border-color: rgb(var(--c-brand-400));
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgb(67 56 202 / 0.08);
+  }
+  .step-num {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: rgb(var(--c-brand-600));
+    margin-bottom: 0.5rem;
+  }
+  [data-theme="dark"] .step-num {
+    color: rgb(var(--c-brand-300));
+  }
+  .step-label {
+    font-family: var(--font-display);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: rgb(var(--c-text));
+    margin-bottom: 0.4rem;
+  }
+  .step-description {
+    font-size: 0.8125rem;
+    color: rgb(var(--c-text-mute));
+    line-height: 1.5;
+  }
+
+  .arch-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  @media (max-width: 980px) {
+    .arch-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .arch-card {
+    padding: 1.75rem;
+    background: rgb(var(--c-surface));
+    border: 1px solid rgb(var(--c-border));
+    border-radius: 1.25rem;
+    transition: all 0.3s var(--ease-smooth);
+  }
+  [data-theme="dark"] .arch-card {
+    background: rgb(var(--c-surface-raised));
+  }
+  .arch-card:hover {
+    border-color: rgb(var(--c-border-strong));
+  }
+  .arch-card-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    margin-bottom: 1rem;
+  }
+  .arch-tag {
+    align-self: flex-start;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.25rem 0.55rem;
+    border-radius: 9999px;
+  }
+  .arch-tag-brand {
+    background: rgb(var(--c-brand-100));
+    color: rgb(var(--c-brand-800));
+  }
+  [data-theme="dark"] .arch-tag-brand {
+    background: rgb(var(--c-brand-900));
+    color: rgb(var(--c-brand-200));
+  }
+  .arch-tag-accent {
+    background: rgb(var(--c-accent-100));
+    color: rgb(var(--c-accent-800));
+  }
+  [data-theme="dark"] .arch-tag-accent {
+    background: rgb(var(--c-accent-900));
+    color: rgb(var(--c-accent-200));
+  }
+  .arch-tag-ink {
+    background: rgb(var(--c-ink-100));
+    color: rgb(var(--c-ink-800));
+  }
+  [data-theme="dark"] .arch-tag-ink {
+    background: rgb(var(--c-ink-800));
+    color: rgb(var(--c-ink-200));
+  }
+  .arch-card-title {
+    font-family: var(--font-display);
+    font-size: 1.1875rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .arch-card p {
+    font-size: 0.9375rem;
+    color: rgb(var(--c-text-soft));
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  .arch-card p code {
+    font-family: var(--font-mono);
+    font-size: 0.86em;
+    padding: 0.1em 0.35em;
+    background: rgb(var(--c-surface-inset));
+    border-radius: 4px;
+  }
+  .arch-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .arch-list code {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    background: rgb(var(--c-surface-sunken));
+    border: 1px solid rgb(var(--c-border-subtle));
+    border-radius: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: rgb(var(--c-text));
+    line-height: 1.5;
+    overflow-x: auto;
+  }
+  [data-theme="dark"] .arch-list code {
+    background: rgb(var(--c-ink-950));
+  }
+</style>

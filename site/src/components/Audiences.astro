@@ -1,0 +1,92 @@
+---
+import { audiences } from "../lib/results.ts";
+---
+
+<section id="audiences" class="audiences section" aria-labelledby="audiences-title">
+  <div class="container-page">
+    <header class="section-head" data-reveal>
+      <span class="eyebrow">Built for</span>
+      <h2 id="audiences-title" class="section-title heading-section">
+        Three kinds of people.
+        <br />
+        <span class="text-gradient">One benchmark.</span>
+      </h2>
+    </header>
+
+    <div class="audiences-grid">
+      {audiences.map((a, i) => (
+        <article class="audience-card" data-reveal data-reveal-delay={(i + 1).toString()}>
+          <div class="audience-num">{String(i + 1).padStart(2, "0")}</div>
+          <h3 class="audience-title">{a.title}</h3>
+          <p class="audience-description">{a.description}</p>
+          <div class="audience-detail">{a.detail}</div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .audiences-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  @media (max-width: 980px) {
+    .audiences-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .audience-card {
+    position: relative;
+    padding: 2rem 1.75rem;
+    background: rgb(var(--c-surface));
+    border: 1px solid rgb(var(--c-border));
+    border-radius: 1.25rem;
+    transition: all 0.3s var(--ease-smooth);
+  }
+  [data-theme="dark"] .audience-card {
+    background: rgb(var(--c-surface-raised));
+  }
+  .audience-card:hover {
+    border-color: rgb(var(--c-border-strong));
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgb(15 23 42 / 0.04);
+  }
+  [data-theme="dark"] .audience-card:hover {
+    box-shadow: 0 12px 32px rgb(0 0 0 / 0.3);
+  }
+  .audience-num {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    color: rgb(var(--c-text-mute));
+    margin-bottom: 1.25rem;
+  }
+  .audience-title {
+    font-family: var(--font-display);
+    font-size: 1.4375rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: rgb(var(--c-text));
+    margin-bottom: 0.85rem;
+  }
+  .audience-description {
+    font-size: 0.9375rem;
+    color: rgb(var(--c-text-soft));
+    line-height: 1.65;
+    margin-bottom: 1.25rem;
+  }
+  .audience-detail {
+    padding: 0.85rem 1rem;
+    background: rgb(var(--c-surface-sunken));
+    border-radius: 0.75rem;
+    border-left: 2px solid rgb(var(--c-brand-500));
+    font-size: 0.8125rem;
+    color: rgb(var(--c-text-soft));
+    font-style: italic;
+  }
+  [data-theme="dark"] .audience-detail {
+    background: rgb(var(--c-surface-sunken));
+  }
+</style>
