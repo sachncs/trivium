@@ -41,10 +41,8 @@ jobs:
         env:
           NODE_ENV: production
 
-      - name: Prepare artifact
-        run: |
-          touch site/dist/.nojekyll
-          find site/dist -type f -name "*.html" -exec sed -i 's|/@fs/Users/[^"]*||g' {} \;
+      - name: Add .nojekyll
+        run: touch site/dist/.nojekyll
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -64,7 +62,7 @@ jobs:
           name: trivium-site
           path: dist
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
