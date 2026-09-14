@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -41,13 +41,17 @@ jobs:
         env:
           NODE_ENV: production
 
-      - name: Add .nojekyll
-        run: touch site/dist/.nojekyll
+      - name: Prepare artifact
+        run: |
+          touch site/dist/.nojekyll
+          find site/dist -type f -name "*.html" -exec sed -i 's|/@fs/Users/[^"]*||g' {} \;
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
+          name: trivium-site
           path: site/dist
+          retention-days: 7
 
   deploy:
     name: Deploy to GitHub Pages
@@ -55,8 +59,19 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: trivium-site
+          path: dist
+
       - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: gh-pages
+          force_orphan: true
+          user_name: trivium-bot
+          user_email: trivium@users.noreply.github.com
