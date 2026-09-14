@@ -1,0 +1,263 @@
+---
+import { Code } from "astro:components";
+
+const apiSnippet = `from trivium.retrieval.bm25 import Bm25
+from trivium.retrieval.faiss import Faiss
+from trivium.fusion.rrf import Rrf
+from trivium.reranking.registry import get_reranker
+
+# 1. Build a BM25 retriever
+bm25 = Bm25()
+bm25.add_documents(your_docs)
+
+# 2. Build a dense retriever
+vec = Faiss.Flat()
+vec.add_documents(your_docs, vectors=your_vectors)
+
+# 3. Search in parallel
+bm25_results = bm25.search(queries, k=100)
+vec_results   = vec.search(query_vecs, k=100)
+
+# 4. Fuse with Reciprocal Rank Fusion
+fused = Rrf(k=60).fuse([bm25_results, vec_results], top_k=50)
+candidates = [doc_lookup[h.doc_id] for h in fused]
+
+# 5. Rerank with a cross-encoder (optional)
+reranker = get_reranker("bge-large")
+final   = reranker.rerank(query_text, candidates, top_k=10)`;
+
+const registrySnippet = `# A new pipeline mode is one decorator away.
+from trivium.pipelines.registry import register_pipeline
+
+@register_pipeline("hybrid_rrf_v2")
+def hybrid_rrf_v2(query, docs, weights=(0.4, 0.6), k=60):
+    bm25_hits = bm25.search([query], k=100)[0]
+    vec_hits  = vec.search([embed(query)], k=100)[0]
+    return weighted_rrf([bm25_hits, vec_hits], weights=weights, k=k)
+`;
+
+const benchSnippet = `$ trivium-benchmark \\
+      --modes bm25,vector,hybrid_rrf,hybrid_rerank \\
+      --scales 5000,100000 \\
+      --output results/benchmark.csv
+
+[pre-flight] bm25 nDCG@10 = 0.6781 ✓ (target 0.6789 ± 0.03)
+[5K]    bm25           nDCG@10=0.6569   R@10=0.7784   p95=0.9 ms
+[5K]    vector (flat)  nDCG@10=0.6451   R@10=0.7833   p95=0.1 ms
+[5K]    hybrid_rrf     nDCG@10=0.7016   R@10=0.8482   p95=1.1 ms
+[100K]  hybrid_rrf     nDCG@10=0.3232   R@10=0.3796   p95=6.8 ms
+[100K]  hybrid_rerank  nDCG@10=0.3362   R@10=0.3871   p95=187.7 ms
+`;
+---
+
+<style is:global>
+  /* Custom Shiki theme — matches the brand dark surface. */
+  .astro-code,
+  .astro-code span {
+    color: var(--shiki-dark, #e1e4e8) !important;
+    background-color: var(--shiki-dark-bg, transparent) !important;
+    font-style: var(--shiki-dark-font-style) !important;
+    font-weight: var(--shiki-dark-font-weight) !important;
+    text-decoration: var(--shiki-dark-text-decoration) !important;
+  }
+</style>
+
+<section id="api" class="api section" aria-labelledby="api-title">
+  <div class="container-page">
+    <div class="api-layout">
+      <div class="api-copy" data-reveal>
+        <span class="eyebrow">The public API</span>
+        <h2 id="api-title" class="section-title heading-section">
+          A library, not a notebook.
+        </h2>
+        <p class="section-lede">
+          Composable primitives that work the same way whether you're benchmarking
+          against BEIR or running in production. Same retriever ABC, same fusion
+          contract, same reranker interface.
+        </p>
+        <ul class="api-bullets">
+          <li>
+            <strong>Same retriever ABC.</strong>
+            <span>Bm25, Faiss.Flat, Faiss.IVFPQ, DiskBBQ all return <code>list[SearchResult]</code>.</span>
+          </li>
+          <li>
+            <strong>Fuse anything.</strong>
+            <span>RRF, weighted RRF, custom ranker — all the same <code>fuse()</code> signature.</span>
+          </li>
+          <li>
+            <strong>One decorator.</strong>
+            <span>Add a new pipeline mode with <code>@register_pipeline("name")</code>; no elif chains.</span>
+          </li>
+        </ul>
+        <div class="api-actions">
+          <a class="btn btn-primary" href="https://github.com/sachncs/trivium#installation" rel="noopener">
+            <span>Read the docs</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M7 17L17 7M9 7h8v8" />
+            </svg>
+          </a>
+          <a class="btn btn-secondary" href="https://github.com/sachncs/trivium/blob/main/README.md" rel="noopener">
+            <span>Full README</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="api-snippets" data-reveal data-reveal-delay="1">
+        <div class="snippet-tab-bar">
+          <button type="button" class="snippet-tab is-active" data-tab="api">api.py</button>
+          <button type="button" class="snippet-tab" data-tab="registry">add_pipeline.py</button>
+          <button type="button" class="snippet-tab" data-tab="bench">terminal</button>
+        </div>
+
+        <div class="snippet-pane is-active" data-pane="api">
+          <Code code={apiSnippet} lang="python" theme="github-dark" />
+        </div>
+        <div class="snippet-pane" data-pane="registry">
+          <Code code={registrySnippet} lang="python" theme="github-dark" />
+        </div>
+        <div class="snippet-pane" data-pane="bench">
+          <Code code={benchSnippet} lang="bash" theme="github-dark" />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Tab switching for snippet panes
+  const tabs = document.querySelectorAll<HTMLButtonElement>(".snippet-tab");
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const target = tab.getAttribute("data-tab");
+      if (!target) return;
+      tabs.forEach((t) => t.classList.toggle("is-active", t === tab));
+      document.querySelectorAll<HTMLElement>(".snippet-pane").forEach((p) => {
+        p.classList.toggle("is-active", p.getAttribute("data-pane") === target);
+      });
+    });
+  });
+</script>
+
+<style>
+  .api-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
+    gap: clamp(2rem, 4vw, 4rem);
+    align-items: center;
+  }
+  @media (max-width: 980px) {
+    .api-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+  .api-copy .eyebrow {
+    margin-bottom: 1rem;
+  }
+  .api-copy .section-title {
+    text-align: left;
+    margin-bottom: 1.25rem;
+    font-size: clamp(2rem, 4.5vw, 2.875rem);
+  }
+  .api-copy .section-lede {
+    text-align: left;
+    margin-bottom: 2rem;
+  }
+  .api-bullets {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+  .api-bullets li {
+    padding-left: 1.5rem;
+    position: relative;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+  }
+  .api-bullets li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.55rem;
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background: rgb(var(--c-brand-500));
+  }
+  .api-bullets strong {
+    color: rgb(var(--c-text));
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.1rem;
+  }
+  .api-bullets span {
+    color: rgb(var(--c-text-soft));
+  }
+  .api-bullets code {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    padding: 0.1em 0.35em;
+    background: rgb(var(--c-surface-inset));
+    border-radius: 4px;
+  }
+  .api-actions {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .api-snippets {
+    background: rgb(var(--c-ink-950));
+    border-radius: 1.25rem;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.2), 0 24px 48px -8px rgb(0 0 0 / 0.4);
+    border: 1px solid rgb(var(--c-ink-800));
+  }
+  .snippet-tab-bar {
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.65rem 0.65rem 0;
+    border-bottom: 1px solid rgb(30 41 59);
+    background: rgb(15 23 42);
+  }
+  .snippet-tab {
+    background: transparent;
+    color: rgb(148 163 184);
+    border: 0;
+    padding: 0.45rem 0.85rem;
+    border-radius: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    cursor: pointer;
+    transition: all 0.2s var(--ease-smooth);
+  }
+  .snippet-tab:hover {
+    color: rgb(226 232 240);
+  }
+  .snippet-tab.is-active {
+    background: rgb(30 41 59);
+    color: rgb(241 245 249);
+  }
+  .snippet-pane {
+    display: none;
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+  .snippet-pane.is-active {
+    display: block;
+  }
+  .snippet-pane :global(pre) {
+    margin: 0 !important;
+    padding: 1.5rem !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    font-family: var(--font-mono) !important;
+    overflow-x: auto;
+  }
+  .snippet-pane :global(code) {
+    font-family: var(--font-mono) !important;
+    font-size: inherit !important;
+  }
+</style>

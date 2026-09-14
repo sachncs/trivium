@@ -1,0 +1,136 @@
+---
+import "../styles/global.css";
+
+export interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  pageClass?: string;
+}
+
+const {
+  title = "trivium — The reproducible benchmark for hybrid search",
+  description = "A reproducible benchmark for hybrid search engines — BM25 + dense vector + cross-encoder rerank — on distractor-augmented BEIR scifact. Honest numbers, defensible methodology.",
+  ogImage = "/_assets/og.svg",
+  pageClass = "",
+} = Astro.props as Props;
+
+const siteUrl = Astro.site?.toString().replace(/\/$/, "") ?? "";
+const canonicalURL = new URL(Astro.url.pathname, siteUrl).toString();
+const ogImageURL = new URL(Astro.url.pathname.replace(/\/$/, "") + ogImage, siteUrl).toString();
+const basePath = Astro.url.pathname.endsWith("/") ? Astro.url.pathname : Astro.url.pathname + "/";
+---
+
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="keywords" content="hybrid search, BM25, FAISS, BEIR, scifact, cross-encoder, reranker, RRF, information retrieval, benchmark, trivium" />
+    <meta name="author" content="Sachin" />
+    <link rel="canonical" href={canonicalURL} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageURL} />
+    <meta property="og:site_name" content="trivium" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
+
+    <link rel="icon" type="image/svg+xml" href={`${basePath}favicon.svg`} />
+    <link rel="alternate icon" href={`${basePath}favicon.svg`} />
+    <link rel="sitemap" href={`${basePath}sitemap-index.xml`} />
+    <link rel="alternate" type="application/rss+xml" title="trivium" href={`${basePath}rss.xml`} />
+
+    <link rel="preconnect" href="https://rsms.me" crossorigin />
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+
+    <script is:inline>
+      // Inline theme bootstrap — runs before paint to avoid FOUC.
+      (function () {
+        try {
+          var stored = localStorage.getItem("trivium-theme");
+          var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+          var theme = stored || (prefersDark ? "dark" : "light");
+          document.documentElement.setAttribute("data-theme", theme);
+        } catch (_e) {
+          /* no-op */
+        }
+      })();
+    </script>
+  </head>
+  <body class={pageClass}>
+    <slot />
+    <script>
+      // Smooth scroll for anchor links with offset for sticky header.
+      document.addEventListener(
+        "click",
+        (e) => {
+          const target = e.target as HTMLElement | null;
+          if (!target) return;
+          const anchor = target.closest('a[href^="#"]') as HTMLAnchorElement | null;
+          if (!anchor) return;
+          const href = anchor.getAttribute("href");
+          if (!href || href === "#") return;
+          const el = document.querySelector(href);
+          if (!el) return;
+          e.preventDefault();
+          const offset = 72;
+          const top = (el as HTMLElement).getBoundingClientRect().top + window.scrollY - offset;
+          window.scrollTo({ top, behavior: "smooth" });
+        },
+        { passive: false }
+      );
+
+      // Reveal-on-scroll using IntersectionObserver.
+      const reveal = () => {
+        const items = document.querySelectorAll<HTMLElement>("[data-reveal]");
+        if (!items.length) return;
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("is-visible");
+                io.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
+        );
+        items.forEach((el) => io.observe(el));
+      };
+      reveal();
+      document.addEventListener("astro:page-load", reveal);
+
+      // Theme toggle (button with [data-theme-toggle]).
+      const wireToggle = () => {
+        const toggle = document.querySelector<HTMLButtonElement>("[data-theme-toggle]");
+        if (!toggle) return;
+        toggle.addEventListener("click", () => {
+          const current = document.documentElement.getAttribute("data-theme") || "light";
+          const next = current === "dark" ? "light" : "dark";
+          document.documentElement.setAttribute("data-theme", next);
+          try {
+            localStorage.setItem("trivium-theme", next);
+          } catch (_e) {
+            /* no-op */
+          }
+        });
+      };
+      wireToggle();
+      document.addEventListener("astro:page-load", wireToggle);
+    </script>
+  </body>
+</html>

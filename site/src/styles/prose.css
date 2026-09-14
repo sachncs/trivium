@@ -1,0 +1,63 @@
+/* =============================================================================
+   Prose — used for any narrative content blocks.
+   ============================================================================= */
+
+@layer components {
+  .prose-trivium {
+    color: rgb(var(--c-text-soft));
+    line-height: 1.7;
+    font-size: 1rem;
+  }
+  .prose-trivium h2 {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-block: 2rem 1rem;
+    color: rgb(var(--c-text));
+  }
+  .prose-trivium h3 {
+    font-family: var(--font-display);
+    font-size: 1.375rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    margin-block: 1.5rem 0.75rem;
+    color: rgb(var(--c-text));
+  }
+  .prose-trivium p {
+    margin-block: 1rem;
+  }
+  .prose-trivium a {
+    color: rgb(var(--c-brand-700));
+    text-decoration: underline;
+    text-decoration-color: rgb(var(--c-brand-200));
+    text-underline-offset: 3px;
+    transition: text-decoration-color var(--dur-2) var(--ease-smooth);
+  }
+  [data-theme="dark"] .prose-trivium a {
+    color: rgb(var(--c-brand-300));
+    text-decoration-color: rgb(var(--c-brand-700));
+  }
+  .prose-trivium a:hover {
+    text-decoration-color: currentColor;
+  }
+  .prose-trivium code {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    padding: 0.15em 0.4em;
+    background: rgb(var(--c-surface-sunken));
+    border-radius: 6px;
+    border: 1px solid rgb(var(--c-border-subtle));
+  }
+  [data-theme="dark"] .prose-trivium code {
+    background: rgb(var(--c-surface-inset));
+  }
+  .prose-trivium ul {
+    list-style: disc;
+    padding-left: 1.25rem;
+    margin-block: 1rem;
+  }
+  .prose-trivium li {
+    margin-block: 0.5rem;
+  }
+}

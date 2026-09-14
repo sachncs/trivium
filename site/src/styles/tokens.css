@@ -1,0 +1,129 @@
+/* =============================================================================
+   Design tokens — single source of truth for colors, type, spacing.
+   RGB triplets so Tailwind can compose alpha via rgb(var(...) / <alpha-value>).
+   Light is the default; dark is opted in via [data-theme="dark"].
+   ============================================================================= */
+
+:root {
+  /* Surface (light) */
+  --c-surface: 255 255 255;
+  --c-surface-raised: 255 255 255;
+  --c-surface-sunken: 248 250 252;
+  --c-surface-inset: 241 245 249;
+
+  /* Ink / text scale (light) */
+  --c-ink-50: 248 250 252;
+  --c-ink-100: 241 245 249;
+  --c-ink-200: 226 232 240;
+  --c-ink-300: 203 213 225;
+  --c-ink-400: 148 163 184;
+  --c-ink-500: 100 116 139;
+  --c-ink-600: 71 85 105;
+  --c-ink-700: 51 65 85;
+  --c-ink-800: 30 41 59;
+  --c-ink-900: 15 23 42;
+  --c-ink-950: 2 6 23;
+
+  /* Borders (light) */
+  --c-border: 226 232 240;
+  --c-border-subtle: 241 245 249;
+  --c-border-strong: 203 213 225;
+
+  /* Text */
+  --c-text: 15 23 42;
+  --c-text-soft: 51 65 85;
+  --c-text-mute: 100 116 139;
+  --c-text-faint: 148 163 184;
+
+  /* Brand — deep indigo, refined */
+  --c-brand-50: 238 242 255;
+  --c-brand-100: 224 231 255;
+  --c-brand-200: 199 210 254;
+  --c-brand-300: 165 180 252;
+  --c-brand-400: 129 140 248;
+  --c-brand-500: 99 102 241;
+  --c-brand-600: 79 70 229;
+  --c-brand-700: 67 56 202;
+  --c-brand-800: 55 48 163;
+  --c-brand-900: 49 46 129;
+  --c-brand-950: 30 27 75;
+
+  /* Accent — warm orange / ember */
+  --c-accent-50: 255 247 237;
+  --c-accent-100: 255 237 213;
+  --c-accent-200: 254 215 170;
+  --c-accent-300: 253 186 116;
+  --c-accent-400: 251 146 60;
+  --c-accent-500: 249 115 22;
+  --c-accent-600: 234 88 12;
+  --c-accent-700: 194 65 12;
+  --c-accent-800: 154 52 18;
+  --c-accent-900: 124 45 18;
+
+  /* Typography */
+  --font-sans: "Inter var", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Inter Display var", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono var", "JetBrains Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Layout */
+  --max-content: 1280px;
+  --max-narrow: 960px;
+  --max-prose: 68ch;
+  --header-height: 64px;
+  --radius-card: 1.25rem;
+  --radius-pill: 9999px;
+
+  /* Motion */
+  --ease-smooth: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-1: 150ms;
+  --dur-2: 240ms;
+  --dur-3: 380ms;
+  --dur-4: 600ms;
+}
+
+[data-theme="dark"] {
+  --c-surface: 9 12 24;
+  --c-surface-raised: 15 19 35;
+  --c-surface-sunken: 5 8 18;
+  --c-surface-inset: 20 25 43;
+
+  --c-ink-50: 248 250 252;
+  --c-ink-100: 241 245 249;
+  --c-ink-200: 226 232 240;
+  --c-ink-300: 203 213 225;
+  --c-ink-400: 148 163 184;
+  --c-ink-500: 100 116 139;
+  --c-ink-600: 71 85 105;
+  --c-ink-700: 51 65 85;
+  --c-ink-800: 30 41 59;
+  --c-ink-900: 15 23 42;
+  --c-ink-950: 2 6 23;
+
+  --c-border: 30 41 59;
+  --c-border-subtle: 22 28 48;
+  --c-border-strong: 51 65 85;
+
+  --c-text: 241 245 249;
+  --c-text-soft: 203 213 225;
+  --c-text-mute: 148 163 184;
+  --c-text-faint: 100 116 139;
+
+  --c-brand-50: 30 27 75;
+  --c-brand-100: 49 46 129;
+  --c-brand-200: 55 48 163;
+  --c-brand-300: 67 56 202;
+  --c-brand-400: 79 70 229;
+  --c-brand-500: 99 102 241;
+  --c-brand-600: 129 140 248;
+  --c-brand-700: 165 180 252;
+  --c-brand-800: 199 210 254;
+  --c-brand-900: 224 231 255;
+  --c-brand-950: 238 242 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+  }
+}

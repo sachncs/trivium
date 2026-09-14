@@ -16,3 +16,11 @@ htmlcov/
 .mypy_cache/
 .ruff_cache/
 _site/
+
+# site build artifacts
+site/node_modules/
+site/dist/
+site/.astro/
+site/.cache/
+site/.env
+site/.env.production
