@@ -76,7 +76,7 @@ class Sentence(Embedder):
     def warmup(self, sample_texts: Sequence[str] = ("warmup",)) -> None:
         if self.model is None:
             self.ensure_model()
-        _ = self.model.encode(
+        self.model.encode(
             list(sample_texts),
             batch_size=self.batch_size,
             show_progress_bar=False,
