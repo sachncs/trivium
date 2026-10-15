@@ -3,6 +3,7 @@
 Replaces data/prepare.py:load_seed_corpus. The scifact zip is
 fetched once from the BEIR UKP server and cached locally.
 """
+
 from __future__ import annotations
 
 from trivium.domain.document import Document
@@ -41,7 +42,9 @@ def load_scifact_queries_and_qrels() -> tuple[list[dict], list[dict]]:
         "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/scifact.zip",
         "data/cache/beir_raw",
     )
-    corpus, queries, qrels = GenericDataLoader(data_folder=data_path).load(split="test")
+    corpus_data, queries, qrels = GenericDataLoader(data_folder=data_path).load(split="test")
+    if not corpus_data:
+        raise ValueError("BEIR scifact corpus is empty")
     qids = list(queries.keys())
     out_queries = [{"id": qid, "text": queries[qid]} for qid in qids]
     out_qrels = []

@@ -26,6 +26,7 @@ on packed uint8 codes (m/8 bytes per vector).
 Optional RFlat: re-rank top `k_factor * k` candidates with the exact
 inner product against `.floats`.
 """
+
 from __future__ import annotations
 
 import json
@@ -78,11 +79,11 @@ class Bbq(Retriever):
         self.doc_ids: list[str] = []
         self.list_files: dict[int, dict[str, Path]] = {}
         self.list_handles: dict[int, dict[str, object]] = {}
-        self._memmaps: list[object] = []
+        self.memmaps: list[object] = []
 
-        self._ram_codes: dict[int, np.ndarray] | None = None
-        self._ram_ids: dict[int, np.ndarray] | None = None
-        self._ram_floats: dict[int, np.ndarray] | None = None
+        self.ram_codes: dict[int, np.ndarray] | None = None
+        self.ram_ids: dict[int, np.ndarray] | None = None
+        self.ram_floats: dict[int, np.ndarray] | None = None
 
     @property
     def slug(self) -> str:
@@ -111,7 +112,7 @@ class Bbq(Retriever):
         self.dim = int(dim)
         self.doc_ids = [d.doc_id for d in documents]
 
-        nlist = self.nlist or self._default_nlist(n)
+        nlist = self.nlist or self.default_nlist(n)
         self.nlist = int(nlist)
 
         self.out_dir.mkdir(parents=True, exist_ok=True)
@@ -122,8 +123,8 @@ class Bbq(Retriever):
         for old in self.out_dir.glob("list_*.floats.npy"):
             old.unlink()
 
-        self.centroids = self._train_coarse(arr)
-        assignments = self._assign_lists(arr, self.centroids)
+        self.centroids = self.train_coarse(arr)
+        assignments = self.assign_lists(arr, self.centroids)
 
         codes_ram: dict[int, np.ndarray] = {}
         ids_ram: dict[int, np.ndarray] = {}
@@ -140,8 +141,10 @@ class Bbq(Retriever):
                 continue
 
             list_vecs = arr[idx]
-            codes, thresholds_for_list = self._pack_binary_codes(list_vecs)
-            self._write_list(
+            codes, thresholds_for_list = self.pack_binary_codes(list_vecs)
+            if thresholds_for_list.shape != (self.m,):
+                raise ValueError("binary quantization thresholds have an unexpected shape")
+            self.write_list(
                 cid,
                 ids=np.arange(n, dtype=np.int64)[idx],
                 codes=codes,
@@ -149,18 +152,20 @@ class Bbq(Retriever):
             )
             codes_ram[cid] = codes
             ids_ram[cid] = np.arange(n, dtype=np.int64)[idx]
-            floats_ram[cid] = list_vecs if self.use_rescore else np.empty((0, self.dim), dtype=np.float32)
+            floats_ram[cid] = (
+                list_vecs if self.use_rescore else np.empty((0, self.dim), dtype=np.float32)
+            )
             list_sizes.append(int(idx.size))
 
-        self.thresholds = self._compute_thresholds(arr, assignments)
+        self.thresholds = self.compute_thresholds(arr, assignments)
         np.save(self.out_dir / "centroids.npy", self.centroids.astype(np.float32))
         np.save(self.out_dir / "subvector_thresholds.npy", self.thresholds.astype(np.float32))
-        self._write_metadata(list_sizes)
+        self.write_metadata(list_sizes)
 
-        self._ram_codes = codes_ram
-        self._ram_ids = ids_ram
-        self._ram_floats = floats_ram
-        self.list_files = self._discover_list_files()
+        self.ram_codes = codes_ram
+        self.ram_ids = ids_ram
+        self.ram_floats = floats_ram
+        self.list_files = self.discover_list_files()
         self.list_handles = {}
 
     def search(
@@ -185,10 +190,10 @@ class Bbq(Retriever):
         if arr.ndim == 1:
             arr = arr.reshape(1, -1)
 
-        effective_mode = self._resolve_mode(mode)
+        effective_mode = self.resolve_mode(mode)
         if effective_mode == "ram":
-            return self._ram_search(arr, k)
-        return self._disk_search(arr, k)
+            return self.ram_search(arr, k)
+        return self.disk_search(arr, k)
 
     def set_search_params(self, **params) -> None:
         if "nprobe" in params:
@@ -226,17 +231,17 @@ class Bbq(Retriever):
         return json.loads(path.read_text())
 
     def close(self) -> None:
-        for mm in self._memmaps:
+        for mm in self.memmaps:
             try:
                 close = getattr(mm, "close", None)
                 if callable(close):
                     close()
             except Exception:
                 pass
-        self._memmaps = []
+        self.memmaps = []
         self.list_handles = {}
 
-    def _resolve_mode(self, mode: SearchMode) -> SearchMode:
+    def resolve_mode(self, mode: SearchMode) -> SearchMode:
         if mode == "auto":
             return "disk" if self.size_bytes() >= self.auto_disk_threshold_bytes else "ram"
         if mode in ("ram", "disk"):
@@ -244,12 +249,12 @@ class Bbq(Retriever):
         raise ValueError(f"unknown search mode {mode!r}; expected 'ram', 'disk', or 'auto'")
 
     @staticmethod
-    def _default_nlist(n: int) -> int:
+    def default_nlist(n: int) -> int:
         """4·sqrt(N) rounded up to the next power of 2 (FAISS wiki recipe)."""
         raw = max(1, int(4 * np.sqrt(n)))
         return 1 << (raw - 1).bit_length()
 
-    def _train_coarse(self, vectors: np.ndarray) -> np.ndarray:
+    def train_coarse(self, vectors: np.ndarray) -> np.ndarray:
         """Train k-means centroids; seeded for reproducibility.
 
         Uses the numpy fallback path directly. FAISS Kmeans hangs on
@@ -286,7 +291,7 @@ class Bbq(Retriever):
         return centroids.astype(np.float32)
 
     @staticmethod
-    def _assign_lists(vectors: np.ndarray, centroids: np.ndarray) -> list[np.ndarray]:
+    def assign_lists(vectors: np.ndarray, centroids: np.ndarray) -> list[np.ndarray]:
         """Argmin-distance partition; returns list of index arrays."""
         diffs = vectors[:, None, :] - centroids[None, :, :]
         dists = (diffs * diffs).sum(axis=2)
@@ -294,7 +299,7 @@ class Bbq(Retriever):
         nlist = centroids.shape[0]
         return [np.where(assign == cid)[0] for cid in range(nlist)]
 
-    def _pack_binary_codes(self, list_vectors: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    def pack_binary_codes(self, list_vectors: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """Split into m subvectors; per-subvector mean → 1-bit codes packed in uint8.
 
         Returns (codes (|list|, m*chunk/8) uint8, thresholds (m,) float32 for THIS list).
@@ -302,7 +307,9 @@ class Bbq(Retriever):
         `thresholds` (mean over all vectors) is.
         """
         if list_vectors.shape[0] == 0:
-            return np.empty((0, (self.dim // self.m) * self.m // 8), dtype=np.uint8), np.zeros(self.m, dtype=np.float32)
+            return np.empty((0, (self.dim // self.m) * self.m // 8), dtype=np.uint8), np.zeros(
+                self.m, dtype=np.float32
+            )
         n, dim = list_vectors.shape
         chunk = dim // self.m
         reshaped = list_vectors.reshape(n, self.m, chunk)
@@ -312,7 +319,7 @@ class Bbq(Retriever):
         codes = np.packbits(bits, axis=1).astype(np.uint8)
         return codes, thresholds
 
-    def _compute_thresholds(self, vectors: np.ndarray, assignments: list[np.ndarray]) -> np.ndarray:
+    def compute_thresholds(self, vectors: np.ndarray, assignments: list[np.ndarray]) -> np.ndarray:
         """Global per-subvector mean over all vectors (1-bit quantisation thresholds)."""
         n, dim = vectors.shape
         chunk = dim // self.m
@@ -321,13 +328,15 @@ class Bbq(Retriever):
         reshaped = vectors.reshape(n, self.m, chunk)
         return reshaped.mean(axis=(0, 2)).astype(np.float32)
 
-    def _write_list(self, cid: int, ids: np.ndarray, codes: np.ndarray, floats: np.ndarray | None) -> None:
+    def write_list(
+        self, cid: int, ids: np.ndarray, codes: np.ndarray, floats: np.ndarray | None
+    ) -> None:
         np.save(self.out_dir / f"list_{cid}.ids.npy", ids.astype(np.int64))
         np.save(self.out_dir / f"list_{cid}.codes.npy", codes.astype(np.uint8))
         if floats is not None and floats.size:
             np.save(self.out_dir / f"list_{cid}.floats.npy", floats.astype(np.float32))
 
-    def _write_metadata(self, list_sizes: list[int]) -> None:
+    def write_metadata(self, list_sizes: list[int]) -> None:
         meta = {
             "nlist": int(self.nlist),
             "m": int(self.m),
@@ -339,7 +348,7 @@ class Bbq(Retriever):
         }
         (self.out_dir / "metadata.json").write_text(json.dumps(meta, indent=2))
 
-    def _discover_list_files(self) -> dict[int, dict[str, Path]]:
+    def discover_list_files(self) -> dict[int, dict[str, Path]]:
         files: dict[int, dict[str, Path]] = {}
         for cid in range(self.nlist):
             entry: dict[str, Path] = {}
@@ -354,7 +363,7 @@ class Bbq(Retriever):
             files[cid] = entry
         return files
 
-    def _coarse_quantize(self, query: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    def coarse_quantize(self, query: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """Return (distances, indices) to top-nprobe centroids for one query vector."""
         assert self.centroids is not None
         diffs = self.centroids - query[None, :]
@@ -364,76 +373,78 @@ class Bbq(Retriever):
         order = order[np.argsort(dists[order])]
         return dists[order], order
 
-    def _pack_query_bits(self, query: np.ndarray) -> np.ndarray:
+    def pack_query_bits(self, query: np.ndarray) -> np.ndarray:
         assert self.thresholds is not None
         chunk = self.dim // self.m
         reshaped = query.reshape(self.m, chunk)
         bits = (reshaped > self.thresholds[:, None]).astype(np.uint8).reshape(self.m * chunk)
         return np.packbits(bits).astype(np.uint8)
 
-    def _hamming_to_codes(self, query_bits: np.ndarray, list_codes: np.ndarray) -> np.ndarray:
+    def hamming_to_codes(self, query_bits: np.ndarray, list_codes: np.ndarray) -> np.ndarray:
         """XOR query_bits against each packed code; popcount gives Hamming distance."""
         if list_codes.shape[0] == 0:
             return np.empty((0,), dtype=np.int32)
         xor = np.bitwise_xor(list_codes, query_bits[None, :])
         return np.unpackbits(xor, axis=1).sum(axis=1, dtype=np.int32)
 
-    def _ram_search(self, queries: np.ndarray, k: int) -> list[SearchResult]:
+    def ram_search(self, queries: np.ndarray, k: int) -> list[SearchResult]:
         """RAM-resident search: uses in-memory codes + RFlat rescoring."""
-        assert self._ram_codes is not None and self._ram_ids is not None
+        assert self.ram_codes is not None and self.ram_ids is not None
         out: list[SearchResult] = []
         for q in queries:
-            _, probe_idx = self._coarse_quantize(q)
-            qbits = self._pack_query_bits(q)
+            _, probe_idx = self.coarse_quantize(q)
+            qbits = self.pack_query_bits(q)
             cands: list[tuple[int, int, int]] = []
             for cid in probe_idx:
-                codes = self._ram_codes[int(cid)]
+                codes = self.ram_codes[int(cid)]
                 if codes.shape[0] == 0:
                     continue
-                dists = self._hamming_to_codes(qbits, codes)
+                dists = self.hamming_to_codes(qbits, codes)
                 for j in range(dists.shape[0]):
                     cands.append((int(dists[j]), int(cid), int(j)))
             cands.sort(key=lambda t: t[0])
             top = cands[: self.k_factor * k]
             if self.use_rescore and top:
-                assert self._ram_floats is not None
+                assert self.ram_floats is not None
                 refined: list[tuple[float, int, int]] = []
                 for _, cid, j in top:
-                    vec = self._ram_floats[int(cid)][int(j)]
+                    vec = self.ram_floats[int(cid)][int(j)]
                     refined.append((float(vec @ q), int(cid), int(j)))
                 refined.sort(key=lambda t: -t[0])
                 top = [(s, c, j) for s, c, j in refined[:k]]
             else:
                 top = top[:k]
             pairs = [
-                (self.doc_ids[self._ram_ids[int(cid)][int(j)]], float(score))
+                (self.doc_ids[self.ram_ids[int(cid)][int(j)]], float(score))
                 for score, cid, j in top
             ]
             out.append(SearchResult.from_pairs(pairs))
         return out
 
-    def _disk_search(self, queries: np.ndarray, k: int) -> list[SearchResult]:
+    def disk_search(self, queries: np.ndarray, k: int) -> list[SearchResult]:
         """Disk-resident search: lazy-load top-nprobe lists via ThreadPoolExecutor."""
         out: list[SearchResult] = []
         with self.ensure_worker_pool() as pool:
             for q in queries:
-                _, probe_idx = self._coarse_quantize(q)
-                qbits = self._pack_query_bits(q)
+                _, probe_idx = self.coarse_quantize(q)
+                qbits = self.pack_query_bits(q)
                 preload_count = min(len(probe_idx), self.prefetch_depth * self.nprobe)
                 futures = {
-                    int(cid): pool.submit(self._load_list_for_search, int(cid))
+                    int(cid): pool.submit(self.load_list_for_search, int(cid))
                     for cid in probe_idx[:preload_count]
                 }
                 cands: list[tuple[int, int, int, int]] = []
                 for cid in probe_idx:
                     fut = futures.get(int(cid))
-                    payload = fut.result() if fut is not None else self._load_list_for_search(int(cid))
+                    payload = (
+                        fut.result() if fut is not None else self.load_list_for_search(int(cid))
+                    )
                     if payload is None:
                         continue
                     codes, doc_indices, floats = payload
                     if codes.shape[0] == 0:
                         continue
-                    dists = self._hamming_to_codes(qbits, codes)
+                    dists = self.hamming_to_codes(qbits, codes)
                     for j in range(dists.shape[0]):
                         cands.append((int(dists[j]), int(cid), int(j), int(doc_indices[j])))
                 cands.sort(key=lambda t: t[0])
@@ -442,10 +453,14 @@ class Bbq(Retriever):
                     refined: list[tuple[float, int]] = []
                     for _, cid, j, doc_idx in top:
                         fut = futures.get(int(cid))
-                        payload = fut.result() if fut is not None else self._load_list_for_search(int(cid))
+                        payload = (
+                            fut.result() if fut is not None else self.load_list_for_search(int(cid))
+                        )
                         if payload is None:
                             continue
-                        _codes, _doc_indices, floats = payload
+                        list_codes, document_indices, floats = payload
+                        if list_codes.shape[0] <= j or document_indices.shape[0] <= j:
+                            continue
                         if floats is None or floats.shape[0] == 0:
                             continue
                         vec = floats[j]
@@ -453,14 +468,17 @@ class Bbq(Retriever):
                     refined.sort(key=lambda t: -t[0])
                     pairs = [(self.doc_ids[doc_idx], score) for score, doc_idx in refined[:k]]
                 else:
-                    pairs = [
-                        (self.doc_ids[doc_idx], float(-dist))
-                        for dist, _cid, _j, doc_idx in top[:k]
-                    ]
+                    pairs = []
+                    for candidate in top[:k]:
+                        distance = candidate[0]
+                        document_index = candidate[3]
+                        pairs.append((self.doc_ids[document_index], float(-distance)))
                 out.append(SearchResult.from_pairs(pairs))
         return out
 
-    def _load_list_for_search(self, cid: int) -> tuple[np.ndarray, np.ndarray, np.ndarray | None] | None:
+    def load_list_for_search(
+        self, cid: int
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray | None] | None:
         """Lazy-load list_{cid}.{ids,codes,floats} as memmaps; cache handle."""
         if cid in self.list_handles:
             cached = self.list_handles[cid]

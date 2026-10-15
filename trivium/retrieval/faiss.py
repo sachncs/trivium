@@ -55,16 +55,28 @@ class Faiss:
 
             if vectors is None:
                 raise ValueError("Faiss.Flat requires pre-computed vectors")
-            self.doc_ids = [d.doc_id for d in documents]
-            d = int(vectors.shape[1])
             arr = np.asarray(vectors, dtype=np.float32)
+            if arr.ndim != 2 or len(arr) != len(documents):
+                raise ValueError("vectors must be 2-D with one row per document")
+            doc_ids = [d.doc_id for d in documents]
+            if len(set(doc_ids)) != len(doc_ids):
+                raise ValueError("document ids must be unique")
+            self.doc_ids = doc_ids
+            d = int(arr.shape[1])
             self.index = faiss.IndexFlatIP(d)
             self.index.add(arr)
 
         def search(self, query_vectors: np.ndarray, k: int) -> list[SearchResult]:
             if self.index is None:
                 raise RuntimeError("Faiss.Flat.search called before add_documents")
+            if k <= 0:
+                raise ValueError("k must be > 0")
             arr = np.asarray(query_vectors, dtype=np.float32)
+            if arr.ndim == 1:
+                arr = arr.reshape(1, -1)
+            if arr.ndim != 2:
+                raise ValueError("query_vectors must be a 1-D or 2-D array")
+            k = min(k, len(self.doc_ids))
             scores, ids = self.index.search(arr, k)
             results: list[SearchResult] = []
             for row in range(ids.shape[0]):

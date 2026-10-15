@@ -50,6 +50,7 @@ class LatencyStats:
 
     @classmethod
     def from_samples(cls, samples_ns: np.ndarray) -> LatencyStats:
+        samples_ns = np.asarray(samples_ns, dtype=np.float64)
         if samples_ns.size == 0:
             return cls(0.0, 0.0, 0.0, 0.0, 0.0, 0)
         return cls(
@@ -105,7 +106,7 @@ class LatencyProbe:
             self.prime_cache()
         if self.cold_cache:
             drop_os_page_cache()
-        samples = np.empty(self.n, dtype=np.int64)
+        samples: np.ndarray = np.empty(self.n, dtype=np.int64)
         for i in range(self.n):
             arg = self.rotate[i % len(self.rotate)] if self.rotate else None
             t0 = time.perf_counter_ns()

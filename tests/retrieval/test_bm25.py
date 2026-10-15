@@ -5,19 +5,19 @@ must serialise doc_ids.npy alongside the index and load() must
 restore them. Without this round-trip, search() after load()
 returns SearchResult objects with no doc_id values.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
 
 import numpy as np
 import pytest
-
 from trivium.domain.document import Document
-from trivium.retrieval.bm25 import Bm25
+from trivium.retrieval.bm25 import Bm25, coerce_query_strings
 
 
-def _toy_corpus(n: int = 100, seed: int = 42) -> list[Document]:
-    rng = np.random.RandomState(seed)
+def toy_corpus(n: int = 100, seed: int = 42) -> list[Document]:
+    np.random.RandomState(seed)
     return [
         Document(
             doc_id=f"doc-{i:04d}",
@@ -28,16 +28,33 @@ def _toy_corpus(n: int = 100, seed: int = 42) -> list[Document]:
     ]
 
 
+def test_bm25_input_validation_and_query_coercion():
+    bm = Bm25()
+    assert bm.slug == "bm25"
+    assert bm.size_bytes() == 0
+    bm.set_search_params(nprobe=2)
+    bm.ensure_doc_positions()
+    assert coerce_query_strings("query") == ["query"]
+    assert coerce_query_strings(np.array([["a", "b"]])) == [["a", "b"]]
+    assert coerce_query_strings(("a", "b")) == ["a", "b"]
+    with pytest.raises(RuntimeError, match="before add_documents"):
+        bm.search(np.array(["query"]), k=1)
+    with pytest.raises(RuntimeError, match="at least one"):
+        bm.add_documents([])
+    with pytest.raises(ValueError, match="unique"):
+        bm.add_documents([Document("same"), Document("same")])
+
+
 class TestBm25RoundTrip:
     def test_save_persists_doc_ids(self, tmp_path: Path) -> None:
-        docs = _toy_corpus()
+        docs = toy_corpus()
         bm = Bm25()
         bm.add_documents(docs)
         bm.save(tmp_path)
         assert (tmp_path / "doc_ids.npy").exists()
 
     def test_load_restores_doc_ids(self, tmp_path: Path) -> None:
-        docs = _toy_corpus()
+        docs = toy_corpus()
         bm = Bm25()
         bm.add_documents(docs)
         bm.save(tmp_path)
@@ -50,7 +67,7 @@ class TestBm25RoundTrip:
 
     def test_search_after_load_returns_correct_doc_ids(self, tmp_path: Path) -> None:
         """End-to-end: save, load, search -> hits carry the original doc_id."""
-        docs = _toy_corpus()
+        docs = toy_corpus()
         bm = Bm25()
         bm.add_documents(docs)
         bm.save(tmp_path)
@@ -66,7 +83,7 @@ class TestBm25RoundTrip:
 
     def test_load_without_doc_ids_file_yields_empty(self, tmp_path: Path) -> None:
         """Back-compat: a pre-fix saved index has no doc_ids.npy and loads cleanly."""
-        docs = _toy_corpus()
+        docs = toy_corpus()
 
         bm = Bm25()
         bm.add_documents(docs)
@@ -82,7 +99,7 @@ class TestBm25RoundTrip:
 
     def test_round_trip_preserves_scores(self, tmp_path: Path) -> None:
         """Top-1 hit's score must match across save/load."""
-        docs = _toy_corpus()
+        docs = toy_corpus()
         bm = Bm25()
         bm.add_documents(docs)
         query = np.array(["body 42"])

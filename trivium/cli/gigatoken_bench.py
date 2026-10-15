@@ -10,6 +10,7 @@ Run:
     python -m trivium.cli.gigatoken_bench --scales 5000,100000
     python -m trivium.cli.gigatoken_bench --tokenizer gpt2 --output /tmp/gigabench.csv
 """
+
 from __future__ import annotations
 
 import argparse

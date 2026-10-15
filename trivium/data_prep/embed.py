@@ -4,6 +4,7 @@ Each encoder slug is content-hashed; re-running with a new
 encoder does not destroy previous embeddings (the legacy code
 overwrote vectors.npz).
 """
+
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -40,8 +41,10 @@ def embed_corpus_per_encoder(
 
     cached = cache.get(embedder.slug, revision)
     if cached is not None:
-        vectors, ids = cached
-        return vectors
+        cached_vectors, cached_ids = cached
+        if len(cached_vectors) != len(cached_ids):
+            raise ValueError("cached embeddings and IDs have different lengths")
+        return cached_vectors
 
     docs_to_encode = list(documents)
     seed_ids = {d.doc_id for d in docs_to_encode if d.doc_id.startswith("scifact:")}

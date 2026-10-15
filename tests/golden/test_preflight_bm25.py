@@ -12,16 +12,13 @@ that the new code path reproduces the legacy result byte-for-byte.
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import numpy as np
 import pytest
-
-from trivium.config.loader import load_config
 from trivium.domain.document import Document
-from trivium.domain.query import Query
 from trivium.domain.qrels import Qrels
+from trivium.domain.query import Query
 from trivium.evaluation.metrics import Evaluator, hits_to_results
 from trivium.io.corpus import CorpusCache
 from trivium.retrieval.bm25 import Bm25

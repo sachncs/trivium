@@ -8,6 +8,7 @@ Output is the per-(scale, mode, encoder) pivot that the README
 references. summariser is the single source of truth — README
 headline numbers are produced from this script, not hand-edited.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -28,7 +29,9 @@ def main():
     for key in sorted(headline.keys()):
         scale, mode, encoder = key
         v = headline[key]
-        print(f"{scale:>7} {mode:<14} {encoder:<14} {v['ndcg_cut.10']:>9.4f} {v['recall.10']:>7.4f} {v['p95_ms']:>9.2f}")
+        print(
+            f"{scale:>7} {mode:<14} {encoder:<14} {v['ndcg_cut.10']:>9.4f} {v['recall.10']:>7.4f} {v['p95_ms']:>9.2f}"
+        )
 
 
 if __name__ == "__main__":

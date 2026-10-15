@@ -4,6 +4,7 @@ Builds the Bbq index at `data/cache/diskbbq_index/<scale>/` once per
 (scale, encoder) pair. Sweeps nprobe over `config.vector.nprobe_sweep`,
 emitting one PipelineResult per (nprobe, mode) combination.
 """
+
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -20,7 +21,7 @@ from trivium.pipelines.registry import register_pipeline
 from trivium.retrieval.diskbbq import Bbq
 
 
-def _index_dir(scale: int, encoder_slug: str) -> Path:
+def index_directory(scale: int, encoder_slug: str) -> Path:
     cache_root = Path(__file__).parent.parent.parent / "data" / "cache"
     return cache_root / "diskbbq_index" / f"{encoder_slug}_{scale}"
 
@@ -56,9 +57,15 @@ class BbqPipeline(BenchmarkPipeline):
             nlist = config.vector.nlist_for_scale(scale)
         except KeyError:
             nlist = min(config.vector.nlist_by_scale.values())
-        out_dir = _index_dir(scale, inp.encoder_slug)
+        out_dir = index_directory(scale, inp.encoder_slug)
 
-        bbq = Bbq(out_dir=out_dir, nlist=nlist, m=m, nprobe=config.vector.nprobe_sweep[0], use_rescore=True)
+        bbq = Bbq(
+            out_dir=out_dir,
+            nlist=nlist,
+            m=m,
+            nprobe=config.vector.nprobe_sweep[0],
+            use_rescore=True,
+        )
         bbq.add_documents(list(inp.documents), vectors=cv)
 
         k = config.hybrid.candidate_pool
@@ -69,12 +76,14 @@ class BbqPipeline(BenchmarkPipeline):
                 results = bbq.search(qv, k=k, mode=mode)
                 per_query = [[(h.doc_id, h.score) for h in r] for r in results]
                 eval_pairs = hits_to_results(per_query, list(inp.queries))
-                metrics = Evaluator(k_values=config.benchmark.top_k_eval).evaluate(inp.qrels, eval_pairs)
+                metrics = Evaluator(k_values=config.benchmark.top_k_eval).evaluate(
+                    inp.qrels, eval_pairs
+                )
 
                 rotate = [qv[i % len(qv)] for i in range(min(len(qv), 100))]
 
-                def step(v: np.ndarray, _m: str = mode) -> list:
-                    return bbq.search(v.reshape(1, -1).astype(np.float32), k=k, mode=_m)
+                def step(v: np.ndarray, mode_value: str = mode) -> list:
+                    return bbq.search(v.reshape(1, -1).astype(np.float32), k=k, mode=mode_value)
 
                 probe = LatencyProbe(
                     fn=step,

@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
-
 from trivium.domain.document import Document
-from trivium.domain.query import Query
 from trivium.domain.result import SearchResult
 from trivium.fusion.rrf import Rrf
 from trivium.pipelines.helpers import (
@@ -20,7 +18,7 @@ class StubRetriever:
     """Trivial retriever for testing pipeline helpers."""
 
     def __init__(self, hits: list[tuple[str, float]]) -> None:
-        self._hits = hits
+        self.hits = hits
         self.slug = f"stub-{id(self)}"
 
     def add_documents(self, *_, **__):
@@ -29,7 +27,7 @@ class StubRetriever:
     def search(self, query_vectors, k):
         # One SearchResult per input query (per ABC contract).
         n = max(1, len(query_vectors))
-        return [SearchResult.from_pairs(self._hits[:k]) for _ in range(n)]
+        return [SearchResult.from_pairs(self.hits[:k]) for iteration in range(n)]
 
     def set_search_params(self, **params):
         pass

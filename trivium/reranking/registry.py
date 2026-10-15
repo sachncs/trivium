@@ -39,7 +39,7 @@ class RerankerRegistry:
 
 
 @register_reranker("encoder")
-def _make_encoder(**kwargs: Any) -> Reranker:
+def create_encoder(**kwargs: Any) -> Reranker:
     """cross-encoder/ms-marco-MiniLM-L-6-v2 (default)."""
     from trivium.reranking.encoder import Encoder
 
@@ -49,7 +49,7 @@ def _make_encoder(**kwargs: Any) -> Reranker:
 
 
 @register_reranker("bge-large")
-def _make_bge_large(**kwargs: Any) -> Reranker:
+def create_bge_large(**kwargs: Any) -> Reranker:
     """BAAI/bge-reranker-large (2.3 GB)."""
     from trivium.reranking.bge import Bge
 
@@ -62,7 +62,7 @@ def _make_bge_large(**kwargs: Any) -> Reranker:
 
 
 @register_reranker("bge-base")
-def _make_bge_base(**kwargs: Any) -> Reranker:
+def create_bge_base(**kwargs: Any) -> Reranker:
     """BAAI/bge-reranker-base (450 MB, faster than bge-large)."""
     from trivium.reranking.bge import Bge
 
@@ -75,10 +75,10 @@ def _make_bge_base(**kwargs: Any) -> Reranker:
 
 
 try:
-    from trivium.reranking.monot5 import Monot5  # noqa: F401
+    from trivium.reranking.monot5 import Monot5
 
     @register_reranker("monot5-3b")
-    def _make_monot5_3b(**kwargs: Any) -> Reranker:
+    def create_monot5_3b(**kwargs: Any) -> Reranker:
         """castorini/monot5-3b-msmarco-10k (T5-3B, 11 GB; fp16 on GPU/MPS)."""
         defaults: dict[str, Any] = {"slug": "monot5-3b"}
         defaults.update(kwargs)

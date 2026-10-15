@@ -7,20 +7,18 @@ Atomic checks:
 - size_bytes reports on-disk footprint after build
 - Round-trip: write to disk, instantiate fresh Bbq from same out_dir, same hits
 """
+
 from __future__ import annotations
 
-import shutil
 from pathlib import Path
 
 import numpy as np
 import pytest
-
 from trivium.domain.document import Document
 from trivium.retrieval.diskbbq import Bbq
-from trivium.retrieval.faiss import Faiss
 
 
-def _toy_corpus(n: int = 200, dim: int = 96, seed: int = 42) -> tuple[list[Document], np.ndarray]:
+def toy_corpus(n: int = 200, dim: int = 96, seed: int = 42) -> tuple[list[Document], np.ndarray]:
     docs = [Document(doc_id=f"d{i:04d}", title=f"t{i}", text=f"doc number {i}") for i in range(n)]
     rng = np.random.RandomState(seed)
     vecs = rng.randn(n, dim).astype(np.float32)
@@ -30,7 +28,7 @@ def _toy_corpus(n: int = 200, dim: int = 96, seed: int = 42) -> tuple[list[Docum
 
 class TestBbqBuildAndSearch:
     def test_build_emits_disk_layout(self, tmp_path: Path) -> None:
-        docs, vecs = _toy_corpus(n=200, dim=96)
+        docs, vecs = toy_corpus(n=200, dim=96)
         bbq = Bbq(out_dir=tmp_path, nlist=8, m=24, nprobe=4, use_rescore=False)
         bbq.add_documents(docs, vectors=vecs)
         assert (tmp_path / "centroids.npy").exists()
@@ -41,7 +39,7 @@ class TestBbqBuildAndSearch:
             assert (tmp_path / f"list_{cid}.codes.npy").exists()
 
     def test_search_returns_nonempty_hits(self, tmp_path: Path) -> None:
-        docs, vecs = _toy_corpus(n=200, dim=96)
+        docs, vecs = toy_corpus(n=200, dim=96)
         bbq = Bbq(out_dir=tmp_path, nlist=8, m=24, nprobe=4, use_rescore=False)
         bbq.add_documents(docs, vectors=vecs)
         results = bbq.search(vecs[:5], k=10, mode="ram")
@@ -51,7 +49,7 @@ class TestBbqBuildAndSearch:
             assert all(h.doc_id.startswith("d") for h in r)
 
     def test_ram_and_disk_agree(self, tmp_path: Path) -> None:
-        docs, vecs = _toy_corpus(n=200, dim=96)
+        docs, vecs = toy_corpus(n=200, dim=96)
         bbq = Bbq(out_dir=tmp_path, nlist=8, m=24, nprobe=4, use_rescore=True)
         bbq.add_documents(docs, vectors=vecs)
         q = vecs[:5]
@@ -63,7 +61,7 @@ class TestBbqBuildAndSearch:
             assert ram_ids == disk_ids, f"q{i}: RAM {ram_ids} != DISK {disk_ids}"
 
     def test_recall_vs_flat(self, tmp_path: Path) -> None:
-        docs, vecs = _toy_corpus(n=500, dim=96)
+        docs, vecs = toy_corpus(n=500, dim=96)
         bbq = Bbq(out_dir=tmp_path, nlist=16, m=24, nprobe=8, use_rescore=True)
         bbq.add_documents(docs, vectors=vecs)
 
@@ -86,7 +84,9 @@ class TestBbqBuildAndSearch:
             row_sorted = row[np.argsort(-sims[i, row])]
             r_exact.append(
                 [
-                    type("Hit", (), {"doc_id": docs[int(j)].doc_id, "score": float(sims[i, int(j)])})
+                    type(
+                        "Hit", (), {"doc_id": docs[int(j)].doc_id, "score": float(sims[i, int(j)])}
+                    )
                     for j in row_sorted
                 ]
             )
@@ -100,17 +100,17 @@ class TestBbqBuildAndSearch:
         assert avg >= 0.5, f"recall@10 vs flat = {avg:.3f} < 0.5"
 
     def test_size_bytes_positive(self, tmp_path: Path) -> None:
-        docs, vecs = _toy_corpus(n=200, dim=96)
+        docs, vecs = toy_corpus(n=200, dim=96)
         bbq = Bbq(out_dir=tmp_path, nlist=8, m=24, nprobe=4, use_rescore=True)
         bbq.add_documents(docs, vectors=vecs)
         assert bbq.size_bytes() > 0
 
     def test_round_trip(self, tmp_path: Path) -> None:
-        docs, vecs = _toy_corpus(n=200, dim=96)
+        docs, vecs = toy_corpus(n=200, dim=96)
         bbq = Bbq(out_dir=tmp_path, nlist=8, m=24, nprobe=4, use_rescore=True)
         bbq.add_documents(docs, vectors=vecs)
         q = vecs[:5]
-        r1 = bbq.search(q, k=10, mode="ram")
+        bbq.search(q, k=10, mode="ram")
         bbq2 = Bbq(out_dir=tmp_path, nlist=8, m=24, nprobe=4, use_rescore=True)
         assert bbq2.centroids is None
         meta = bbq2.load_metadata()
@@ -125,7 +125,7 @@ class TestBbqBuildAndSearch:
             bbq.search(np.zeros((1, 96), dtype=np.float32), k=10, mode="ram")
 
     def test_unknown_mode_raises(self, tmp_path: Path) -> None:
-        docs, vecs = _toy_corpus(n=100, dim=96)
+        docs, vecs = toy_corpus(n=100, dim=96)
         bbq = Bbq(out_dir=tmp_path, nlist=4, m=24, nprobe=2, use_rescore=False)
         bbq.add_documents(docs, vectors=vecs)
         import pytest
@@ -134,7 +134,7 @@ class TestBbqBuildAndSearch:
             bbq.search(vecs[:1], k=5, mode="nope")
 
     def test_set_search_params_roundtrip(self, tmp_path: Path) -> None:
-        docs, vecs = _toy_corpus(n=100, dim=96)
+        docs, vecs = toy_corpus(n=100, dim=96)
         bbq = Bbq(out_dir=tmp_path, nlist=4, m=24, nprobe=2, use_rescore=False)
         bbq.add_documents(docs, vectors=vecs)
         bbq.set_search_params(nprobe=3)
@@ -152,7 +152,7 @@ class TestBbqEdgeCases:
             Bbq(out_dir=tmp_path, m=24, nbits=4)
 
     def test_dim_must_be_divisible_by_m(self, tmp_path: Path) -> None:
-        docs, vecs = _toy_corpus(n=100, dim=100)
+        docs, vecs = toy_corpus(n=100, dim=100)
         bbq = Bbq(out_dir=tmp_path, nlist=4, m=24, nprobe=2)
         import pytest
 
@@ -160,7 +160,7 @@ class TestBbqEdgeCases:
             bbq.add_documents(docs, vectors=vecs)
 
     def test_requires_vectors(self, tmp_path: Path) -> None:
-        docs, _ = _toy_corpus(n=10)
+        docs, _ = toy_corpus(n=10)
         bbq = Bbq(out_dir=tmp_path, nlist=4, m=24, nprobe=2)
         import pytest
 
@@ -173,7 +173,7 @@ class TestBbqEdgeCases:
         Reported in issue #4. With use_rescore=True, every hit must carry the
         actual <vec, query> similarity, not a placeholder 0.0.
         """
-        docs, vecs = _toy_corpus(n=200, dim=96)
+        docs, vecs = toy_corpus(n=200, dim=96)
         bbq = Bbq(out_dir=tmp_path, nlist=8, m=24, nprobe=4, use_rescore=True)
         bbq.add_documents(docs, vectors=vecs)
         results = bbq.search(vecs[:5], k=10, mode="ram")
@@ -186,7 +186,7 @@ class TestBbqEdgeCases:
 
     def test_ram_rescore_scores_match_disk_rescore(self, tmp_path: Path) -> None:
         """RAM and disk modes must report the same scores for the same hits."""
-        docs, vecs = _toy_corpus(n=200, dim=96)
+        docs, vecs = toy_corpus(n=200, dim=96)
         bbq = Bbq(out_dir=tmp_path, nlist=8, m=24, nprobe=4, use_rescore=True)
         bbq.add_documents(docs, vectors=vecs)
         q = vecs[:5]

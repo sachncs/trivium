@@ -1,10 +1,10 @@
 """Tests for trivium.tokenizer.gigatoken (wrapper over the gigatoken Rust lib)."""
+
 from __future__ import annotations
 
 from pathlib import Path
 
 import pytest
-
 from trivium.tokenizer.gigatoken import GigaToken, GigaTokenSummary
 
 
@@ -96,9 +96,11 @@ class TestGigaTokenMemmap:
 
         offsets = np.fromfile(out_dir / "offsets.bin", dtype=np.int64)
         assert offsets[0] == 0
-        assert offsets[-1] == sum(
-            len(line) for line in ["hello world", "goodbye world"] for _ in [0]
-        ) or offsets[-1] > 0
+        assert (
+            offsets[-1]
+            == sum(len(line) for line in ["hello world", "goodbye world"] for iteration in [0])
+            or offsets[-1] > 0
+        )
 
 
 class TestGigaTokenFileSources:

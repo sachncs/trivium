@@ -53,12 +53,12 @@ class EmbedderRegistry:
 def make_minilm(**kwargs) -> Embedder:
     """sentence-transformers/all-MiniLM-L6-v2 (90 MB, 384d, l2-normalised)."""
     try:
-        import torch  # noqa: F401
+        import torch
 
         torch.set_num_threads(1)
     except ImportError:
         pass
-    from trivium.embeddings import sentence as _sentence_module
+    from trivium.embeddings import sentence as sentence_module
 
     defaults = {
         "slug": "minilm-l6",
@@ -66,13 +66,13 @@ def make_minilm(**kwargs) -> Embedder:
         "dimension": 384,
     }
     defaults.update(kwargs)
-    return _sentence_module.Sentence(**defaults)
+    return sentence_module.Sentence(**defaults)
 
 
 @register_embedder("bge-small")
 def make_bge_small(**kwargs) -> Embedder:
     """BAAI/bge-small-en-v1.5 (130 MB, 384d)."""
-    from trivium.embeddings import sentence as _sentence_module
+    from trivium.embeddings import sentence as sentence_module
 
     defaults = {
         "slug": "bge-small",
@@ -81,13 +81,13 @@ def make_bge_small(**kwargs) -> Embedder:
         "max_seq_length": 512,
     }
     defaults.update(kwargs)
-    return _sentence_module.Sentence(**defaults)
+    return sentence_module.Sentence(**defaults)
 
 
 @register_embedder("bge-base")
 def make_bge_base(**kwargs) -> Embedder:
     """BAAI/bge-base-en-v1.5 (440 MB, 768d)."""
-    from trivium.embeddings import sentence as _sentence_module
+    from trivium.embeddings import sentence as sentence_module
 
     defaults = {
         "slug": "bge-base",
@@ -96,13 +96,13 @@ def make_bge_base(**kwargs) -> Embedder:
         "max_seq_length": 512,
     }
     defaults.update(kwargs)
-    return _sentence_module.Sentence(**defaults)
+    return sentence_module.Sentence(**defaults)
 
 
 @register_embedder("bge-large")
 def make_bge_large(**kwargs) -> Embedder:
     """BAAI/bge-large-en-v1.5 (1.34 GB, 1024d)."""
-    from trivium.embeddings import sentence as _sentence_module
+    from trivium.embeddings import sentence as sentence_module
 
     defaults = {
         "slug": "bge-large",
@@ -111,13 +111,13 @@ def make_bge_large(**kwargs) -> Embedder:
         "max_seq_length": 512,
     }
     defaults.update(kwargs)
-    return _sentence_module.Sentence(**defaults)
+    return sentence_module.Sentence(**defaults)
 
 
 @register_embedder("mpnet-base")
 def make_mpnet_base(**kwargs) -> Embedder:
     """sentence-transformers/all-mpnet-base-v2 (440 MB, 768d)."""
-    from trivium.embeddings import sentence as _sentence_module
+    from trivium.embeddings import sentence as sentence_module
 
     defaults = {
         "slug": "mpnet-base",
@@ -126,16 +126,16 @@ def make_mpnet_base(**kwargs) -> Embedder:
         "max_seq_length": 384,
     }
     defaults.update(kwargs)
-    return _sentence_module.Sentence(**defaults)
+    return sentence_module.Sentence(**defaults)
 
 
 try:
-    import trivium.embeddings.e5 as _e5_module  # noqa: F401
+    import trivium.embeddings.e5 as e5_module  # noqa: F401
 
     @register_embedder("e5-mistral-7b")
     def make_e5_mistral_7b(**kwargs) -> Embedder:
         """intfloat/e5-mistral-7b-instruct (14 GB, 4096d; GPU/MPS strongly preferred)."""
-        from trivium.embeddings import e5 as _live_e5
+        from trivium.embeddings import e5 as live_e5
 
         defaults = {
             "slug": "e5-mistral-7b",
@@ -143,7 +143,7 @@ try:
         defaults.update(kwargs)
         # Resolve E5 through the live module reference so test-time
         # monkey-patching of trivium.embeddings.e5.E5 is honoured.
-        return _live_e5.E5(**defaults)
+        return live_e5.E5(**defaults)
 
 except ImportError:
     # transformers / torch not installed; the E5 slug is simply missing.

@@ -4,10 +4,10 @@ For each configured scale, nlist must equal the smallest power of
 two >= 4 * sqrt(N). This pins the doc-comment to the on-disk value
 so a hand-edit cannot drift the formula.
 """
+
 from __future__ import annotations
 
 import pytest
-
 from trivium.config.loader import load_config
 
 

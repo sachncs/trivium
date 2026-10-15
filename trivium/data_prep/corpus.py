@@ -10,6 +10,7 @@ overwrote scales[5000], making the '5000 is a true prefix of
 larger scales' invariant non-local. Here we write the 5000 entry
 FIRST then slice.
 """
+
 from __future__ import annotations
 
 import random

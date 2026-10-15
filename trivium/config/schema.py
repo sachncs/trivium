@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class CorpusConfig(BaseModel):
@@ -26,6 +26,20 @@ class CorpusConfig(BaseModel):
     fever_sample: int = 0
     seed_random: int = 42
     dedup_jaccard_threshold: float = 0.85
+
+    @field_validator("fever_sample")
+    @classmethod
+    def validate_sample(cls, value: int) -> int:
+        if value < 0:
+            raise ValueError("fever_sample must be >= 0")
+        return value
+
+    @field_validator("dedup_jaccard_threshold")
+    @classmethod
+    def validate_threshold(cls, value: float) -> float:
+        if not 0 <= value <= 1:
+            raise ValueError("dedup_jaccard_threshold must be between 0 and 1")
+        return value
 
 
 class EncoderEntry(BaseModel):
@@ -127,3 +141,12 @@ class Config(BaseModel):
     benchmark: BenchmarkConfig = Field(default_factory=BenchmarkConfig)
     preflight: PreflightConfig = Field(default_factory=PreflightConfig)
     runtime: RuntimeConfig = Field(default_factory=RuntimeConfig)
+
+    @field_validator("scales")
+    @classmethod
+    def validate_scales(cls, value: list[int]) -> list[int]:
+        if not value or any(scale <= 0 for scale in value):
+            raise ValueError("scales must contain positive integers")
+        if value != sorted(set(value)):
+            raise ValueError("scales must be sorted and unique")
+        return value

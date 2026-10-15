@@ -4,18 +4,18 @@ We stub out the heavy Sentence and E5 classes via sys.modules so
 the real sentence_transformers (which spawns a tqdm monitor thread
 that races with faiss on macOS) is never imported during tests.
 """
+
 from __future__ import annotations
 
 import sys
 import types
 
 import pytest
-
 from trivium.embeddings import registry as embedder_registry
 from trivium.embeddings.base import Embedder
 
 
-class _StubEmbedder(Embedder):
+class StubEmbedder(Embedder):
     """Test double that records constructor kwargs for assertions."""
 
     def __init__(
@@ -52,16 +52,18 @@ class _StubEmbedder(Embedder):
 
 
 @pytest.fixture(autouse=True)
-def _stub_heavy_modules(monkeypatch: pytest.MonkeyPatch) -> None:
+def stub_heavy_modules(monkeypatch: pytest.MonkeyPatch) -> None:
     """Inject lightweight stand-ins for trivium.embeddings.sentence and trivium.embeddings.e5."""
     sentence_stub = types.ModuleType("trivium.embeddings.sentence")
     e5_stub = types.ModuleType("trivium.embeddings.e5")
 
-    class _StubSentence(_StubEmbedder):
-        def __init__(self, slug="sentence-stub", model_id="m", dimension=0, **extra: object) -> None:
+    class StubSentence(StubEmbedder):
+        def __init__(
+            self, slug="sentence-stub", model_id="m", dimension=0, **extra: object
+        ) -> None:
             super().__init__(stub_slug=slug, stub_model_id=model_id, stub_dimension=dimension)
 
-    class _StubE5(_StubEmbedder):
+    class StubE5(StubEmbedder):
         def __init__(self, slug="e5-stub", **extra: object) -> None:
             super().__init__(
                 stub_slug=slug,
@@ -73,8 +75,8 @@ def _stub_heavy_modules(monkeypatch: pytest.MonkeyPatch) -> None:
         def dimension(self) -> int:
             return 4096
 
-    sentence_stub.Sentence = _StubSentence  # type: ignore[attr-defined]
-    e5_stub.E5 = _StubE5  # type: ignore[attr-defined]
+    sentence_stub.Sentence = StubSentence  # type: ignore[attr-defined]
+    e5_stub.E5 = StubE5  # type: ignore[attr-defined]
 
     # Delete any previously-cached real modules so the lazy
     # `from trivium.embeddings import e5` resolves to the stub.
@@ -91,17 +93,17 @@ def _stub_heavy_modules(monkeypatch: pytest.MonkeyPatch) -> None:
 
     # Patch the registry's module-level reference too, in case any code
     # path cached the import.
-    import trivium.embeddings.registry as _reg
+    import trivium.embeddings.registry as registry_module
 
-    if hasattr(_reg, "_e5_module"):
-        monkeypatch.setattr(_reg, "_e5_module", e5_stub)
+    if hasattr(registry_module, "e5_module"):
+        monkeypatch.setattr(registry_module, "e5_module", e5_stub)
 
     # Drop the cached attribute on the package so the next
     # `from trivium.embeddings import e5` re-imports and finds the stub.
-    import trivium.embeddings as _pkg
+    import trivium.embeddings as package_module
 
-    monkeypatch.delitem(_pkg.__dict__, "e5", raising=False)
-    monkeypatch.delitem(_pkg.__dict__, "sentence", raising=False)
+    monkeypatch.delitem(package_module.__dict__, "e5", raising=False)
+    monkeypatch.delitem(package_module.__dict__, "sentence", raising=False)
 
 
 def test_minilm_l6_factory_returns_stub() -> None:

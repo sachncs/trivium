@@ -28,7 +28,7 @@ class SearchResult:
     def __len__(self) -> int:
         return len(self.hits)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int | slice) -> Hit | tuple[Hit, ...]:
         return self.hits[idx]
 
     def top_k(self, k: int) -> SearchResult:

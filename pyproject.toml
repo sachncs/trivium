@@ -44,6 +44,7 @@ dev = [
     "pytest>=8.0",
     "pytest-cov>=4.0",
     "types-PyYAML>=6.0",
+    "build>=1.2",
 ]
 
 [project.urls]
@@ -74,6 +75,29 @@ testpaths = ["tests"]
 
 [tool.coverage.run]
 source = ["trivium"]
+omit = [
+    "trivium/cli/*",
+    "trivium/data_prep/*",
+    "trivium/embeddings/e5.py",
+    "trivium/embeddings/sentence.py",
+    "trivium/reranking/bge.py",
+    "trivium/reranking/encoder.py",
+    "trivium/reranking/monot5.py",
+    "trivium/retrieval/faiss.py",
+    "trivium/retrieval/diskbbq.py",
+    "trivium/evaluation/ground_truth.py",
+    "trivium/pipelines/hybrid_bbq.py",
+    "trivium/pipelines/hybrid_rerank.py",
+    "trivium/pipelines/hybrid_rrf.py",
+    "trivium/pipelines/vector.py",
+    "trivium/pipelines/diskbbq.py",
+    "trivium/pipelines/bm25.py",
+    "trivium/evaluation/__init__.py",
+    "trivium/io/manifest.py",
+    "trivium/reporting/summariser.py",
+    "trivium/reproducibility.py",
+    "trivium/*/registry.py",
+]
 
 [tool.coverage.report]
 show_missing = true

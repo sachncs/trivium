@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
+from typing import Any
 
 import numpy as np
 
@@ -36,7 +37,7 @@ class PipelineInput:
         encoder_slug: str,
         query_vectors: np.ndarray | None = None,
         corpus_vectors: np.ndarray | None = None,
-        reranker=None,
+        reranker: Any = None,
     ) -> None:
         self.documents = documents
         self.queries = queries

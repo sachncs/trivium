@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-import pytest
+from dataclasses import FrozenInstanceError
 
+import pytest
 from trivium.domain.document import Document
 from trivium.domain.hit import Hit
 from trivium.domain.pipeline_result import FORMAT_VERSION, PipelineResult
-from trivium.domain.query import Query
 from trivium.domain.qrels import Qrels
+from trivium.domain.query import Query
 from trivium.domain.result import SearchResult
 
 
@@ -36,7 +37,7 @@ class TestDocument:
 
     def test_frozen(self):
         d = Document("d", "T", "B")
-        with pytest.raises(Exception):
+        with pytest.raises(FrozenInstanceError):
             d.doc_id = "other"  # type: ignore[misc]
 
 

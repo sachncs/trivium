@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
+from typing import Any
 
 import numpy as np
 
@@ -40,7 +41,7 @@ class Retriever(ABC):
         """
 
     @abstractmethod
-    def search(self, query_vectors: np.ndarray, k: int) -> SearchResult:
+    def search(self, query_vectors: Any, k: int) -> list[SearchResult]:
         """Search N queries. Returns a list of SearchResult, one per query.
 
         Args:
@@ -49,7 +50,7 @@ class Retriever(ABC):
         """
 
     @abstractmethod
-    def set_search_params(self, **params) -> None:
+    def set_search_params(self, **params: Any) -> None:
         """Set search-time parameters (e.g. nprobe for IVF indexes).
 
         Implementations validate the keys they recognise and ignore

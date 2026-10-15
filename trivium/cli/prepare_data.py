@@ -3,6 +3,7 @@
 
 CLI over the trivium.data_prep package. Replaces data/prepare.py.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -12,15 +13,14 @@ import os
 from pathlib import Path
 
 from trivium.config.loader import default_config_path, load_config
-from trivium.io.embeddings import EmbeddingCache
-from trivium.io.manifest import Manifest, ManifestEncoders, ManifestScales
-
 from trivium.data_prep.corpus import build_prefixed_corpus
 from trivium.data_prep.dedup import deduplicate
 from trivium.data_prep.distractors import load_distractor_pool
 from trivium.data_prep.embed import embed_corpus_per_encoder
 from trivium.data_prep.fever import sample_fever
 from trivium.data_prep.seed import load_scifact_queries_and_qrels, load_scifact_seed
+from trivium.io.embeddings import EmbeddingCache
+from trivium.io.manifest import Manifest, ManifestEncoders, ManifestScales
 
 CACHE = Path.cwd() / "data" / "cache"
 CACHE.mkdir(parents=True, exist_ok=True)
@@ -63,15 +63,16 @@ def main():
     for n in sorted(sliced):
         print(f"  scale {n:>9,}: {len(sliced[n]):>9,} docs", flush=True)
 
-    write_jsonl(CACHE / "scifact_seed.jsonl", [
-        {"id": d.doc_id, "title": d.title, "text": d.text} for d in sliced.get(5000, seed)
-    ])
+    write_jsonl(
+        CACHE / "scifact_seed.jsonl",
+        [{"id": d.doc_id, "title": d.title, "text": d.text} for d in sliced.get(5000, seed)],
+    )
     print(f"  wrote {CACHE / 'scifact_seed.jsonl'}", flush=True)
 
     onem = sliced[max_scale]
-    write_jsonl(CACHE / "corpus.jsonl", [
-        {"id": d.doc_id, "title": d.title, "text": d.text} for d in onem
-    ])
+    write_jsonl(
+        CACHE / "corpus.jsonl", [{"id": d.doc_id, "title": d.title, "text": d.text} for d in onem]
+    )
     print(f"  wrote {CACHE / 'corpus.jsonl'} ({len(onem):,} rows)", flush=True)
 
     queries, qrels = load_scifact_queries_and_qrels()

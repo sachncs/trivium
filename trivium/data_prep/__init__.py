@@ -8,6 +8,7 @@ Each module focuses on one slice of the pipeline:
 - corpus.py: prefix-extension corpus builder (1M = superset of 500K = ...)
 - embed.py: per-encoder embedding using EmbeddingCache
 """
+
 from trivium.data_prep.corpus import build_prefixed_corpus
 from trivium.data_prep.dedup import deduplicate
 from trivium.data_prep.distractors import load_distractor_pool

@@ -18,7 +18,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
+import tempfile
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -73,22 +75,52 @@ class EmbeddingCache:
         path = self.cache_dir / record["file"]
         if not path.exists():
             return None
-        npz = np.load(path, allow_pickle=True)
-        vectors = np.asarray(npz["vectors"], dtype=np.float32)
-        ids = np.asarray(npz["ids"])
+        try:
+            with np.load(path, allow_pickle=False) as npz:
+                vectors = np.asarray(npz["vectors"], dtype=np.float32)
+                ids = np.asarray(npz["ids"])
+        except (OSError, ValueError, KeyError, EOFError):
+            return None
+        if vectors.ndim != 2 or ids.ndim != 1 or len(vectors) != len(ids):
+            return None
         return vectors, ids
 
     def put(
         self, slug: str, revision: str, vectors: np.ndarray, ids: Sequence[str], doc_count: int
     ) -> None:
         """Persist (vectors, ids) and record the entry in the index."""
+        vectors = np.asarray(vectors, dtype=np.float32)
+        id_array = np.asarray(list(ids), dtype=str)
+        if vectors.ndim != 2:
+            raise ValueError(f"vectors must be 2-D; got shape {vectors.shape}")
+        if len(vectors) != len(id_array) or len(vectors) != int(doc_count):
+            raise ValueError("vectors, ids, and doc_count must contain the same number of rows")
+        if len(set(id_array.tolist())) != len(id_array):
+            raise ValueError("embedding ids must be unique")
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
         path = self.file_for(slug, revision)
-        np.savez_compressed(path, vectors=vectors, ids=np.array(list(ids)))
+        with tempfile.NamedTemporaryFile(dir=self.cache_dir, suffix=".npz", delete=False) as tmp:
+            temp_path = Path(tmp.name)
+        try:
+            np.savez_compressed(temp_path, vectors=vectors, ids=id_array)
+            os.replace(temp_path, path)
+        finally:
+            temp_path.unlink(missing_ok=True)
         idx = self.index()
         idx[f"{slug}@{revision}"] = {
             "file": path.name,
             "doc_count": int(doc_count),
             "dimension": int(vectors.shape[1]) if vectors.ndim == 2 else 0,
         }
-        (self.cache_dir / self.INDEX_FILE).write_text(json.dumps(idx, indent=2, sort_keys=True))
+        index_path = self.cache_dir / self.INDEX_FILE
+        with tempfile.NamedTemporaryFile(
+            mode="w", dir=self.cache_dir, suffix=".json", encoding="utf-8", delete=False
+        ) as tmp:
+            json.dump(idx, tmp, indent=2, sort_keys=True)
+            tmp.write("\n")
+            temp_index = Path(tmp.name)
+        try:
+            os.replace(temp_index, index_path)
+        finally:
+            temp_index.unlink(missing_ok=True)
         self.cache_index = idx

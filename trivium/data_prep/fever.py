@@ -1,4 +1,5 @@
 """FEVER sampler for padding past the BEIR scientific corpus ceiling."""
+
 from __future__ import annotations
 
 import random

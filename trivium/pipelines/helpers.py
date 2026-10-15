@@ -1,12 +1,13 @@
 """Public helpers used by the pipeline implementations.
 
-Module-named `helpers.py` and function-named `*_step` rather than
-semi-private `_do_*` so the no-semi-private rule holds.
+Module-named `helpers.py` and behavior-oriented public step functions keep
+the orchestration surface explicit and discoverable.
 """
 
 from __future__ import annotations
 
 from collections.abc import Sequence
+from typing import Any
 
 import numpy as np
 
@@ -41,7 +42,7 @@ def retriever_search_step(
 ) -> tuple[list[SearchResult], LatencyStats]:
     """Convenience: run a search, return (results, latency_stats) per call.
 
-    Replaces the legacy _do_hybrid_query closure that built bm25_hits
+    Replaces the legacy hybrid-query closure that built BM25 hits
     and vec_hits inline. Here the retriever is passed in, so this
     helper works for any single-retriever search.
     """
@@ -72,11 +73,11 @@ def hybrid_query_step(
     documents: Sequence[Document],
     query_vecs: np.ndarray,
     top_k: int,
-    fusion,
-):
+    fusion: Any,
+) -> list[SearchResult]:
     """Run both retrievers end-to-end and fuse the per-query result lists.
 
-    Replaces the legacy _do_hybrid_query closure (which had 7 args and
+    Replaces the legacy hybrid-query closure (which had 7 args and
     was module-bottom semi-private). Now a public function with a
     focus on composition.
     """
@@ -89,13 +90,13 @@ def rerank_query_step(
     fusion_result: SearchResult,
     query_text: str,
     documents: Sequence[Document],
-    reranker,
+    reranker: Any,
     top_k_rerank: int,
     top_k_out: int,
 ) -> SearchResult:
     """Apply a Reranker to the fused candidate set.
 
-    Replaces the legacy _do_rerank_query closure.
+    Replaces the legacy rerank-query closure.
     """
     id_to_doc = {d.doc_id: d for d in documents}
     candidates = [id_to_doc[h.doc_id] for h in fusion_result if h.doc_id in id_to_doc][

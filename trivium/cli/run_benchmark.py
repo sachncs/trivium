@@ -9,6 +9,7 @@ Pre-flight: BM25 nDCG@10 on the untouched 5K scifact corpus must
 reproduce Anserini 0.6789 +/- 0.03, the documented bm25s-vs-Lucene
 implementation drift. Below 0.62 = pipeline is broken; fail fast.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -19,9 +20,8 @@ from pathlib import Path
 import numpy as np
 
 from trivium.config.loader import default_config_path, load_config
-from trivium.domain.document import Document
-from trivium.domain.query import Query
 from trivium.domain.qrels import Qrels
+from trivium.domain.query import Query
 from trivium.embeddings.registry import get_embedder
 from trivium.evaluation.metrics import Evaluator, hits_to_results
 from trivium.io.corpus import CorpusCache
@@ -31,21 +31,21 @@ from trivium.pipelines import hybrid_rerank as pipelines_hybrid_rerank  # noqa: 
 from trivium.pipelines import hybrid_rrf as pipelines_hybrid_rrf  # noqa: F401
 from trivium.pipelines import vector as pipelines_vector  # noqa: F401
 from trivium.pipelines.base import PipelineInput
-from trivium.pipelines.registry import PipelineRegistry, get_pipeline
-from trivium.reranking.registry import RerankerRegistry, get_reranker
-from trivium.reporting.csv_writer import CsvResultWriter
+from trivium.pipelines.registry import get_pipeline
+from trivium.reporting.csv_writer import write_csv
 from trivium.reproducibility import ReproducibilityManifest
+from trivium.reranking.registry import get_reranker
 from trivium.retrieval.bm25 import Bm25
 
 
-def _data_dir() -> Path:
+def data_directory() -> Path:
     """Runtime data directory: `$PWD/data/cache` (resolved at call time)."""
     return Path.cwd() / "data" / "cache"
 
 
 def preflight_check(config) -> bool:
     """BM25 nDCG@10 on 5K scifact must reproduce the Anserini baseline."""
-    cache = CorpusCache(_data_dir())
+    cache = CorpusCache(data_directory())
     seed_docs = cache.load_scale(5000)
     if not seed_docs:
         print("  no scifact_seed.jsonl; skipping pre-flight")
@@ -94,7 +94,7 @@ def preflight_check(config) -> bool:
     return True
 
 
-def _instantiate_reranker(slug: str) -> object | None:
+def instantiate_reranker(slug: str) -> object | None:
     """Construct a reranker by slug; return None if instantiation fails.
 
     Errors are logged so the rest of the benchmark can proceed.
@@ -104,7 +104,7 @@ def _instantiate_reranker(slug: str) -> object | None:
     except KeyError as exc:
         print(f"  reranker {slug!r} not registered: {exc}", flush=True)
         return None
-    except Exception as exc:  # noqa: BLE001 - surface any model-load failure
+    except Exception as exc:
         print(f"  reranker {slug!r} failed to instantiate: {exc}", flush=True)
         return None
 
@@ -155,11 +155,10 @@ def main() -> None:
     os.environ["PYTHONHASHSEED"] = str(config.runtime.python_hash_seed)
     os.environ.setdefault("OMP_NUM_THREADS", str(config.runtime.faiss_omp_threads))
 
-    if not args.skip_preflight:
-        if not preflight_check(config):
-            sys.exit(1)
+    if not args.skip_preflight and not preflight_check(config):
+        sys.exit(1)
 
-    cache = CorpusCache(_data_dir())
+    cache = CorpusCache(data_directory())
     query_rows, qrels_rows = cache.load_queries_and_qrels()
     queries = Query.many(query_rows)
     qrels = Qrels.from_rows(qrels_rows)
@@ -181,7 +180,6 @@ def main() -> None:
         try:
             embedder = get_embedder(
                 slug,
-                slug=slug,
                 model_id=entry.model_id,
                 dimension=entry.dimension,
                 batch_size=entry.batch_size,
@@ -199,13 +197,13 @@ def main() -> None:
             qv = embedder.encode_queries([q.text for q in queries])
             query_vectors[slug] = np.asarray(qv, dtype=np.float32)
             print(f"  encoded {len(qv)} queries with {slug}", flush=True)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             print(f"  encoder {slug!r} failed: {exc}", flush=True)
             continue
 
     rerankers_by_slug: dict[str, object] = {}
     for slug in selected_rerankers:
-        rr = _instantiate_reranker(slug)
+        rr = instantiate_reranker(slug)
         if rr is not None:
             rerankers_by_slug[slug] = rr
             print(f"  loaded reranker {slug}", flush=True)
@@ -249,7 +247,8 @@ def main() -> None:
                 if qv is None:
                     continue
                 if rerankers_for_mode:
-                    for rr_slug, rr in rerankers_for_mode:
+                    for reranker_entry in rerankers_for_mode:
+                        rr = reranker_entry[1]
                         inp = PipelineInput(
                             documents=documents,
                             queries=queries,
@@ -279,7 +278,7 @@ def main() -> None:
         for k, v in repro_dict.items():
             r.extras.setdefault(k, v)
 
-    CsvResultWriter.write(all_rows, args.output)
+    write_csv(all_rows, args.output)
     print(f"\n=== Wrote {len(all_rows)} rows to {args.output} ===", flush=True)
 
 

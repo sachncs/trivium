@@ -11,7 +11,7 @@ __all__ = [
     "Document",
     "Hit",
     "PipelineResult",
-    "Query",
     "Qrels",
+    "Query",
     "SearchResult",
 ]

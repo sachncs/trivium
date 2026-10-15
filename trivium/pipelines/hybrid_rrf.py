@@ -78,12 +78,12 @@ class HybridRrf(BenchmarkPipeline):
                 ]
                 bound_fusion = fusion  # default-arg binding fixes the B023 loop-var warning
 
-                def probe_step(i: int, _fuse_obj=bound_fusion):
+                def probe_step(i: int, fuse_obj=bound_fusion):
                     s = str(query_texts[i % len(query_texts)])
                     v = qv[i % len(qv)]
                     r1 = bm25.search(s, k=pool)
                     r2 = dense.search(v.reshape(1, -1).astype(np.float32), k=pool)
-                    _fuse_obj.fuse([r1, r2], top_k=pool)
+                    fuse_obj.fuse([r1, r2], top_k=pool)
 
                 probe = LatencyProbe(
                     fn=probe_step,

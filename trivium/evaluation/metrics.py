@@ -5,8 +5,6 @@ from __future__ import annotations
 from collections.abc import Iterable
 from dataclasses import dataclass
 
-import pytrec_eval
-
 from trivium.domain.qrels import Qrels
 
 
@@ -81,6 +79,12 @@ class Evaluator:
         Returns:
             EvaluationMetrics with the per-measure macro averages.
         """
+        try:
+            import pytrec_eval
+        except ImportError as exc:
+            raise RuntimeError(
+                "pytrec_eval is required to evaluate benchmark metrics; install the full package"
+            ) from exc
         param_measures = {self.to_measure_name(m) for m in self.measures}
         ev = pytrec_eval.RelevanceEvaluator(qrels.to_pytrec(), param_measures)
         per_query = ev.evaluate(results)
@@ -134,7 +138,7 @@ def hits_to_results(
 ) -> dict[str, dict[str, float]]:
     """Convert per-query hit lists into the {qid: {did: score}} shape.
 
-    Public helper (replaces the legacy _hit_lists_to_results). Lives
+    Public helper replacing the legacy hit-list conversion. Lives
     in trivium.evaluation because evaluation is its only consumer
     and it composes results into a structure the Evaluator consumes.
     """

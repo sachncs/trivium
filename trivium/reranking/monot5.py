@@ -122,5 +122,9 @@ class Monot5(Reranker):
             torch_dtype=dtype,
         ).to(self.device)
         self.model.eval()
-        self.true_token_id = self.tokenizer("true", add_special_tokens=False).input_ids[0]
-        self.false_token_id = self.tokenizer("false", add_special_tokens=False).input_ids[0]
+        self.true_token_id = self.tokenizer(
+            "true", addsubprocess_moduleecial_tokens=False
+        ).input_ids[0]
+        self.false_token_id = self.tokenizer(
+            "false", addsubprocess_moduleecial_tokens=False
+        ).input_ids[0]

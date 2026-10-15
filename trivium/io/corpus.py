@@ -66,30 +66,38 @@ class CorpusCache:
     def load_vectors(self) -> tuple[np.ndarray, np.ndarray]:
         """Load (vectors, ids). Reads vectors.npz once and caches."""
         if self.vectors is None:
-            npz = np.load(self.cache_dir / self.VECTORS_FILE, allow_pickle=True)
-            self.vector_ids = npz["ids"]
-            self.vectors = np.asarray(npz["vectors"], dtype=np.float32)
+            with np.load(self.cache_dir / self.VECTORS_FILE, allow_pickle=False) as npz:
+                self.vector_ids = np.asarray(npz["ids"], dtype=str)
+                self.vectors = np.asarray(npz["vectors"], dtype=np.float32)
+            if self.vectors.ndim != 2 or self.vector_ids.ndim != 1:
+                raise ValueError("vectors.npz must contain a 2-D vectors array and 1-D ids array")
+            if len(self.vectors) != len(self.vector_ids):
+                raise ValueError("vectors.npz vectors and ids lengths differ")
+            if len(set(self.vector_ids.tolist())) != len(self.vector_ids):
+                raise ValueError("vectors.npz contains duplicate document ids")
             self.id_to_idx = {did: i for i, did in enumerate(self.vector_ids.tolist())}
+        assert self.vectors is not None and self.vector_ids is not None
         return self.vectors, self.vector_ids
 
     def vectors_for_documents(self, documents: Sequence[Document]) -> np.ndarray:
         """Return float32 vectors for the given documents, in order.
 
         Vectorised via np.searchsorted. Replaces the legacy Python
-        loop `_corpus_vectors` which was O(N) Python at every call.
+        loop `vectors_for_documents` which was O(N) Python at every call.
         """
         vectors, _ = self.load_vectors()
         if self.id_to_idx is None:
-            self.id_to_idx = {did: i for i, did in enumerate(self.vector_ids.tolist())}
+            raise RuntimeError("vector ID index was not initialized")
 
         positions_map = self.id_to_idx
 
-        positions = np.fromiter(
-            (positions_map[d.doc_id] for d in documents),
-            dtype=np.int64,
-            count=len(documents),
+        missing = [d.doc_id for d in documents if d.doc_id not in positions_map]
+        if missing:
+            raise KeyError(f"no embedding found for document id(s): {missing[:3]}")
+        positions: np.ndarray = np.fromiter(
+            (positions_map[d.doc_id] for d in documents), dtype=np.int64, count=len(documents)
         )
-        return vectors[positions]  # type: ignore[index]
+        return vectors[positions]
 
     def load_queries_and_qrels(self) -> tuple[list[dict], list[dict]]:
         q = []

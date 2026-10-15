@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import pytest
-
+from pydantic import ValidationError
 from trivium.config.loader import load_config
 from trivium.config.schema import (
     BenchmarkConfig,
@@ -44,7 +44,7 @@ def test_nlist_for_scale_unconfigured_raises_key_error():
 
 
 def test_pydantic_forbids_extra_fields():
-    with pytest.raises(Exception):
+    with pytest.raises(ValidationError):
         EncoderEntry(slug="x", unknown="bad")  # type: ignore[call-arg]
 
 

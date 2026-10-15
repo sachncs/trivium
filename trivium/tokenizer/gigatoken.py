@@ -161,7 +161,7 @@ class GigaToken:
                     offsets.append(offsets[-1] + arr.size)
                 del encoded
 
-        offsets_arr = np.asarray(offsets, dtype=np.int64)
+        offsets_arr: np.ndarray = np.asarray(offsets, dtype=np.int64)
         with open(offsets_path, "wb") as offsets_f:
             offsets_arr.tofile(offsets_f)
 
@@ -225,7 +225,7 @@ class GigaToken:
         )
 
 
-def batched_texts(iterable: Iterable[str], batch_size: int):
+def batched_texts(iterable: Iterable[str], batch_size: int) -> Iterable[list[str]]:
     """Yield lists of up to batch_size items from the iterable."""
     batch: list[str] = []
     for item in iterable:

@@ -1,4 +1,5 @@
 """HybridBbq pipeline: BM25 + DiskBBQ fused via RRF."""
+
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -11,7 +12,7 @@ from trivium.evaluation.latency import LatencyProbe
 from trivium.evaluation.metrics import Evaluator, hits_to_results
 from trivium.fusion.rrf import Rrf
 from trivium.pipelines.base import BenchmarkPipeline, PipelineInput
-from trivium.pipelines.diskbbq import _index_dir
+from trivium.pipelines.diskbbq import index_directory
 from trivium.pipelines.registry import register_pipeline
 from trivium.retrieval.bm25 import Bm25 as Bm25Retriever
 from trivium.retrieval.diskbbq import Bbq
@@ -62,8 +63,14 @@ class HybridBbq(BenchmarkPipeline):
             nlist = config.vector.nlist_for_scale(scale)
         except KeyError:
             nlist = min(config.vector.nlist_by_scale.values())
-        out_dir = _index_dir(scale, inp.encoder_slug)
-        bbq = Bbq(out_dir=out_dir, nlist=nlist, m=m, nprobe=config.vector.nprobe_sweep[0], use_rescore=True)
+        out_dir = index_directory(scale, inp.encoder_slug)
+        bbq = Bbq(
+            out_dir=out_dir,
+            nlist=nlist,
+            m=m,
+            nprobe=config.vector.nprobe_sweep[0],
+            use_rescore=True,
+        )
         bbq.add_documents(list(inp.documents), vectors=cv)
 
         pool = config.hybrid.candidate_pool
@@ -85,17 +92,21 @@ class HybridBbq(BenchmarkPipeline):
                 ]
                 per_query = [[(h.doc_id, h.score) for h in r] for r in fused_results]
                 eval_pairs = hits_to_results(per_query, list(inp.queries))
-                metrics = Evaluator(k_values=config.benchmark.top_k_eval).evaluate(inp.qrels, eval_pairs)
+                metrics = Evaluator(k_values=config.benchmark.top_k_eval).evaluate(
+                    inp.qrels, eval_pairs
+                )
 
-                rotate_q = [str(query_texts[i % len(query_texts)]) for i in range(min(len(inp.queries), 30))]
+                rotate_q = [
+                    str(query_texts[i % len(query_texts)]) for i in range(min(len(inp.queries), 30))
+                ]
                 bound_fusion = fusion
 
-                def probe_step(i: int, _fuse_obj=bound_fusion, _mode: str = "ram") -> None:
+                def probe_step(i: int, fuse_obj=bound_fusion, mode_value: str = "ram") -> None:
                     s = str(query_texts[i % len(query_texts)])
                     v = qv[i % len(qv)]
                     r1 = bm25.search(s, k=pool)
-                    r2 = bbq.search(v.reshape(1, -1).astype(np.float32), k=pool, mode=_mode)
-                    _fuse_obj.fuse([r1, r2], top_k=pool)
+                    r2 = bbq.search(v.reshape(1, -1).astype(np.float32), k=pool, mode=mode_value)
+                    fuse_obj.fuse([r1, r2], top_k=pool)
 
                 probe = LatencyProbe(
                     fn=probe_step,

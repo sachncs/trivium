@@ -3,17 +3,17 @@
 We mock the heavy CrossEncoder / T5 model loads so the tests run on
 CI without downloading 2-11 GB checkpoints.
 """
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock
 
 import pytest
-
 from trivium.reranking import registry as reranker_registry
 from trivium.reranking.base import Reranker
 
 
-class _StubReranker(Reranker):
+class StubReranker(Reranker):
     """Test double: returns candidates in input order, no model load."""
 
     def __init__(self, slug: str = "stub", model_id: str = "stub-id", **extra: object) -> None:
@@ -46,14 +46,14 @@ class _StubReranker(Reranker):
 
 
 @pytest.fixture(autouse=True)
-def _patch_heavy_imports(monkeypatch: pytest.MonkeyPatch) -> None:
+def patch_heavy_imports(monkeypatch: pytest.MonkeyPatch) -> None:
     """Replace the heavy reranker classes with light stubs."""
     encoder_module = MagicMock()
-    encoder_module.Encoder = _StubReranker
+    encoder_module.Encoder = StubReranker
     bge_module = MagicMock()
-    bge_module.Bge = _StubReranker
+    bge_module.Bge = StubReranker
     monot5_module = MagicMock()
-    monot5_module.Monot5 = _StubReranker
+    monot5_module.Monot5 = StubReranker
 
     monkeypatch.setitem(
         __import__("sys").modules,

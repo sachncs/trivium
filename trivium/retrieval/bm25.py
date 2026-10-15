@@ -49,6 +49,8 @@ class Bm25(Retriever):
         if not documents:
             raise RuntimeError("Bm25.add_documents requires at least one document")
         self.doc_ids = [d.doc_id for d in documents]
+        if len(set(self.doc_ids)) != len(self.doc_ids):
+            raise ValueError("document ids must be unique")
         self.id_to_pos = {did: i for i, did in enumerate(self.doc_ids)}
 
         from bm25s import BM25
@@ -122,7 +124,7 @@ class Bm25(Retriever):
         self.bm25.save(str(dir_path), corpus=None)
         self.tokenizer.save_vocab(save_dir=str(dir_path))
         self.tokenizer.save_stopwords(save_dir=str(dir_path))
-        np.save(dir_path / "doc_ids.npy", np.asarray(self.doc_ids, dtype=object))
+        np.save(dir_path / "doc_ids.npy", np.asarray(self.doc_ids, dtype=str))
 
     def load(self, dir_path: str | Path, mmap: bool = True) -> None:
         """Reload a saved BM25 index; doc_ids are restored if doc_ids.npy is present."""
@@ -137,8 +139,10 @@ class Bm25(Retriever):
 
         ids_path = dir_path / "doc_ids.npy"
         if ids_path.is_file():
-            loaded = np.load(ids_path, allow_pickle=True).tolist()
+            loaded = np.load(ids_path, allow_pickle=False).tolist()
             self.doc_ids = [str(d) for d in loaded]
+            if len(set(self.doc_ids)) != len(self.doc_ids):
+                raise ValueError("saved BM25 index contains duplicate document ids")
             self.id_to_pos = {did: i for i, did in enumerate(self.doc_ids)}
         else:
             # Historical fallback: no doc_ids on disk. Caller can use

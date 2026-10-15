@@ -14,7 +14,7 @@ CACHE = ROOT / "data" / "cache"
 sys.path.insert(0, str(ROOT))
 
 
-def _resolve_default_config_path() -> Path:
+def resolve_default_config_path() -> Path:
     """Find the canonical config: prefer repo-root checkout, fall back to the package."""
     repo_local = ROOT / "configs" / "default.yaml"
     if repo_local.is_file():
@@ -24,7 +24,7 @@ def _resolve_default_config_path() -> Path:
     return default_config_path()
 
 
-CONFIG_PATH = _resolve_default_config_path()
+CONFIG_PATH = resolve_default_config_path()
 
 
 @pytest.fixture(scope="session")

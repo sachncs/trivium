@@ -54,10 +54,9 @@ class ReproducibilityManifest:
             # wheel that crashes on import on this OS) cannot abort the
             # benchmark process.
             try:
-                import json as _json
-                import subprocess as _sp
+                import subprocess as subprocess_module
 
-                r = _sp.run(
+                r = subprocess_module.run(
                     [sys.executable, "-c", f"import {name}; print({name}.__version__)"],
                     capture_output=True,
                     text=True,

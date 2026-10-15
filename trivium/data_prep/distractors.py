@@ -1,4 +1,5 @@
 """BEIR scientific + encyclopedic distractors (no web/MS-MARCO; domain-mismatch)."""
+
 from __future__ import annotations
 
 from collections.abc import Iterator

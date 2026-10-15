@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 import numpy as np
-
+import pytest
 from trivium.domain.qrels import Qrels
-from trivium.domain.result import SearchResult
 from trivium.evaluation.latency import LatencyProbe, LatencyStats, drop_os_page_cache, probe_lambda
 from trivium.evaluation.metrics import Evaluator, hits_to_results
 
@@ -70,6 +69,3 @@ class TestLatencyStats:
         s = LatencyStats.from_samples(samples)
         assert s.n == 100
         assert s.mean_ms == pytest.approx(1.0, abs=1e-3)
-
-
-import pytest
