@@ -3,6 +3,7 @@
 @import "./components.css";
 @import "./prose.css";
 @import "./utilities.css";
+@import "./docs.css";
 
 @tailwind base;
 @tailwind components;

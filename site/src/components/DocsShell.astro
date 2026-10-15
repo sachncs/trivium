@@ -1,0 +1,139 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SiteHeader from "./SiteHeader.astro";
+import SiteFooter from "./SiteFooter.astro";
+
+export interface Props {
+  title: string;
+  description: string;
+  current: "overview" | "getting-started" | "architecture" | "methodology" | "api" | "contributing";
+}
+
+const { title, description, current } = Astro.props as Props;
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "") || "";
+const links = [
+  { id: "overview", label: "Overview", href: `${baseUrl}/docs/` },
+  { id: "getting-started", label: "Getting started", href: `${baseUrl}/docs/getting-started/` },
+  { id: "architecture", label: "Architecture", href: `${baseUrl}/docs/architecture/` },
+  { id: "methodology", label: "Methodology", href: `${baseUrl}/docs/methodology/` },
+  { id: "api", label: "API reference", href: `${baseUrl}/docs/api/` },
+  { id: "contributing", label: "Contributing", href: `${baseUrl}/docs/contributing/` },
+] as const;
+---
+
+<BaseLayout title={`${title} — trivium`} description={description} pageClass="docs-page">
+  <SiteHeader />
+  <main class="docs-main">
+    <div class="container-page docs-layout">
+      <aside class="docs-sidebar" aria-label="Documentation navigation">
+        <div class="docs-sidebar-label">Documentation</div>
+        <nav>
+          <ul>
+            {links.map((link) => (
+              <li>
+                <a href={link.href} class:list={{ active: current === link.id }} aria-current={current === link.id ? "page" : undefined}>
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <div class="docs-sidebar-note">
+          <span class="status-dot"></span>
+          <span>Source-first. No package release yet.</span>
+        </div>
+      </aside>
+      <article class="docs-content">
+        <slot />
+      </article>
+    </div>
+  </main>
+  <SiteFooter />
+</BaseLayout>
+
+<style>
+  .docs-main {
+    min-height: calc(100vh - var(--header-height));
+    padding: 4.5rem 0 6rem;
+  }
+  .docs-layout {
+    display: grid;
+    grid-template-columns: 210px minmax(0, 1fr);
+    gap: clamp(3rem, 8vw, 7rem);
+    align-items: start;
+  }
+  .docs-sidebar {
+    position: sticky;
+    top: calc(var(--header-height) + 2rem);
+  }
+  .docs-sidebar-label {
+    margin-bottom: 0.8rem;
+    color: rgb(var(--c-text-faint));
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .docs-sidebar ul {
+    display: grid;
+    gap: 0.18rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .docs-sidebar a {
+    display: block;
+    padding: 0.56rem 0.75rem;
+    border-left: 2px solid transparent;
+    border-radius: 0 0.45rem 0.45rem 0;
+    color: rgb(var(--c-text-mute));
+    font-size: 0.88rem;
+    transition: color var(--dur-1) var(--ease-smooth), background var(--dur-1) var(--ease-smooth), border-color var(--dur-1) var(--ease-smooth);
+  }
+  .docs-sidebar a:hover,
+  .docs-sidebar a.active {
+    border-left-color: rgb(var(--c-brand-500));
+    background: rgb(var(--c-brand-50));
+    color: rgb(var(--c-brand-700));
+  }
+  [data-theme="dark"] .docs-sidebar a:hover,
+  [data-theme="dark"] .docs-sidebar a.active {
+    background: rgb(var(--c-brand-950) / 0.55);
+    color: rgb(var(--c-brand-300));
+  }
+  .docs-sidebar-note {
+    display: flex;
+    gap: 0.55rem;
+    margin-top: 2rem;
+    padding: 0.8rem 0.75rem;
+    border-top: 1px solid rgb(var(--c-border-subtle));
+    color: rgb(var(--c-text-faint));
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    line-height: 1.5;
+  }
+  .status-dot {
+    flex: 0 0 auto;
+    width: 0.45rem;
+    height: 0.45rem;
+    margin-top: 0.25rem;
+    border-radius: 50%;
+    background: rgb(var(--c-accent-500));
+    box-shadow: 0 0 0 4px rgb(var(--c-accent-500) / 0.12);
+  }
+  .docs-content {
+    min-width: 0;
+    max-width: 800px;
+  }
+  @media (max-width: 760px) {
+    .docs-main { padding: 2.5rem 0 4rem; }
+    .docs-layout { display: block; }
+    .docs-sidebar { position: static; margin-bottom: 2.5rem; }
+    .docs-sidebar nav { overflow-x: auto; padding-bottom: 0.25rem; }
+    .docs-sidebar ul { display: flex; min-width: max-content; gap: 0.35rem; }
+    .docs-sidebar a { border: 1px solid rgb(var(--c-border)); border-radius: 999px; padding: 0.48rem 0.75rem; white-space: nowrap; }
+    .docs-sidebar a:hover, .docs-sidebar a.active { border-color: rgb(var(--c-brand-500)); }
+    .docs-sidebar-note { display: none; }
+  }
+</style>

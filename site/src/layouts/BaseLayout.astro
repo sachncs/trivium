@@ -18,7 +18,7 @@ const {
 const siteUrl = Astro.site?.toString().replace(/\/$/, "") ?? "";
 const canonicalURL = new URL(Astro.url.pathname, siteUrl).toString();
 const ogImageURL = new URL(ogImage.replace(/^\//, ""), `${siteUrl}/`).toString();
-const basePath = Astro.url.pathname.endsWith("/") ? Astro.url.pathname : Astro.url.pathname + "/";
+const assetBase = import.meta.env.BASE_URL;
 ---
 
 <!doctype html>
@@ -49,10 +49,10 @@ const basePath = Astro.url.pathname.endsWith("/") ? Astro.url.pathname : Astro.u
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageURL} />
 
-    <link rel="icon" type="image/svg+xml" href={`${basePath}favicon.svg`} />
-    <link rel="alternate icon" href={`${basePath}favicon.svg`} />
-    <link rel="sitemap" href={`${basePath}sitemap-index.xml`} />
-    <link rel="alternate" type="application/rss+xml" title="trivium" href={`${basePath}rss.xml`} />
+    <link rel="icon" type="image/svg+xml" href={`${assetBase}favicon.svg`} />
+    <link rel="alternate icon" href={`${assetBase}favicon.svg`} />
+    <link rel="sitemap" href={`${assetBase}sitemap-index.xml`} />
+    <link rel="alternate" type="application/rss+xml" title="trivium" href={`${assetBase}rss.xml`} />
 
     <link rel="preconnect" href="https://rsms.me" crossorigin />
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
@@ -65,7 +65,7 @@ const basePath = Astro.url.pathname.endsWith("/") ? Astro.url.pathname : Astro.u
           var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
           var theme = stored || (prefersDark ? "dark" : "light");
           document.documentElement.setAttribute("data-theme", theme);
-        } catch (_e) {
+        } catch (error) {
           /* no-op */
         }
       })();
@@ -124,7 +124,7 @@ const basePath = Astro.url.pathname.endsWith("/") ? Astro.url.pathname : Astro.u
           document.documentElement.setAttribute("data-theme", next);
           try {
             localStorage.setItem("trivium-theme", next);
-          } catch (_e) {
+          } catch (error) {
             /* no-op */
           }
         });

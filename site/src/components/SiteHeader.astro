@@ -5,6 +5,10 @@ export interface Props {
 const { class: className = "" } = Astro.props as Props;
 const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "") || "";
 const homeUrl = baseUrl ? `${baseUrl}/` : "/";
+const docsUrl = `${baseUrl}/docs/`;
+const gettingStartedUrl = `${baseUrl}/docs/getting-started/`;
+const methodologyUrl = `${baseUrl}/docs/methodology/`;
+const architectureUrl = `${baseUrl}/docs/architecture/`;
 ---
 
 <header class:list={["site-header", className]} data-scroll-progress>
@@ -31,10 +35,10 @@ const homeUrl = baseUrl ? `${baseUrl}/` : "/";
 
     <nav class="site-nav" aria-label="Primary">
       <ul class="site-nav-list">
-        <li><a href="#features">Features</a></li>
-        <li><a href="#results">Results</a></li>
-        <li><a href="#methodology">Methodology</a></li>
-        <li><a href="#architecture">Architecture</a></li>
+        <li><a href={docsUrl}>Docs</a></li>
+        <li><a href={`${homeUrl}#results`}>Results</a></li>
+        <li><a href={methodologyUrl}>Methodology</a></li>
+        <li><a href={architectureUrl}>Architecture</a></li>
       </ul>
     </nav>
 
@@ -54,7 +58,7 @@ const homeUrl = baseUrl ? `${baseUrl}/` : "/";
         </svg>
         <span>Star</span>
       </a>
-      <a class="btn btn-primary btn-sm" href="https://github.com/sachncs/trivium#installation" rel="noopener">
+      <a class="btn btn-primary btn-sm" href={gettingStartedUrl}>
         <span>Get started</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M7 17L17 7M9 7h8v8" />

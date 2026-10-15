@@ -1,0 +1,72 @@
+---
+import DocsShell from "../../components/DocsShell.astro";
+
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "") || "";
+---
+
+<DocsShell
+  title="Documentation"
+  description="Learn how to install, run, and extend trivium, a reproducible benchmark for hybrid search."
+  current="overview"
+>
+  <span class="docs-eyebrow">Documentation / v0.1</span>
+  <h1 class="docs-title">Run a benchmark you can explain.</h1>
+  <p class="docs-lede">
+    trivium gives retrieval engineers a clean way to compare BM25, dense vector search, fusion, and reranking. The workload is reproducible, the numbers are inspectable, and the limitations are part of the product.
+  </p>
+  <div class="docs-actions">
+    <a class="btn btn-primary" href={`${baseUrl}/docs/getting-started/`}>Install from source <span aria-hidden="true">↗</span></a>
+    <a class="btn btn-secondary" href={`${baseUrl}/docs/methodology/`}>Read the methodology</a>
+  </div>
+
+  <section class="docs-section">
+    <h2>Start with the path that fits your question.</h2>
+    <div class="docs-grid">
+      <a class="docs-card" href={`${baseUrl}/docs/getting-started/`}>
+        <span class="docs-card-kicker">01 · Setup</span>
+        <h3>Getting started</h3>
+        <p>Install the checked-out source, build the corpus cache, and run the first benchmark sweep.</p>
+        <span class="docs-card-arrow">Open guide →</span>
+      </a>
+      <a class="docs-card" href={`${baseUrl}/docs/architecture/`}>
+        <span class="docs-card-kicker">02 · Concepts</span>
+        <h3>Architecture</h3>
+        <p>See how documents move through embedders, retrievers, fusion, reranking, and evaluation.</p>
+        <span class="docs-card-arrow">Explore the system →</span>
+      </a>
+      <a class="docs-card" href={`${baseUrl}/docs/methodology/`}>
+        <span class="docs-card-kicker">03 · Evidence</span>
+        <h3>Methodology</h3>
+        <p>Understand the corpus, metrics, latency protocol, and the claims the benchmark does not make.</p>
+        <span class="docs-card-arrow">Read the evidence →</span>
+      </a>
+      <a class="docs-card" href={`${baseUrl}/docs/api/`}>
+        <span class="docs-card-kicker">04 · Build</span>
+        <h3>API reference</h3>
+        <p>Use the small public contracts directly in your own benchmark or retrieval service.</p>
+        <span class="docs-card-arrow">View the API →</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="docs-section">
+    <h2>Four steps from checkout to result.</h2>
+    <ol class="docs-steps">
+      <li>Install trivium from the repository so the code you run is the code you can inspect.</li>
+      <li>Prepare the BEIR scifact seed and the distractor-augmented corpus cache.</li>
+      <li>Run one or more registered pipeline modes at the scales you want to compare.</li>
+      <li>Read the CSV rows, latency distribution, reproducibility manifest, and pre-flight result together.</li>
+    </ol>
+  </section>
+
+  <section class="docs-section">
+    <h2>The shortest useful install.</h2>
+    <p>This is source-first software. A package release is not assumed; the canonical path is the repository checkout.</p>
+    <pre class="docs-code"><code>git clone https://github.com/sachncs/trivium.git
+cd trivium
+python -m pip install -e ".[dev]"
+trivium-prepare --max-scales 100000
+trivium-benchmark --modes bm25,vector,hybrid_rrf</code></pre>
+    <div class="docs-callout"><strong>What you get:</strong> a benchmark CSV with metrics, p50/p95 latency, configuration, runtime details, and the commit that produced each row.</div>
+  </section>
+</DocsShell>

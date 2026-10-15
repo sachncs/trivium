@@ -1,0 +1,59 @@
+---
+import DocsShell from "../../components/DocsShell.astro";
+---
+
+<DocsShell
+  title="Architecture"
+  description="The contracts and data flow behind trivium's hybrid search benchmark."
+  current="architecture"
+>
+  <span class="docs-eyebrow">Architecture</span>
+  <h1 class="docs-title">Small contracts. Composable search systems.</h1>
+  <p class="docs-lede">The runner does not know how every model works. It knows the contracts. Concrete implementations register themselves, and the same pipeline can be measured across modes.</p>
+
+  <section class="docs-section">
+    <h2>The data flow.</h2>
+    <ol class="docs-steps">
+      <li><strong>Corpus:</strong> load validated documents, queries, and qrels from the cache.</li>
+      <li><strong>Embed:</strong> encode documents and queries through an <code>Embedder</code>.</li>
+      <li><strong>Retrieve:</strong> run one or more <code>Retriever</code> implementations such as BM25 or FAISS.</li>
+      <li><strong>Fuse:</strong> combine ranked lists through a <code>FusionStrategy</code>, usually reciprocal rank fusion.</li>
+      <li><strong>Rerank:</strong> optionally apply a <code>Reranker</code> to the candidate pool.</li>
+      <li><strong>Evaluate:</strong> score relevance and latency, then persist a reproducibility-rich CSV row.</li>
+    </ol>
+  </section>
+
+  <section class="docs-section">
+    <h2>Five public contracts.</h2>
+    <div class="docs-table-wrap">
+      <table class="docs-table">
+        <thead><tr><th>Contract</th><th>Implementations</th><th>Responsibility</th></tr></thead>
+        <tbody>
+          <tr><td><code>Embedder</code></td><td>Sentence, E5</td><td>Encode documents and queries with a declared dimension.</td></tr>
+          <tr><td><code>Retriever</code></td><td>BM25, FAISS, DiskBBQ</td><td>Index documents, search, expose tuning parameters, report size.</td></tr>
+          <tr><td><code>FusionStrategy</code></td><td>RRF, Weighted</td><td>Turn ranked result lists into one ranked result list.</td></tr>
+          <tr><td><code>Reranker</code></td><td>Encoder, BGE, MonoT5</td><td>Score candidate documents for one query.</td></tr>
+          <tr><td><code>BenchmarkPipeline</code></td><td>BM25, vector, hybrid modes</td><td>Wire components together and emit measured result rows.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="docs-section">
+    <h2>Use the same contracts in your code.</h2>
+    <p>The public API is intentionally direct. There are no compatibility aliases or forwarding layers hiding the component boundaries.</p>
+    <pre class="docs-code"><code>from trivium.retrieval.bm25 import Bm25
+from trivium.retrieval.faiss import Faiss
+from trivium.fusion.rrf import Rrf
+
+bm25 = Bm25()
+bm25.add_documents(documents)
+
+vector = Faiss.Flat()
+vector.add_documents(documents, vectors=embeddings)
+
+lexical = bm25.search(queries, k=100)
+dense = vector.search(query_vectors, k=100)
+fused = Rrf(k=60).fuse([lexical, dense], top_k=50)</code></pre>
+  </section>
+</DocsShell>

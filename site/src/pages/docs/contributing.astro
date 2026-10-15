@@ -1,0 +1,43 @@
+---
+import DocsShell from "../../components/DocsShell.astro";
+---
+
+<DocsShell
+  title="Contributing"
+  description="Contribute components, tests, and benchmark improvements to trivium."
+  current="contributing"
+>
+  <span class="docs-eyebrow">Contributing</span>
+  <h1 class="docs-title">Make the benchmark more trustworthy.</h1>
+  <p class="docs-lede">Good contributions make a number easier to reproduce, a contract easier to use, or a limitation easier to see. Keep changes direct, tested, and explainable.</p>
+
+  <section class="docs-section">
+    <h2>Development setup.</h2>
+    <pre class="docs-code"><code>git clone https://github.com/sachncs/trivium.git
+cd trivium
+uv venv
+uv pip install -e ".[dev]"</code></pre>
+  </section>
+
+  <section class="docs-section">
+    <h2>Run the quality gates.</h2>
+    <pre class="docs-code"><code>ruff check .
+ruff format --check .
+mypy
+pytest -q -m "not golden" --cov=trivium --cov-branch --cov-fail-under=90
+npm --prefix site ci
+npm --prefix site run build</code></pre>
+    <p>Golden tests are explicit regression anchors and require the benchmark data cache. Run them separately when that cache is available.</p>
+  </section>
+
+  <section class="docs-section">
+    <h2>Design rules.</h2>
+    <ul class="docs-inline-list">
+      <li>Implement the smallest relevant public contract: embedder, retriever, fusion strategy, reranker, or pipeline.</li>
+      <li>Register concrete components rather than adding forwarding wrappers or compatibility aliases.</li>
+      <li>Validate persistence boundaries: shapes, cardinality, IDs, metadata, and atomic writes.</li>
+      <li>When a benchmark number changes, update the evidence and explain why.</li>
+    </ul>
+    <div class="docs-actions"><a class="btn btn-primary" href="https://github.com/sachncs/trivium/issues" rel="noopener">Open an issue <span aria-hidden="true">↗</span></a></div>
+  </section>
+</DocsShell>

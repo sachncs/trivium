@@ -1,0 +1,47 @@
+---
+import DocsShell from "../../components/DocsShell.astro";
+---
+
+<DocsShell
+  title="Methodology"
+  description="Corpus construction, metrics, latency protocol, and limitations for the trivium benchmark."
+  current="methodology"
+>
+  <span class="docs-eyebrow">Methodology</span>
+  <h1 class="docs-title">The measurement is the product.</h1>
+  <p class="docs-lede">trivium makes the workload and the limits visible together. The goal is not a leaderboard number; it is a comparison another engineer can reproduce and challenge.</p>
+
+  <section class="docs-section">
+    <h2>Corpus and distractors.</h2>
+    <p>The 5K seed is the canonical BEIR scifact corpus: 5,183 documents, 300 test queries, and unchanged qrels. The larger scales add scientific distractors from SCIDOCS, TREC-COVID, and NFCorpus.</p>
+    <ul class="docs-inline-list">
+      <li>Exact duplicates are removed with SHA-256 over title plus text.</li>
+      <li>Near duplicates are filtered with MinHash LSH at threshold 0.85.</li>
+      <li>Document IDs are namespaced as <code>scifact:</code> and <code>distractor:</code>.</li>
+      <li>Each scale is a seeded prefix, so comparisons do not change the corpus underneath the index.</li>
+    </ul>
+  </section>
+
+  <section class="docs-section">
+    <h2>Metrics and latency.</h2>
+    <div class="docs-table-wrap">
+      <table class="docs-table">
+        <thead><tr><th>Measure</th><th>Definition</th></tr></thead>
+        <tbody>
+          <tr><td>nDCG@10</td><td>Rank-aware relevance quality at the first ten results, evaluated with pytrec_eval.</td></tr>
+          <tr><td>Recall@10 / @100</td><td>Whether the relevant document appears in the first 10 or 100 retrieved candidates.</td></tr>
+          <tr><td>p50 / p95 latency</td><td>Per-query wall-clock latency after warmup, reported as a distribution rather than a single estimate.</td></tr>
+          <tr><td>Pre-flight</td><td>BM25 on untouched 5K scifact compared with the published Anserini reference and its documented implementation drift.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="docs-section">
+    <h2>What this benchmark does not claim.</h2>
+    <div class="docs-grid">
+      <div class="docs-card"><span class="docs-card-kicker">Not SOTA</span><h3>Model ceilings</h3><p>Default runs use MiniLM-L6. Larger encoders and rerankers may achieve higher published scores.</p></div>
+      <div class="docs-card"><span class="docs-card-kicker">Not disk-aware</span><h3>Memory boundary</h3><p>The standard vector baseline is RAM-resident. DiskBBQ is an algorithmic analogue, not a 100M-vector production claim.</p></div>
+    </div>
+  </section>
+</DocsShell>

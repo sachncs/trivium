@@ -1,0 +1,54 @@
+---
+import DocsShell from "../../components/DocsShell.astro";
+---
+
+<DocsShell
+  title="API reference"
+  description="The public Python contracts and concrete components exposed by trivium."
+  current="api"
+>
+  <span class="docs-eyebrow">API reference</span>
+  <h1 class="docs-title">Primitives you can build on.</h1>
+  <p class="docs-lede">The benchmark is the reference workload. The library is the useful part: small components with direct names and explicit boundaries.</p>
+
+  <section class="docs-section">
+    <h2>Retrievers.</h2>
+    <p>All retrievers expose the same search shape and return <code>list[SearchResult]</code>. Choose the implementation that matches your memory and latency budget.</p>
+    <pre class="docs-code"><code>from trivium.retrieval.bm25 import Bm25
+from trivium.retrieval.faiss import Faiss
+
+bm25 = Bm25(k1=0.9, b=0.4)
+bm25.add_documents(documents)
+bm25_hits = bm25.search(query_texts, k=100)
+
+flat = Faiss.Flat()
+flat.add_documents(documents, vectors=document_vectors)
+vector_hits = flat.search(query_vectors, k=100)</code></pre>
+  </section>
+
+  <section class="docs-section">
+    <h2>Fusion and reranking.</h2>
+    <pre class="docs-code"><code>from trivium.fusion.rrf import Rrf
+from trivium.reranking.registry import get_reranker
+
+fused = Rrf(k=60).fuse([bm25_hits, vector_hits], top_k=50)
+reranker = get_reranker("bge-large")
+final_hits = reranker.rerank(query_text, candidates, top_k=10)</code></pre>
+    <p>Registries are the extension point for new embedders, rerankers, fusion strategies, and pipeline modes. Add a concrete implementation to the relevant contract; keep the public surface direct.</p>
+  </section>
+
+  <section class="docs-section">
+    <h2>Command-line entry points.</h2>
+    <div class="docs-table-wrap">
+      <table class="docs-table">
+        <thead><tr><th>Command</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>trivium-prepare</code></td><td>Build the corpus, query, qrels, and embedding caches.</td></tr>
+          <tr><td><code>trivium-benchmark</code></td><td>Run registered pipeline modes across one or more scales.</td></tr>
+          <tr><td><code>trivium-summarise</code></td><td>Print a concise summary from a benchmark CSV.</td></tr>
+          <tr><td><code>trivium-gigatoken-bench</code></td><td>Measure tokenizer throughput for a local corpus stream.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</DocsShell>

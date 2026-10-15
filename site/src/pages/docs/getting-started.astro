@@ -1,0 +1,54 @@
+---
+import DocsShell from "../../components/DocsShell.astro";
+---
+
+<DocsShell
+  title="Getting started"
+  description="Install trivium from source and run a first hybrid search benchmark."
+  current="getting-started"
+>
+  <span class="docs-eyebrow">Getting started</span>
+  <h1 class="docs-title">From source checkout to benchmark CSV.</h1>
+  <p class="docs-lede">The first run downloads the BEIR corpus and model dependencies. Expect roughly 6 GB of corpus data and a few minutes on a modern laptop.</p>
+
+  <section class="docs-section">
+    <h2>1. Install the checked-out source.</h2>
+    <p>trivium is not being distributed through PyPI yet. Install the repository in editable mode so changes and registered components are immediately available.</p>
+    <pre class="docs-code"><code>git clone https://github.com/sachncs/trivium.git
+cd trivium
+python -m pip install -e ".[dev]"</code></pre>
+    <div class="docs-callout">Python 3.12 or newer is required. The development extra installs pytest, coverage, Ruff, mypy, and the wheel builder used by CI.</div>
+  </section>
+
+  <section class="docs-section">
+    <h2>2. Prepare the corpus cache.</h2>
+    <p>Preparation downloads the canonical scifact seed, adds scientific distractors, deduplicates documents, and writes the cached embeddings used by the benchmark.</p>
+    <pre class="docs-code"><code>trivium-prepare --max-scales 100000</code></pre>
+    <p>The cache is written under <code>data/cache/</code>. It is safe to rerun preparation; validated cache files are reused.</p>
+  </section>
+
+  <section class="docs-section">
+    <h2>3. Run a first comparison.</h2>
+    <p>Start with the small, interpretable set of modes below. Add scales or tuning sweeps only after the pre-flight result is healthy.</p>
+    <pre class="docs-code"><code>trivium-benchmark \
+  --modes bm25,vector,hybrid_rrf,hybrid_rerank \
+  --scales 5000,100000 \
+  --output results/benchmark.csv</code></pre>
+    <p>Summarise the generated rows with:</p>
+    <pre class="docs-code"><code>trivium-summarise --csv results/benchmark.csv</code></pre>
+  </section>
+
+  <section class="docs-section">
+    <h2>4. Read the result responsibly.</h2>
+    <div class="docs-table-wrap">
+      <table class="docs-table">
+        <thead><tr><th>Check</th><th>Why it matters</th></tr></thead>
+        <tbody>
+          <tr><td><span class="docs-pill">Pre-flight</span></td><td>Untouched 5K scifact BM25 should land near 0.6789 ± 0.03. A result below 0.62 is a failed run.</td></tr>
+          <tr><td><span class="docs-pill">CSV row</span></td><td>Every row carries metrics, latency, configuration, runtime information, and the source commit.</td></tr>
+          <tr><td><span class="docs-pill">Scale</span></td><td>100K adds 95K scientific distractors. A lower score there is part of the workload, not a hidden failure.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</DocsShell>
