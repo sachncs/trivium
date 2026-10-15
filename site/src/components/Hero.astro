@@ -101,11 +101,16 @@ import { headlineResults } from "../lib/results.ts";
             </span>
             <span class="hero-bar-label">Quality share (nDCG@10)</span>
           </div>
-          <p class="hero-card-note">
-            Hybrid RRF <strong>+0.045 nDCG@10</strong> over BM25 at 5K — and
-            <strong> +0.057</strong> over pure vector. Reproduce with
-            <code>trivium-benchmark --modes bm25,vector,hybrid_rrf,hybrid_rerank --scales 5000</code>.
-          </p>
+          <div class="hero-card-note">
+            <p class="hero-card-note-copy">
+              <span class="hero-card-note-label">5K result</span>
+              <span>Hybrid RRF adds <strong>0.045 nDCG@10</strong> versus BM25 and <strong>0.057</strong> versus vector.</span>
+            </p>
+            <div class="hero-card-command">
+              <span class="hero-card-note-label">Reproduce</span>
+              <code>trivium-benchmark --modes bm25,vector,hybrid_rrf,hybrid_rerank --scales 5000</code>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -528,13 +533,36 @@ import { headlineResults } from "../lib/results.ts";
     color: rgb(var(--c-text-mute));
   }
   .hero-card-note {
+    display: grid;
+    gap: 0.75rem;
     font-size: 0.8125rem;
     color: rgb(var(--c-text-soft));
     line-height: 1.55;
   }
+  .hero-card-note-copy,
+  .hero-card-command {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin: 0;
+  }
+  .hero-card-note-label {
+    flex: 0 0 5.2rem;
+    color: rgb(var(--c-text-mute));
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    line-height: 1.4;
+    text-transform: uppercase;
+  }
   .hero-card-note strong {
     color: rgb(var(--c-text));
     font-weight: 600;
+  }
+  .hero-card-command code {
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
   .hero-card-note code {
     font-family: var(--font-mono);
@@ -542,6 +570,14 @@ import { headlineResults } from "../lib/results.ts";
     padding: 0.15em 0.4em;
     background: rgb(var(--c-surface-inset));
     border-radius: 4px;
+  }
+  @media (max-width: 640px) {
+    .hero-card-note-copy,
+    .hero-card-command {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
   }
 
   /* Floating accent cards */

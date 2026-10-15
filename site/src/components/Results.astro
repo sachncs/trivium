@@ -12,8 +12,8 @@ import { scaleResults } from "../lib/results.ts";
         <span class="text-gradient">Hybrids actually win.</span>
       </h2>
       <p class="section-lede">
-        At 5K untouched scifact, hybrid RRF beats BM25 by <strong>+0.045 nDCG@10</strong> and
-        pure vector by <strong>+0.057</strong>. At 100K with 95K scientific distractors, the
+        At 5K on untouched SciFact, hybrid RRF adds <strong>0.045 nDCG@10</strong> over BM25 and
+        <strong>0.057</strong> over vector. At 100K with 95K scientific distractors, the
         encoder hits its recall ceiling and BM25 ties. Every number comes from a single
         <code>trivium-benchmark</code> invocation.
       </p>
@@ -85,7 +85,7 @@ import { scaleResults } from "../lib/results.ts";
           <h3 class="insight-title">Hybrids actually win</h3>
         </div>
         <p>
-          Hybrid RRF pulls +0.045 nDCG@10 over BM25 — and +0.057 over pure vector. This is the
+          Hybrid RRF adds 0.045 nDCG@10 over BM25 — and 0.057 over vector. This is the
           headline: hybrid wins on the smallest test set, where the dense encoder has full recall
           and BM25 has full lexical precision.
         </p>
