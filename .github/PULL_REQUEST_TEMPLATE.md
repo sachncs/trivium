@@ -19,7 +19,7 @@
       golden test still passes:
       `pytest -q -m golden`
 - [ ] The coverage gate is still met:
-      `pytest -q --cov=trivium --cov-fail-under=55 -m "not golden"`
+      `pytest -q --cov=trivium --cov-fail-under=90 -m "not golden"`
 - [ ] `ruff check .` and `ruff format --check .` are clean
 - [ ] I have read [CONTRIBUTING.md](../CONTRIBUTING.md)
 

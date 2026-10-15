@@ -10,7 +10,7 @@ publish numbers they can defend.
 [![CI](https://github.com/sachncs/trivium/actions/workflows/ci.yml/badge.svg)](https://github.com/sachncs/trivium/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/sachncs/trivium)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.12%2B-blue)](pyproject.toml)
-[![Tests](https://img.shields.io/badge/tests-101%20passed-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-109%20passed-brightgreen)](tests/)
 
 ## Quick start
 

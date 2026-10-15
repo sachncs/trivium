@@ -7,8 +7,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
@@ -33,13 +31,17 @@ jobs:
 
       - name: Install dependencies
         working-directory: site
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       - name: Build
         working-directory: site
         run: npm run build
         env:
           NODE_ENV: production
+
+      - name: Validate generated site
+        working-directory: site
+        run: test -f dist/index.html && test -f dist/sitemap-index.xml
 
       - name: Add .nojekyll
         run: touch site/dist/.nojekyll

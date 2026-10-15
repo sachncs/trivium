@@ -39,7 +39,7 @@ export const stats: StatItem[] = [
   { value: "+0.045", label: "nDCG@10 over BM25", detail: "at 5K untouched scifact, hybrid RRF wins" },
   { value: "6 GB", label: "corpus, ~5 min", detail: "first-run BEIR distractor cache" },
   { value: "0.6789", label: "BM25 pre-flight ±0.03", detail: "Anserini equivalence pinned at startup" },
-  { value: "101", label: "tests passing", detail: "with a golden pre-flight anchor" },
+  { value: "109", label: "tests passing", detail: "with a golden pre-flight anchor" },
 ];
 
 export interface FeatureItem {

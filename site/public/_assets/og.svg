@@ -67,7 +67,7 @@
     <text x="460" y="58" fill="#94a3b8" font-family="Inter, system-ui, sans-serif" font-size="14">BM25 pre-flight ±0.03</text>
 
     <rect x="660" y="0" width="200" height="80" rx="12" fill="#1e293b" opacity="0.6" stroke="#334155" />
-    <text x="680" y="35" fill="#a5b4fc" font-family="JetBrains Mono, monospace" font-size="22" font-weight="600">101</text>
+    <text x="680" y="35" fill="#a5b4fc" font-family="JetBrains Mono, monospace" font-size="22" font-weight="600">109</text>
     <text x="680" y="58" fill="#94a3b8" font-family="Inter, system-ui, sans-serif" font-size="14">tests passing</text>
   </g>
 </svg>
