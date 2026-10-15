@@ -15,7 +15,9 @@ publish numbers they can defend.
 ## Quick start
 
 ```bash
-pip install trivium
+git clone https://github.com/sachncs/trivium.git
+cd trivium
+python -m pip install .
 trivium-prepare --max-scales 100000
 trivium-benchmark --modes bm25,vector,hybrid_rrf,hybrid_rerank \
                   --scales 5000,100000 \
@@ -115,7 +117,9 @@ and tutorials.
 ## Installation
 
 ```bash
-pip install trivium
+git clone https://github.com/sachncs/trivium.git
+cd trivium
+python -m pip install .
 ```
 
 Dependencies (~520 MB on first install): `faiss-cpu`, `numpy`,
@@ -126,9 +130,9 @@ Dependencies (~520 MB on first install): `faiss-cpu`, `numpy`,
 For development:
 
 ```bash
-git clone https://github.com/sachncs/trivium
+git clone https://github.com/sachncs/trivium.git
 cd trivium
-pip install -e ".[dev]"
+python -m pip install -e ".[dev]"
 pytest -q
 ```
 
