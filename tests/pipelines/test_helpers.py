@@ -21,7 +21,7 @@ class StubRetriever:
         self.hits = hits
         self.slug = f"stub-{id(self)}"
 
-    def add_documents(self, *_, **__):
+    def add_documents(self, *documents, **options):
         pass
 
     def search(self, query_vectors, k):

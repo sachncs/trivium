@@ -23,7 +23,7 @@ class StubEmbedder(Embedder):
         stub_slug: str = "stub",
         stub_model_id: str = "stub-id",
         stub_dimension: int = 0,
-        **_: object,
+        **options: object,
     ) -> None:
         self.stub_slug = stub_slug
         self.stub_model_id = stub_model_id
