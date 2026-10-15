@@ -115,6 +115,7 @@ const xTicks = [0.1, 1, 10, 100].map((value) => ({ value, x: xPosition(value) })
 
       {xTicks.map((tick) => (
         <g class="axis-column">
+          <line x1={tick.x} y1={padding.top} x2={tick.x} y2={height - padding.bottom} class="grid-line vertical-grid" />
           <line x1={tick.x} y1={height - padding.bottom} x2={tick.x} y2={height - padding.bottom + 5} class="tick" />
           <text x={tick.x} y={height - padding.bottom + 22} class="axis-label" text-anchor="middle">{tick.value} ms</text>
         </g>
@@ -134,11 +135,11 @@ const xTicks = [0.1, 1, 10, 100].map((value) => ({ value, x: xPosition(value) })
         return (
           <g class={`point point-${point.color} ${point.winner ? "is-winner" : ""}`} transform={`translate(${x} ${y})`} tabindex="0" aria-label={`${point.scale} ${point.label}: recall ${point.recall.toFixed(4)}, p95 latency ${point.latency} milliseconds`}>
             <title>{point.scale} · {point.label}: recall@10 {point.recall.toFixed(4)}, p95 {point.latency} ms</title>
-            <line x1="0" y1="0" x2={point.dx * 0.72} y2={point.dy * 0.72} class="label-leader" />
+            {point.winner && <line x1="0" y1="0" x2={point.dx * 0.72} y2={point.dy * 0.72} class="label-leader" />}
             {point.winner && <circle r="13" class="winner-glow" />}
             {point.winner && <circle r="9" class="winner-ring" />}
             <circle r={point.winner ? 6 : 4.5} class="dot" />
-            <text x={point.dx} y={point.dy} class="point-label" text-anchor={point.anchor}>{point.label} · {point.scale}</text>
+            {point.winner && <text x={point.dx} y={point.dy} class="point-label" text-anchor={point.anchor}>{point.label} · {point.scale}</text>}
           </g>
         );
       })}
@@ -195,13 +196,15 @@ const xTicks = [0.1, 1, 10, 100].map((value) => ({ value, x: xPosition(value) })
     letter-spacing: 0.06em;
   }
   .pareto-plot {
-    overflow-x: auto;
-    overscroll-behavior-inline: contain;
+    overflow: hidden;
+    padding: 0.75rem 0.5rem 0.25rem;
+    border: 1px solid rgb(var(--c-border-subtle));
+    border-radius: 1rem;
+    background: linear-gradient(180deg, rgb(var(--c-surface-sunken) / 0.7), transparent 72%);
   }
   .pareto-svg {
     display: block;
     width: 100%;
-    min-width: 700px;
     height: auto;
   }
   .pareto-svg :global(.grid-line) {
@@ -228,10 +231,10 @@ const xTicks = [0.1, 1, 10, 100].map((value) => ({ value, x: xPosition(value) })
   }
   .pareto-svg :global(.frontier-line) {
     fill: none;
-    stroke-width: 2;
+    stroke-width: 2.5;
     stroke-linecap: round;
     stroke-linejoin: round;
-    opacity: 0.45;
+    opacity: 0.72;
   }
   .pareto-svg :global(.frontier-5k) { stroke: rgb(var(--c-brand-500)); }
   .pareto-svg :global(.frontier-100k) { stroke: rgb(var(--c-accent-500)); }
@@ -266,8 +269,8 @@ const xTicks = [0.1, 1, 10, 100].map((value) => ({ value, x: xPosition(value) })
   }
   .pareto-svg :global(.winner-glow) { fill: rgb(var(--c-brand-500) / 0.12); }
   .pareto-svg :global(.point-label) {
-    font-family: var(--font-mono);
-    font-size: 10.5px;
+    font-family: var(--font-sans);
+    font-size: 11px;
     fill: rgb(var(--c-text));
     font-weight: 500;
   }
@@ -291,7 +294,7 @@ const xTicks = [0.1, 1, 10, 100].map((value) => ({ value, x: xPosition(value) })
     list-style: none;
     padding: 0;
     margin: 1rem 0 0;
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
     font-size: 0.72rem;
     color: rgb(var(--c-text-mute));
   }

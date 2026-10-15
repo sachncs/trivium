@@ -54,6 +54,24 @@ const colorClass: Record<string, string> = {
 </section>
 
 <style>
+  .features .section-head {
+    max-width: 760px;
+    margin: 0 auto 2.5rem;
+  }
+  .features .section-head .eyebrow {
+    margin-bottom: 0.75rem;
+  }
+  .features .section-title {
+    margin-bottom: 0.9rem;
+  }
+  .features .section-lede {
+    max-width: 680px;
+    color: rgb(var(--c-text-soft));
+    line-height: 1.6;
+  }
+  .features.section {
+    padding-top: clamp(3rem, 7vw, 5.5rem);
+  }
   .features-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
